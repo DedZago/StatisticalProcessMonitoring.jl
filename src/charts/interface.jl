@@ -53,11 +53,13 @@ export get_phase1
 
 """
     get_parameters(CC::AbstractChart)
+    set_parameters(CC::AbstractChart, par)
     
-Get the parameters of the control chart statistic.
+Get and set the parameters of the control chart statistic.
 """
-get_parameters(CC::AbstractChart) = @NamedTuple{}
-export get_parameters
+get_param(CC::AbstractChart) = @NamedTuple{}
+set_param(CC::AbstractChart, par) = set_param(get_statistic(CC), par)
+export get_param
 
 """
     get_value(CC::AbstractChart)
