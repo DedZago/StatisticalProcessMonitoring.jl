@@ -3,7 +3,7 @@
     upw::Vector{Bool} = ones(length(value))
     @assert length(value) == length(upw)
 end
-
+export OneSidedLimit
 
 function is_IC(L::OneSidedLimit, stat::AbstractStatistic)
     #TODO: run tests to check if it is correct
@@ -19,3 +19,24 @@ function is_IC(L::OneSidedLimit, stat::AbstractStatistic)
     end
     return true
 end
+
+
+@with_kw mutable struct TwoSidedLimit{T} <: AbstractLimit
+    value::Vector{T}
+    @assert all(value .> 0.0)
+end
+export TwoSidedLimit
+
+function is_IC(L::TwoSidedLimit, stat::AbstractStatistic)
+    #TODO: run tests to check if it is correct
+    val = get_value(stat)
+    lim = get_limit_value(L)
+    @assert length(val) == length(lim)
+    for i in eachindex(val)
+        if (val[i] > lim[i]) || (val[i] < -lim[i])
+            return false
+        end
+    end
+    return true
+end
+
