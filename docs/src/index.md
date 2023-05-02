@@ -25,4 +25,5 @@ Documentation for [SPM](https://github.com/DedZago/SPM.jl), a package for Statis
 
 ```@autodocs
 Modules = [SPM]
+Order   = [:function, :type]
 ```
