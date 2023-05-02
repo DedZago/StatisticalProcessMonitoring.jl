@@ -13,7 +13,7 @@ function is_IC(L::OneSidedLimit, stat::AbstractStatistic)
     lim = get_value(L)
     @assert length(val) == length(lim)
     for i in eachindex(val)
-        if upw[i]
+        if L.upw[i]
             val[i] < lim[i] || return false
         else
             val[i] > lim[i] || return false

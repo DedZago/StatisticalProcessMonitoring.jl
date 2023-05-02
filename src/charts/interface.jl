@@ -92,7 +92,7 @@ export is_OC
 #################################################################
 #               Generic control chart interface                 #
 #################################################################
-@with_kw mutable struct ControlChart{STAT <: AbstractStatistic, LIM <: AbstractLimit, NOM <: AbstractNominal, PH1 <: AbstractPhase1} <: AbstractChart
+@with_kw mutable struct ControlChart{STAT <: AbstractStatistic, LIM <: AbstractLimit, NOM <: NominalProperties, PH1 <: AbstractPhase1} <: AbstractChart
     stat::STAT
     limit::LIM
     nominal::NOM
@@ -150,11 +150,11 @@ end
 export set_phase1!
 
 """
-    set_nominal!(CC::AbstractChart, nominal::AbstractNominal)
+    set_nominal!(CC::AbstractChart, nominal::NominalProperties)
 
 Set the nominal properties of a control chart.
 """
-function set_nominal!(CC::C, nominal::N) where C <: AbstractChart N <: AbstractNominal
+function set_nominal!(CC::C, nominal::N) where C <: AbstractChart N <: NominalProperties
     CC.nominal = nominal
     return nominal
 end
