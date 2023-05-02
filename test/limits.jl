@@ -30,7 +30,6 @@ using Test
         @test is_OC(L3, STAT)
         @test !is_IC(L3, STAT)
         L4 = TwoSidedLimit(3.0)
-        @show get_value(STAT), get_value(L4)
         @test is_IC(L4, STAT)
         @test !is_OC(L4, STAT)
         STAT = EWMA(λ=0.2, value=-1.0)

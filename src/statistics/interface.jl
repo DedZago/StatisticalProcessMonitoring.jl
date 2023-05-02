@@ -2,8 +2,8 @@ abstract type AbstractStatistic end
 
 get_param(::AbstractStatistic) = @NamedTuple{}
 export get_param
-set_param(::AbstractStatistic) = @NamedTuple{}
-export set_param
+set_param!(::AbstractStatistic) = @NamedTuple{}
+export set_param!
 get_value(stat::AbstractStatistic) = stat.value
 export get_value
 update_statistic!(stat::AbstractStatistic, x) = stat

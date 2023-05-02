@@ -22,7 +22,7 @@ using Test
         update_statistic!(STAT, x)
         @test get_value(STAT) == λ * x
         lnew = 0.999
-        set_param(STAT, lnew)
+        set_param!(STAT, lnew)
         @test get_param(STAT)[1] == lnew
     end
 end
@@ -48,7 +48,7 @@ end
         update_statistic!(STAT, x)
         @test get_value(STAT) == x - k
         knew = 0.999
-        set_param(STAT, knew)
+        set_param!(STAT, knew)
         @test get_param(STAT)[1] == knew
     end
 end

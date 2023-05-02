@@ -4,8 +4,11 @@ using Test
 ti = time()
 
 @testset "SPM.jl" begin
+    include("nominal.jl")
+    include("phase1.jl")
     include("limits.jl")
     include("statistics.jl")
+    include("charts.jl")
 end
 
 ti = time() - ti
