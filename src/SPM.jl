@@ -7,4 +7,5 @@ include("nominal/interface.jl")
 include("statistics/interface.jl")
 include("limits/interface.jl")
 include("charts/interface.jl")
+include("charts/retrospective.jl")
 end
