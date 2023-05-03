@@ -105,7 +105,7 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
     if verbose println("Running optimization ...") end
     while i < (maxiter + Nmin)
         if verbose && (i % floor(maxiter / 20) == 0)
-            println("i: $(i)/$(Int(trunc(maxiter)) + Nmin)\th: $(h)\thm: $(hm)")
+            println("i: $(i)/$(Int(trunc(maxiter)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))")
         end
         i += 1
         set_limit!(CH, h)
@@ -118,13 +118,11 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
             s2 = s2 .+ (score .* score .- s2) ./ Ndenom
         end
         if (i > Nmin) && (i > v * maximum(s2))
-            if verbose println("Convergence!") end
+            if verbose println("i: $(i)/$(Int(trunc(maxiter)))\tConvergence!\n") end
             conv = "Convergence"
             break
         end
     end
-    
-    if verbose println("Done.") end
     set_limit!(CH, hm)
     return (h=hm, iter=i, status = conv)
 end
