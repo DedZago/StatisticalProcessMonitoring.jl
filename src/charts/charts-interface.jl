@@ -37,7 +37,9 @@ export get_limit
 Get the control limit value of a control chart.
 """
 get_limit_value(CH::AbstractChart) = get_value(get_limit(CH))
+#FIXME: test
 get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+#FIXME: test
 get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 export get_limit_value
 
@@ -120,7 +122,11 @@ function update_chart!(CH::AbstractChart, x)
     CH.t += 1
     update_statistic!(get_statistic(CH), x)
 end
-
+function update_chart!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, LIM <: DynamicLimit, NOM, PH1}
+    CH.t += 1
+    update_bootstrap_limit!(CH)
+    update_statistic!(get_statistic(CH), x)
+end
 export update_chart!
 
 
@@ -160,13 +166,8 @@ function set_limit!(CH::C, limit::LIM) where C <: AbstractChart where LIM <: Abs
     return limit
 end
 
-function set_limit!(CH::C, limit::Vector{Float64}) where C <: AbstractChart 
-    set_value!(get_limit(CH), limit)
-    return get_limit(CH)
-end
-
 function set_limit!(CH::C, limit::Float64) where C <: AbstractChart 
-    set_value!(get_limit(CH), [limit])
+    set_value!(get_limit(CH), limit)
     return get_limit(CH)
 end
 export set_limit! 

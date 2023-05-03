@@ -1,6 +1,6 @@
 abstract type NominalProperties end
 
-get_value(A::NominalProperties) = A.value
+get_value(NM::NominalProperties) = NM.value
 
 """
     ARL(value)
