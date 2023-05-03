@@ -1,12 +1,12 @@
 using SPM
 using Parameters
 
-abstract type AbstractChart end
+abstract type AbstractChart{STAT, LIM, NOM, PH1} end
 
 #################################################################
 #               Generic control chart interface                 #
 #################################################################
-@with_kw mutable struct ControlChart{STAT <: AbstractStatistic, LIM <: AbstractLimit, NOM <: NominalProperties, PH1 <: AbstractPhase1} <: AbstractChart
+@with_kw mutable struct ControlChart{STAT, LIM, NOM, PH1} <: AbstractChart{STAT, LIM, NOM, PH1}
     stat::STAT
     limit::LIM
     nominal::NOM
@@ -37,6 +37,8 @@ export get_limit
 Get the control limit value of a control chart.
 """
 get_limit_value(CH::AbstractChart) = get_value(get_limit(CH))
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 export get_limit_value
 
 
@@ -129,6 +131,8 @@ export update_chart!
 Check whether the control chart is in control or out of control.
 """
 is_IC(CH::AbstractChart) = is_IC(get_limit(CH), get_statistic(CH))
+is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
+is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
 is_OC(CH::AbstractChart) = !is_IC(CH)
 export is_IC
 export is_OC
