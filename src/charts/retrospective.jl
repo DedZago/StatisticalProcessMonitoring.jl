@@ -1,3 +1,5 @@
+#FIXME: construct retrospective interface for plotting and diagnosing.
+
 """
     apply_chart(CH::AbstractChart, x::AbstractVecOrMat)
     apply_chart!(CH::AbstractChart, x::AbstractVector)

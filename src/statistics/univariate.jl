@@ -1,5 +1,17 @@
 abstract type UnivariateStatistic <: AbstractStatistic end
 
+"""
+    EWMA(λ, value)
+
+Exponentially weighted moving average with parameter `λ` and initial value `value`.
+
+The update mechanism based on a new observation `x` is given by
+
+``value = (1-λ)*value + λ * x``.
+
+### References 
+* Roberts, S. W. (1959). Control Chart Tests Based on Geometric Moving Averages. Technometrics, 1(3), 239-250. https://doi.org/10.1080/00401706.1959.10489860
+"""
 @with_kw mutable struct EWMA{L,V} <: UnivariateStatistic 
     λ::L = 0.1
     value::V = 0.0
@@ -18,6 +30,18 @@ function update_statistic!(stat::EWMA, x::Real)
 end
 
 
+"""
+    CUSUM(k, value, upw::Bool)
+
+CUSUM statistic with parameter `k` and initial value `value`.
+
+The update mechanism based on a new observation `x` is given by:
+* if `upw == true`, then ``value = \\max\\{0, value + x - k\\}``;
+* if `upw == false`, then ``value = \\min\\{0, value + x + k\\}``.
+
+### References 
+* Page, E. S. (1954). Continuous Inspection Schemes. Biometrika, 41(1/2), 100. https://doi.org/10.2307/2333009
+"""
 @with_kw mutable struct CUSUM{K,V} <: UnivariateStatistic 
     k::K = 1.0
     value::V = 0.0

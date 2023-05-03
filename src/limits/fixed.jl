@@ -1,3 +1,14 @@
+"""
+    OneSidedLimit(value::Float64, upw::Bool)
+    OneSidedLimit(value::Vector{T}, upw::Vector{Bool})
+
+Classical fixed one-sided limit, such that the run length ``RL`` of a control chart is the first time ``t`` in which the statistic ``C_t`` crosses the limit.
+
+* if `upw == true`, RL = \\inf\\{t : C_t > value\\}``
+* if `upw == false`, RL = \\inf\\{t : C_t < -value\\}``
+
+Note that `value > 0` by the way it is defined.
+"""
 @with_kw mutable struct OneSidedLimit{T} <: AbstractLimit
     value::Vector{T}
     upw::Vector{Bool} = ones(length(value))
@@ -22,6 +33,16 @@ function is_IC(L::OneSidedLimit, stat::AbstractStatistic)
 end
 
 
+"""
+    TwoSidedLimit(value::Float64)
+    TwoSidedLimit(value::Vector{T})
+
+Classical fixed two-sided limit, such that the run length ``RL`` of a control chart is the first time ``t`` in which the statistic ``C_t`` crosses the limit:
+
+``RL = \\inf\\{t > 0 : |C_t| > value\\}``.
+
+Note that `value > 0` by the way it is defined.
+"""
 @with_kw mutable struct TwoSidedLimit{T} <: AbstractLimit
     value::Vector{T}
     @assert all(value .> 0.0)

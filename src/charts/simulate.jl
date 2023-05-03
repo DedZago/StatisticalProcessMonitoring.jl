@@ -2,6 +2,12 @@
 	run_sim(CH::AbstractChart)
 
 Simulates a run length for the control chart `CH` by sampling new data from the Phase I object.
+
+### Inputs
+* `CH` - A control chart.
+
+### Returns
+* An `Int`.
 """
 function run_sim(CH::AbstractChart)
     CH_ = shallow_copy_sim(CH)
@@ -15,7 +21,21 @@ function run_sim(CH::AbstractChart)
 end
 export run_sim
 
-function run_sim_sa(CH::AbstractChart, maxiter, deltaSA)
+"""
+	run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
+
+Simulates a run length for the control chart `CH` by sampling new data from the Phase I object, to be used by the stochastic approximation algorithm implemented in the `saCL!` function.
+
+### Inputs
+* `CH` - A control chart.
+* `maxiter` - The maximum value of the run length.
+* `deltaSA` - A value controlling how much the control limit must be shifted for the gain estimation during the first stage.
+
+### Returns
+* A `NamedTuple` containing the simulated run length, `rl`, the simulated run length with control limit shifted by `deltaSA`, `rlPlus`, and the simulated run length with control limit shifted by `-deltaSA`, `rlMinus`.
+"""
+function run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
+    @assert deltaSA >= 0.0
     CH_ = shallow_copy_sim(CH)
     maxrl = min(get_maxrl(CH_), maxiter)
     rl = rlPlus = rlMinus = Int(round(maxrl))
