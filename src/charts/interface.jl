@@ -11,8 +11,15 @@ abstract type AbstractChart end
     limit::LIM
     nominal::NOM
     phase1::PH1
+    t::Int = 0
+    @assert t >= 0
 end
 export ControlChart
+
+ControlChart(stat::S, limit::L, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = ControlChart(stat, limit, nominal, phase1, 0)
+
+shallow_copy_sim(CH::C) where C<:AbstractChart = C(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), get_nominal(CH), get_phase1(CH), get_t(CH))
+export shallow_copy_sim
 
 
 """
@@ -71,6 +78,15 @@ Get the Phase 1 information of a control chart.
 get_phase1(CH::AbstractChart) = CH.phase1
 export get_phase1
 
+"""
+    get_t(CH::AbstractChart)
+
+Get the current time point from a control chart.
+"""
+get_t(CH::AbstractChart) = CH.t
+export get_t
+
+
 
 """
     get_param(CH::AbstractChart)
@@ -98,7 +114,11 @@ export get_maxrl
     
 Update the control chart using a new observation `x`.
 """
-update_chart!(CH::AbstractChart, x) = update_statistic!(get_statistic(CH), x)
+function update_chart!(CH::AbstractChart, x)
+    CH.t += 1
+    update_statistic!(get_statistic(CH), x)
+end
+
 export update_chart!
 
 
@@ -137,7 +157,12 @@ function set_limit!(CH::C, limit::LIM) where C <: AbstractChart where LIM <: Abs
 end
 
 function set_limit!(CH::C, limit::Vector{Float64}) where C <: AbstractChart 
-    set_limit!(get_limit(CH), limit)
+    set_value!(get_limit(CH), limit)
+    return get_limit(CH)
+end
+
+function set_limit!(CH::C, limit::Float64) where C <: AbstractChart 
+    set_value!(get_limit(CH), [limit])
     return get_limit(CH)
 end
 export set_limit! 
@@ -166,6 +191,14 @@ function set_phase1!(CH::C, phase1::PH1) where C <: AbstractChart where PH1 <: A
 end
 export set_phase1!
 
+"""
+    new_data(CH::AbstractChart)
+
+Simulate a new observation for the control chart.
+"""
+new_data(CH::AbstractChart) = new_data(get_phase1(CH))
+export new_data
+    
 
 """
     set_nominal!(CH::AbstractChart, nominal::NominalProperties)
@@ -177,3 +210,5 @@ function set_nominal!(CH::C, nominal::N) where C <: AbstractChart where N <: Nom
     return nominal
 end
 export set_nominal!
+
+include("simulate.jl")

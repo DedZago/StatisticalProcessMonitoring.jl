@@ -10,8 +10,10 @@ using Test
     STAT = EWMA(λ = 0.2)
     @testset "constructor" begin
         CH = ControlChart(STAT, LIM, NM, PH1)
+        CH = ControlChart(STAT, LIM, NM, PH1, 0)
         @test is_IC(CH)
         @test !is_OC(CH)
+        @test get_t(CH) == 0
         @test get_param(CH) == (λ = 0.2,)
         @test get_phase1(CH) == PH1
         @test get_limit_value(CH) == [1.0]
@@ -28,8 +30,12 @@ using Test
         set_phase1!(CH, PH1)
         set_statistic!(CH, STAT)
         set_limit!(CH, LIM)
+        set_limit!(CH, 0.1)
+        @test get_limit_value(CH) == [0.1]
         set_param!(CH, 0.3)
+        @test get_param(CH)[1] == 0.3
         @test get_maxrl(CH) == Inf
+        @test new_data(CH) in x
     end
 end
 end

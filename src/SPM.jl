@@ -8,4 +8,5 @@ include("statistics/interface.jl")
 include("limits/interface.jl")
 include("charts/interface.jl")
 include("charts/retrospective.jl")
+include("algorithms/sacl.jl")
 end

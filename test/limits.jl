@@ -6,6 +6,10 @@ using Test
     h = 1.0; upw = true
     @testset "One-sided limit constructors" begin
         L = OneSidedLimit(h)
+        @test get_value(L) == [h]
+        hup = 5.0
+        set_value!(L, hup)
+        @test get_value(L) == [hup]
         L = OneSidedLimit(h, upw=false)
         L = OneSidedLimit([h], [upw])
         L = OneSidedLimit([h for _ in 1:10], [upw for _ in 1:10])
