@@ -1,3 +1,4 @@
+using Statistics
 mean(x) = sum(x) / length(x)
 
 """
@@ -15,13 +16,12 @@ end
 export calculate_limit_gradient
 
 function calculate_limit_gradient(nominal::ARL, rl)
-    #TODO: extend to multivariate
+    #FIXME: test
     return (minimum(rl) - get_value(nominal) .+ rl .- mean(rl)) ./ get_value(nominal)
 end
 
 function calculate_limit_gradient(nominal::QRL, rl)
-    #TODO: check gradient correctness
-    #TODO: extend to multivariate
+    #FIXME: test
     return -(float(rl <= get_value(nominal)) - nominal.qtl)
 end
 
@@ -33,9 +33,8 @@ Computes the control limit for a control chart such that it satisfies E[RL] = Ar
 
 Keyword arguments are:
 """
-function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, Afixed::Real=0.1, Amin::Real=0.1, Amax::Real=100.0, deltaSA::Real=0.1, q::Real=0.55, gamma::Real=0.02, Nmin::Int=1000, z::Real = 3.0, Cmrl::Real=10.0, maxiter::Real = 4e05, verbose::Bool=true)
-
-    #TODO: Find out why is it not working
+function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, Afixed::Real=0.1, Amin::Real=0.1, Amax::Real=100.0, deltaSA::Real=0.1, q::Real=0.55, gamma::Real=0.02, Nmin::Int=1000, z::Real = 3.0, Cmrl::Real=10.0, maxiter::Real = 4e05, verbose::Bool=true)
+    #FIXME: test
     v = (z/gamma)^2
     eps = 1e-06
     h = deepcopy(get_limit_value(CH))
@@ -57,10 +56,10 @@ function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, A
     for i in 1:Nfixed
         set_limit!(CH, h)
         rl, rlPlus, rlMinus = rlsim(CH, Cmrl * Arl0 * sqrt(i + Nfixed), deltaSA)
-        calculate_limit_gradient(CH, rl)
+        score = calculate_limit_gradient(CH, rl)
         h = max.(eps, h .- Afixed * score ./ (i^q))
-        calculate_limit_gradient(CH, rlPlus)
-        calculate_limit_gradient(CH, rlMinus)
+        scorePlus = calculate_limit_gradient(CH, rlPlus)
+        scoreMinus = calculate_limit_gradient(CH, rlMinus)
         D .+= (scorePlus .- scoreMinus) ./ i
     end
     @. D = 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*deltaSA))))
@@ -92,7 +91,14 @@ function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, A
     end
     
     if verbose println("Done.") end
-
+    set_limit!(CH, hm)
     return (h=hm, iter=i)
+end
+export saCL!
+
+
+function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, Afixed::Real=0.1, Amin::Real=0.1, Amax::Real=100.0, deltaSA::Real=0.1, q::Real=0.55, gamma::Real=0.02, Nmin::Int=1000, z::Real = 3.0, Cmrl::Real=10.0, maxiter::Real = 4e05, verbose::Bool=true)
+    CH_ = shallow_copy_sim(CH)
+    return saCL!(CH_, rlsim = rlsim, Nfixed = Nfixed, Afixed = Afixed, Amin = Amin, Amax = Amax, deltaSA = deltaSA, q = q, gamma = gamma, Nmin = Nmin, z = z, Cmrl = Cmrl, maxiter = maxiter, verbose = verbose)
 end
 export saCL

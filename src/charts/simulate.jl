@@ -50,6 +50,7 @@ function run_sim_sa(CH::AbstractChart, maxiter, deltaSA)
         end
         notDone = notDoneRl + notDoneM + notDoneP
     end
+    set_limit!(CH_, h)
     return (rl = rl, rlPlus = rlPlus, rlMinus = rlMinus)
 end
 export run_sim_sa
