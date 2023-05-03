@@ -5,29 +5,24 @@ using Test
 @testset "Fixed" begin
     h = 1.0; upw = true
     @testset "One-sided fixed limit constructors" begin
-        L = OneSidedFixedLimit(h)
-        @test get_value(L) == [h]
+        L = OneSidedFixedLimit(h, true)
+        @test get_value(L) == h
         hup = 5.0
         set_value!(L, hup)
-        @test get_value(L) == [hup]
-        L = OneSidedFixedLimit(h, upw=false)
-        L = OneSidedFixedLimit([h], [upw])
-        L = OneSidedFixedLimit([h for _ in 1:10], [upw for _ in 1:10])
-        L = OneSidedFixedLimit([h for _ in 1:10], [!upw for _ in 1:10])
-        @test_throws AssertionError OneSidedFixedLimit([h for _ in 1:5], [!upw for _ in 1:10])
+        @test get_value(L) == hup
+        L = OneSidedFixedLimit(value=h, upw=false)
+        @test_throws AssertionError OneSidedFixedLimit(-0.1, true)
     end
     @testset "Two-sided fixed limit constructors" begin
         L = TwoSidedFixedLimit(h)
-        L = TwoSidedFixedLimit([h])
-        L = TwoSidedFixedLimit([h for _ in 1:10])
-        @test_throws AssertionError TwoSidedFixedLimit([-h for _ in 1:5])
+        @test_throws AssertionError TwoSidedFixedLimit(-0.1)
     end
     @testset "isOC statistic" begin
         STAT = EWMA(λ=0.2, value=1.0)
-        L1 = OneSidedFixedLimit([1.5], [true])
+        L1 = OneSidedFixedLimit(1.5, true)
         @test is_IC(L1, STAT)
         @test !is_OC(L1, STAT)
-        L2 = OneSidedFixedLimit([0.5], [true])
+        L2 = OneSidedFixedLimit(0.5, true)
         @test is_OC(L2, STAT)
         @test !is_IC(L2, STAT)
         L3 = TwoSidedFixedLimit(0.5)
@@ -48,9 +43,9 @@ using Test
         STAT = EWMA(λ = λ, value = 0.0)
         h = 0.5
         L = TwoSidedCurvedLimit(h, f, STAT)
-        @test get_value(L, 0, STAT) == [h * f(0, STAT)] 
-        @test get_value(L, 1, STAT) == [h * f(1, STAT)] 
-        @test get_value(L, 10^5, STAT) == [h * sqrt(λ/(2-λ))] 
+        @test get_value(L, 0, STAT) == h * f(0, STAT) 
+        @test get_value(L, 1, STAT) == h * f(1, STAT) 
+        @test get_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
     end
     # @testset "Two-sided curved limit constructors" begin
     #     L = TwoSidedFixedLimit(h)
