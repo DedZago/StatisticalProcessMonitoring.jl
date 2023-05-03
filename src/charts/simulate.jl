@@ -1,5 +1,5 @@
 """
-	run_sim(CH::AbstractChart)
+    run_sim(CH::AbstractChart)
 
 Simulates a run length for the control chart `CH` by sampling new data from the Phase I object.
 
@@ -22,7 +22,7 @@ end
 export run_sim
 
 """
-	run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
+    run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
 
 Simulates a run length for the control chart `CH` by sampling new data from the Phase I object, to be used by the stochastic approximation algorithm implemented in the `saCL!` function.
 
