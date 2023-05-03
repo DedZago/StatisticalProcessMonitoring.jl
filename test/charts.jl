@@ -16,7 +16,7 @@ using Test
         @test get_t(CH) == 0
         @test get_param(CH) == (λ = 0.2,)
         @test get_phase1(CH) == PH1
-        @test get_limit_value(CH) == [1.0]
+        @test get_limit_value(CH) == 1.0
         @test get_value(CH) == 0.0
         @test get_statistic(CH) == STAT
         @test get_nominal(CH) == NM
@@ -31,7 +31,7 @@ using Test
         set_statistic!(CH, STAT)
         set_limit!(CH, LIM)
         set_limit!(CH, 0.1)
-        @test get_limit_value(CH) == [0.1]
+        @test get_limit_value(CH) == 0.1
         set_param!(CH, 0.3)
         @test get_param(CH)[1] == 0.3
         @test get_maxrl(CH) == Inf
@@ -52,7 +52,7 @@ using Test
         @test get_t(CH) == 0
         @test get_param(CH) == (λ = 0.2,)
         @test get_phase1(CH) == PH1
-        @test get_limit_value(CH) == [0.0]
+        @test get_limit_value(CH) == 0.0
         @test get_value(CH) == 0.0
         @test get_statistic(CH) == STAT
         @test get_nominal(CH) == NM
@@ -70,7 +70,7 @@ using Test
         set_statistic!(CH, STAT)
         set_limit!(CH, LIM)
         set_limit!(CH, 0.1)
-        @test get_limit_value(CH) != [0.0]
+        @test get_limit_value(CH) != 0.0
         set_param!(CH, 0.3)
         @test get_param(CH)[1] == 0.3
         @test get_maxrl(CH) == Inf
