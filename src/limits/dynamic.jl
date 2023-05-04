@@ -33,6 +33,7 @@ end
     sim::Vector{T}
     upw::Bool
 end
+#TODO: Define update_limit! method to perform bootstrap
 
 OneSidedBootstrapLimit(S::AbstractStatistic, upw, B::Int) = OneSidedBootstrapLimit([deepcopy(get_value(S)) for _ in 1:B], upw)
 export OneSidedBootstrapLimit
@@ -43,3 +44,5 @@ export OneSidedBootstrapLimit
 end
 TwoSidedBootstrapLimit(S::AbstractStatistic, B::Int) = TwoSidedBootstrapLimit([deepcopy(get_value(S)) for _ in 1:B])
 export TwoSidedBootstrapLimit
+
+#TODO: Define update_limit! method to perform bootstrap

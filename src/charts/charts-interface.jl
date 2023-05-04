@@ -114,23 +114,6 @@ export get_maxrl
 
 
 """
-    update_chart!(CH::AbstractChart, x)
-    
-Update the control chart using a new observation `x`.
-"""
-function update_chart!(CH::AbstractChart, x)
-    CH.t += 1
-    update_statistic!(get_statistic(CH), x)
-end
-function update_chart!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, LIM <: DynamicLimit, NOM, PH1}
-    CH.t += 1
-    update_bootstrap_limit!(CH)
-    update_statistic!(get_statistic(CH), x)
-end
-export update_chart!
-
-
-"""
     is_IC(CH::AbstractChart)
     is_OC(CH::AbstractChart)
     
@@ -215,5 +198,26 @@ function set_nominal!(CH::C, nominal::N) where C <: AbstractChart where N <: Nom
     return nominal
 end
 export set_nominal!
+
+
+"""
+    update_chart!(CH::AbstractChart, x)
+    
+Update the control chart using a new observation `x`.
+"""
+function update_chart!(CH::AbstractChart, x)
+    CH.t += 1
+    update_statistic!(get_statistic(CH), x)
+end
+
+function update_chart!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, LIM <: DynamicLimit, NOM, PH1}
+    CH.t += 1
+    update_limit!(CH)
+    update_statistic!(get_statistic(CH), x)
+end
+export update_chart!
+
+update_limit!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, LIM <: DynamicLimit, NOM, PH1} = error("Not implemented for abstract interface.")
+
 
 include("simulate.jl")
