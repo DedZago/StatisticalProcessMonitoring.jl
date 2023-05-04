@@ -21,8 +21,8 @@ end
 export EWMA
 
 
-get_param(stat::EWMA) = (λ = stat.λ,)
-set_param!(stat::EWMA, λ) = stat.λ = λ
+get_parameter(stat::EWMA) = (λ = stat.λ,)
+set_parameter!(stat::EWMA, λ) = stat.λ = λ
 
 
 function update_statistic!(stat::EWMA, x::Real)
@@ -52,8 +52,8 @@ end
 export CUSUM
 
 
-get_param(stat::CUSUM) = (k = stat.k,)
-set_param!(stat::CUSUM, k) = stat.k = k
+get_parameter(stat::CUSUM) = (k = stat.k,)
+set_parameter!(stat::CUSUM, k) = stat.k = k
 
 
 function update_statistic!(stat::CUSUM, x::Real)

@@ -23,9 +23,7 @@ export ControlChart
 const MultipleControlChart{S,L,N,P} = ControlChart{Vector{S}, Vector{L},N,P} where {S,L,N,P}
 export MultipleControlChart
 
-shallow_copy_sim(CH::C) where C <: AbstractChart = C(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), get_nominal(CH), get_phase1(CH), get_t(CH)) # FIXME:test
-
-shallow_copy_sim(CH::MultipleControlChart{S,L,N,P}) where {S,L,N,P} = ControlChart(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), get_nominal(CH), get_phase1(CH), get_t(CH)) # FIXME:test
+shallow_copy_sim(CH::ControlChart) = ControlChart(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), get_nominal(CH), get_phase1(CH), get_t(CH))
 export shallow_copy_sim
 
 
@@ -107,23 +105,28 @@ export get_t
 
 
 """
-    get_param(CH::AbstractChart)
-    set_param!(CH::AbstractChart, par)
+    get_parameter(CH::AbstractChart)
+    set_parameter!(CH::AbstractChart, par)
     
 Get and set the parameters of the control chart statistic.
 """
-get_param(CH::AbstractChart) = get_param(get_statistic(CH))
-get_param(CH::MultipleControlChart) = get_param.(get_statistic(CH)) #FIXME: test
-set_param!(CH::AbstractChart, par) = set_param!(get_statistic(CH), par)
-set_param(CH::MultipleControlChart, par) = set_param!.(get_statistic(CH), par) #FIXME: test
-function set_param(CH::MultipleControlChart, par::AbstractVector)
-    @assert length(CH) == length(par)
-    for i in 1:length(CH)
-        set_param!(get_statistic(CH)[i], par[i])
+get_parameter(CH::AbstractChart) = get_parameter(get_statistic(CH))
+
+get_parameter(CH::MultipleControlChart) = get_parameter.(get_statistic(CH)) #FIXME: test
+export get_parameter
+
+
+set_parameter!(CH::AbstractChart, par) = set_parameter!(get_statistic(CH), par)
+
+set_parameter!(CH::MultipleControlChart, par) = set_parameter!.(get_statistic(CH), par)
+
+function set_parameter!(CH::MultipleControlChart, par::AbstractVector)
+    @assert length(get_statistic(CH)) == length(par)
+    for i in 1:length(get_statistic(CH))
+        set_parameter!(get_statistic(CH)[i], par[i])
     end
-end#FIXME: test
-export get_param
-export set_param!
+end
+export set_parameter!
 
 
 """
