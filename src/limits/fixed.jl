@@ -4,19 +4,13 @@ import FunctionWrappers.FunctionWrapper
 abstract type OneSidedLimit <: AbstractLimit end
 abstract type TwoSidedLimit <: AbstractLimit end
 
-function is_IC(L::AbstractLimit, stat::AbstractStatistic)
+function is_IC(L::AbstractLimit, t, stat::AbstractStatistic)
     val = get_value(stat)
-    lim = get_value(L)
+    lim = get_curved_value(L, t, stat)
     @assert typeof(val) == typeof(lim)
     return compare_values(lim, val, L)
 end
 
-function is_IC(L::AbstractLimit, t, stat::AbstractStatistic)
-    val = get_value(stat)
-    lim = get_value(L, t, stat)
-    @assert typeof(val) == typeof(lim)
-    return compare_values(lim, val, L)
-end
 
 function compare_values(lim_val, stat_val, L::LIM) where LIM <: TwoSidedLimit
     if (stat_val > lim_val) || (stat_val < -lim_val)
@@ -26,7 +20,7 @@ function compare_values(lim_val, stat_val, L::LIM) where LIM <: TwoSidedLimit
 end
 
 function compare_values(lim_val, stat_val, L::LIM) where LIM <: OneSidedLimit
-    for i in eachindex(lim_val)
+    for i in 1:length(lim_val)
         if L.upw[i]
             stat_val[i] < lim_val[i] || return false
         else
@@ -88,8 +82,7 @@ Note that `value > 0` by the way it is defined.
 end
 export OneSidedCurvedLimit
 
-get_value(::OneSidedCurvedLimit) = error("Curved limit requires specifying a time and a statistic.")
-get_value(L::OneSidedCurvedLimit, t, stat) = L.value * L.fun(t, stat)
+get_curved_value(L::OneSidedCurvedLimit, t, stat) = L.value * L.fun(t, stat)
 
 
 """
@@ -110,5 +103,4 @@ Note that `value > 0` by the way it is defined.
 end
 export TwoSidedCurvedLimit
 
-get_value(::TwoSidedCurvedLimit) = error("Curved limit requires specifying a time and a statistic.")
-get_value(L::TwoSidedCurvedLimit, t, stat) = L.value * L.fun(t, stat)
+get_curved_value(L::TwoSidedCurvedLimit, t, stat) = L.value * L.fun(t, stat)

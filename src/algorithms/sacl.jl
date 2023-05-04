@@ -33,6 +33,14 @@ function calculate_limit_gradient(nominal::QRL, rl)
     return -(float(rl <= get_value(nominal)) - nominal.qtl)
 end
 
+calculate_gain(D::Float64, Amin, Amax, deltaSA) = 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*deltaSA))))
+calculate_gain(D::Vector{Float64}, Amin, Amax, deltaSA) = @. 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*deltaSA))))
+
+calculate_limit(h::Float64, D, score, i, q, eps) = max(eps, h - D * score / (i^q))
+calculate_limit(h::Vector{Float64}, D, score, i, q, eps) = @. max(eps, h - D * score / (i^q))
+
+update_score(s2::Float64, score::Float64, Ndenom) = s2 + (score * score - s2) / Ndenom
+update_score(s2::Vector{Float64}, score::Vector{Float64}, Ndenom) = s2 .+ (score .* score .- s2) ./ Ndenom
 
 """
     saCL!(CH::ControlChart; kw...)
@@ -65,11 +73,23 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
 function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, Afixed::Real=0.1, Amin::Real=0.1, Amax::Real=100.0, deltaSA::Real=0.1, q::Real=0.55, gamma::Real=0.02, Nmin::Int=1000, z::Real = 3.0, Cmrl::Real=10.0, maxiter::Real = 4e05, verbose::Bool=true)
-    #FIXME: test
-    #FIXME: basic argument checking
+
+    #TODO: add checks on the rlsim function
+
+    @assert Nfixed > 0 "Nfixed must be positive"
+    @assert Amin > 0 "Amin must be positive"
+    @assert Amax > 0 "Amax must be positive"
+    @assert deltaSA > 0 "deltaSA must be positive"
+    @assert 0 < q < 1 "q must be a number between 0 and 1"
+    @assert 0 < gamma < 1 "gamma must be a number between 0 and 1"
+    @assert Nmin > 0 "Nmin must be positive"
+    @assert z > 0 "z must be positive"
+    @assert Cmrl > 0 "Cmrl must be positive"
+    @assert maxiter > 0 "maxiter must be positive"
+
     v = (z/gamma)^2
     eps = 1e-06
-    h = deepcopy(get_limit_value(CH))
+    h = deepcopy(get_value(get_limit(CH)))
     score = zero(h)
     s2    = zero(h)
     D     = zero(h)
@@ -88,13 +108,17 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
     for i in 1:Nfixed
         set_limit!(CH, h)
         rl, rlPlus, rlMinus = rlsim(CH, Cmrl * Arl0 * sqrt(i + Nfixed), deltaSA)
+        @show rl, rlPlus, rlMinus, h
         score = calculate_limit_gradient(CH, rl)
-        h = max.(eps, h .- Afixed * score ./ (i^q))
+        h = calculate_limit(h, Afixed, score, i, q, eps)
         scorePlus = calculate_limit_gradient(CH, rlPlus)
         scoreMinus = calculate_limit_gradient(CH, rlMinus)
-        D .+= (scorePlus .- scoreMinus) ./ i
+        @show scorePlus, scoreMinus, D
+        D += (scorePlus - scoreMinus) / i
     end
-    @. D = 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*deltaSA))))
+
+    D = calculate_gain(D, Amin, Amax, deltaSA)
+
     if verbose println("Estimated gain D = $(D)") end
 
 
@@ -111,11 +135,11 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
         set_limit!(CH, h)
         rl, _, _ = rlsim(CH, Cmrl * Arl0 * sqrt(i + Nfixed), 0.0)
         score = calculate_limit_gradient(CH, rl)
-        h = max.(eps, h .- D * score ./ (i^q))
+        h = calculate_limit(h, D, score, i, q, eps)
         if i > Nmin
             Ndenom = (i - Nmin)
-            hm = hm .+ (h .- hm) ./ Ndenom 
-            s2 = s2 .+ (score .* score .- s2) ./ Ndenom
+            hm = hm + (h - hm) / Ndenom 
+            s2 = update_score(s2, score, Ndenom)
         end
         if (i > Nmin) && (i > v * maximum(s2))
             if verbose println("i: $(i)/$(Int(trunc(maxiter)))\tConvergence!\n") end

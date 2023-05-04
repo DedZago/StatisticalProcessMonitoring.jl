@@ -45,13 +45,13 @@ get_limit_value(CH::AbstractChart) = get_value(get_limit(CH))
 
 get_limit_value(CH::MultipleControlChart) = get_value.(get_limit(CH))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_curved_value(get_limit(CH), get_t(CH) + 1, get_statistic(CH))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_curved_value(get_limit(CH), get_t(CH) + 1, get_statistic(CH))
 
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_curved_value.(get_limit(CH), get_t(CH) + 1, get_statistic(CH))
 
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_curved_value.(get_limit(CH), get_t(CH) + 1, get_statistic(CH))
 export get_limit_value
 
 
@@ -129,6 +129,7 @@ end
 export set_parameter!
 
 
+
 """
     get_maxrl(CH::AbstractChart)
     
@@ -148,9 +149,9 @@ is_IC(CH::AbstractChart) = is_IC(get_limit(CH), get_statistic(CH))
 
 is_IC(CH::MultipleControlChart) = all(is_IC.(get_limit(CH), get_statistic(CH)))
 
-is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
+is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH) + 1, get_statistic(CH))
 
-is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
+is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH) + 1, get_statistic(CH))
 
 is_OC(CH::AbstractChart) = !is_IC(CH)
 export is_IC
@@ -193,25 +194,6 @@ function set_limit!(CH::MultipleControlChart, limit::Vector{Float64})
         set_value!(get_limit(CH)[i], limit[i])
     end
 end
-
-"""
-    function set_parameter!(CH::C, par)
-
-Set the parameters of the control chart statistic.
-"""
-function set_parameter!(CH::AbstractChart, par)
-    set_parameter!(get_statistic(CH), par)
-    return par
-end
-export set_parameter!
-
-function set_parameter!(CH::MultipleControlChart, par::AbstractVector)
-    @assert length(get_statistic(CH)) == length(par)
-    for i in 1:length(get_statistic(CH))
-        set_parameter!(get_statistic(CH)[i], par[i])
-    end
-end
-
 
 """
     set_phase1!(CH::AbstractChart, phase1::AbstractPhase1)

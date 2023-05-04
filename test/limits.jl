@@ -43,13 +43,15 @@ using Test
         STAT = EWMA(λ = λ, value = 0.0)
         h = 0.5
         L = OneSidedCurvedLimit(h, true, f, STAT)
-        @test get_value(L, 0, STAT) == h * f(0, STAT) 
-        @test get_value(L, 1, STAT) == h * f(1, STAT) 
-        @test get_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
+        @test get_value(L) == h
+        @test get_curved_value(L, 0, STAT) == h * f(0, STAT) 
+        @test get_curved_value(L, 1, STAT) == h * f(1, STAT) 
+        @test get_curved_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
         L = OneSidedCurvedLimit(-h, false, f, STAT)
-        @test get_value(L, 0, STAT) == -h * f(0, STAT) 
-        @test get_value(L, 1, STAT) == -h * f(1, STAT) 
-        @test get_value(L, 10^5, STAT) == -h * sqrt(λ/(2-λ)) 
+        @test get_value(L) == -h
+        @test get_curved_value(L, 0, STAT) == -h * f(0, STAT) 
+        @test get_curved_value(L, 1, STAT) == -h * f(1, STAT) 
+        @test get_curved_value(L, 10^5, STAT) == -h * sqrt(λ/(2-λ)) 
     end
     @testset "Two-sided curved" begin
         f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
@@ -57,9 +59,10 @@ using Test
         STAT = EWMA(λ = λ, value = 0.0)
         h = 0.5
         L = TwoSidedCurvedLimit(h, f, STAT)
-        @test get_value(L, 0, STAT) == h * f(0, STAT) 
-        @test get_value(L, 1, STAT) == h * f(1, STAT) 
-        @test get_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
+        @test get_value(L) == h
+        @test get_curved_value(L, 0, STAT) == h * f(0, STAT) 
+        @test get_curved_value(L, 1, STAT) == h * f(1, STAT) 
+        @test get_curved_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
     end
 end
 end
