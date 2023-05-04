@@ -18,7 +18,6 @@ function is_IC(L::AbstractLimit, t, stat::AbstractStatistic)
     return compare_values(lim, val, L)
 end
 
-#FIXME: test
 function compare_values(lim_val, stat_val, L::LIM) where LIM <: TwoSidedLimit
     if (stat_val > lim_val) || (stat_val < -lim_val)
         return false
@@ -43,14 +42,13 @@ end
 Classical fixed one-sided limit, such that the run length ``RL`` of a control chart is the first time ``t`` in which the statistic ``C_t`` crosses the limit.
 
 * if `upw == true`, ``RL = \\inf\\{t : C_t > value\\}``
-* if `upw == false`, ``RL = \\inf\\{t : C_t < -value\\}``
+* if `upw == false`, ``RL = \\inf\\{t : C_t < value\\}``
 
 Note that `value > 0` by the way it is defined.
 """
 @with_kw mutable struct OneSidedFixedLimit{T} <: OneSidedLimit
     value::T
     upw::Bool = true
-    @assert value > 0.0
 end
 export OneSidedFixedLimit
 
@@ -81,7 +79,6 @@ Curved one-sided limit, such that the run length ``RL`` of a control chart is th
 
 Note that `value > 0` by the way it is defined.
 """
-#FIXME: test
 @with_kw mutable struct OneSidedCurvedLimit{T, S} <: OneSidedLimit
     value::T
     upw::Bool = true

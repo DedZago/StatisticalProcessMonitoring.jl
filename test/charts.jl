@@ -95,6 +95,7 @@ using Test
         @test get_parameter(CH)[2] == (λ = λ2,)
         @test get_phase1(CH) == PH1
         @test get_limit_value(CH) == fill(h, 2)
+        @test isa(get_limit_value(CH), Vector)
         @test get_value(CH) == zeros(2)
         @test typeof(get_statistic(CH)) <: Vector
         @test length(get_statistic(CH)) == 2

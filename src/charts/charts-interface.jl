@@ -45,13 +45,13 @@ get_limit_value(CH::AbstractChart) = get_value(get_limit(CH))
 
 get_limit_value(CH::MultipleControlChart) = get_value.(get_limit(CH))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH)) #FIXME: test
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH)) #FIXME: test
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH)) #FIXME: test
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH)) #FIXME: test
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 export get_limit_value
 
 
@@ -112,7 +112,7 @@ Get and set the parameters of the control chart statistic.
 """
 get_parameter(CH::AbstractChart) = get_parameter(get_statistic(CH))
 
-get_parameter(CH::MultipleControlChart) = get_parameter.(get_statistic(CH)) #FIXME: test
+get_parameter(CH::MultipleControlChart) = get_parameter.(get_statistic(CH))
 export get_parameter
 
 
@@ -146,9 +146,7 @@ Check whether the control chart is in control or out of control.
 """
 is_IC(CH::AbstractChart) = is_IC(get_limit(CH), get_statistic(CH))
 
-is_IC(CH::MultipleControlChart) = all(is_IC.(get_limit(CH), get_statistic(CH))) #FIXME: test
-
-#TODO: Curved limit is_IC
+is_IC(CH::MultipleControlChart) = all(is_IC.(get_limit(CH), get_statistic(CH)))
 
 is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
 
@@ -187,14 +185,14 @@ function set_limit!(CH::AbstractChart, limit::Float64)
 end
 export set_limit! 
 
-set_limit!(CH::MultipleControlChart, limit::Float64) = set_value!.(get_limit(CH), limit) #FIXME: test
+set_limit!(CH::MultipleControlChart, limit::Float64) = set_value!.(get_limit(CH), limit)
 
 function set_limit!(CH::MultipleControlChart, limit::Vector{Float64})
     @assert length(get_limit(CH)) == length(limit)
     for i in 1:length(get_limit(CH))
         set_value!(get_limit(CH)[i], limit[i])
     end
-end#FIXME: test
+end
 
 """
     function set_parameter!(CH::C, par)
@@ -212,7 +210,7 @@ function set_parameter!(CH::MultipleControlChart, par::AbstractVector)
     for i in 1:length(get_statistic(CH))
         set_parameter!(get_statistic(CH)[i], par[i])
     end
-end#FIXME: test
+end
 
 
 """
@@ -260,7 +258,7 @@ end
 function update_chart!(CH::MultipleControlChart, x)
     CH.t += 1
     update_statistic!.(get_statistic(CH), x)
-end#FIXME: test
+end
 
 function update_chart!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, LIM <: DynamicLimit, NOM, PH1}
     CH.t += 1
