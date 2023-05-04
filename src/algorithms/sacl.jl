@@ -108,12 +108,12 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
     for i in 1:Nfixed
         set_limit!(CH, h)
         rl, rlPlus, rlMinus = rlsim(CH, Cmrl * Arl0 * sqrt(i + Nfixed), deltaSA)
-        @show rl, rlPlus, rlMinus, h
+        # @show rl, rlPlus, rlMinus, h
         score = calculate_limit_gradient(CH, rl)
         h = calculate_limit(h, Afixed, score, i, q, eps)
         scorePlus = calculate_limit_gradient(CH, rlPlus)
         scoreMinus = calculate_limit_gradient(CH, rlMinus)
-        @show scorePlus, scoreMinus, D
+        # @show scorePlus, scoreMinus, D
         D += (scorePlus - scoreMinus) / i
     end
 
