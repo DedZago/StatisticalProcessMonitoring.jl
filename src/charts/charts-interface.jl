@@ -6,19 +6,26 @@ abstract type AbstractChart{STAT, LIM, NOM, PH1} end
 #################################################################
 #               Generic control chart interface                 #
 #################################################################
-@with_kw mutable struct ControlChart{STAT, LIM, NOM, PH1} <: AbstractChart{STAT, LIM, NOM, PH1}
+mutable struct ControlChart{STAT, LIM, NOM, PH1} <: AbstractChart{STAT, LIM, NOM, PH1}
     stat::STAT
     limit::LIM
     nominal::NOM
     phase1::PH1
-    t::Int = 0
-    @assert t >= 0
+    t::Int
+
+    ControlChart(stat::S, limit::L, nominal::N, phase1::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = new{S,L,N,P}(stat, limit, nominal, phase1, t)
+    ControlChart(stat::S, limit::L, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = new{S,L,N,P}(stat, limit, nominal, phase1, 0)
+    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = new{Vector{S},Vector{L},N,P}(stat, limit, nominal, phase1, 0)
+    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase1::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = new{Vector{S},Vector{L},N,P}(stat, limit, nominal, phase1, t)
 end
 export ControlChart
 
-ControlChart(stat::S, limit::L, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = ControlChart(stat, limit, nominal, phase1, 0)
+const MultipleControlChart{S,L,N,P} = ControlChart{Vector{S}, Vector{L},N,P} where {S,L,N,P}
+export MultipleControlChart
 
-shallow_copy_sim(CH::C) where C<:AbstractChart = C(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), get_nominal(CH), get_phase1(CH), get_t(CH))
+shallow_copy_sim(CH::C) where C <: AbstractChart = C(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), get_nominal(CH), get_phase1(CH), get_t(CH)) # FIXME:test
+
+shallow_copy_sim(CH::MultipleControlChart{S,L,N,P}) where {S,L,N,P} = ControlChart(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), get_nominal(CH), get_phase1(CH), get_t(CH)) # FIXME:test
 export shallow_copy_sim
 
 
@@ -37,10 +44,16 @@ export get_limit
 Get the control limit value of a control chart.
 """
 get_limit_value(CH::AbstractChart) = get_value(get_limit(CH))
-#FIXME: test
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
-#FIXME: test
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+
+get_limit_value(CH::MultipleControlChart) = get_value.(get_limit(CH))
+
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH)) #FIXME: test
+
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH)) #FIXME: test
+
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH)) #FIXME: test
+
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH)) #FIXME: test
 export get_limit_value
 
 
@@ -59,6 +72,7 @@ export get_statistic
 Get the current value of the control chart statistic.
 """
 get_value(CH::AbstractChart) = get_value(get_statistic(CH))
+get_value(CH::MultipleControlChart) = get_value.(get_statistic(CH))
 export get_value
 
 
@@ -99,7 +113,15 @@ export get_t
 Get and set the parameters of the control chart statistic.
 """
 get_param(CH::AbstractChart) = get_param(get_statistic(CH))
+get_param(CH::MultipleControlChart) = get_param.(get_statistic(CH)) #FIXME: test
 set_param!(CH::AbstractChart, par) = set_param!(get_statistic(CH), par)
+set_param(CH::MultipleControlChart, par) = set_param!.(get_statistic(CH), par) #FIXME: test
+function set_param(CH::MultipleControlChart, par::AbstractVector)
+    @assert length(CH) == length(par)
+    for i in 1:length(CH)
+        set_param!(get_statistic(CH)[i], par[i])
+    end
+end#FIXME: test
 export get_param
 export set_param!
 
@@ -120,8 +142,15 @@ export get_maxrl
 Check whether the control chart is in control or out of control.
 """
 is_IC(CH::AbstractChart) = is_IC(get_limit(CH), get_statistic(CH))
+
+is_IC(CH::MultipleControlChart) = all(is_IC.(get_limit(CH), get_statistic(CH))) #FIXME: test
+
+#TODO: Curved limit is_IC
+
 is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
+
 is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
+
 is_OC(CH::AbstractChart) = !is_IC(CH)
 export is_IC
 export is_OC
@@ -144,28 +173,43 @@ export set_statistic!
 
 Set the control limit of a control chart.
 """
-function set_limit!(CH::C, limit::LIM) where C <: AbstractChart where LIM <: AbstractLimit
+function set_limit!(CH::AbstractChart, limit::AbstractLimit)
     CH.limit = limit
     return limit
 end
 
-function set_limit!(CH::C, limit::Float64) where C <: AbstractChart 
+function set_limit!(CH::AbstractChart, limit::Float64)
     set_value!(get_limit(CH), limit)
     return get_limit(CH)
 end
 export set_limit! 
 
+set_limit!(CH::MultipleControlChart, limit::Float64) = set_value!.(get_limit(CH), limit) #FIXME: test
+
+function set_limit!(CH::MultipleControlChart, limit::Vector{Float64})
+    @assert length(get_limit(CH)) == length(limit)
+    for i in 1:length(get_limit(CH))
+        set_value!(get_limit(CH)[i], limit[i])
+    end
+end#FIXME: test
 
 """
     function set_parameter!(CH::C, par)
 
 Set the parameters of the control chart statistic.
 """
-function set_parameter!(CH::C, par) where C <: AbstractChart
+function set_parameter!(CH::AbstractChart, par)
     set_parameter!(get_statistic(CH), par)
     return par
 end
 export set_parameter!
+
+function set_parameter!(CH::MultipleControlChart, par::AbstractVector)
+    @assert length(get_statistic(CH)) == length(par)
+    for i in 1:length(get_statistic(CH))
+        set_parameter!(get_statistic(CH)[i], par[i])
+    end
+end#FIXME: test
 
 
 """
@@ -210,11 +254,17 @@ function update_chart!(CH::AbstractChart, x)
     update_statistic!(get_statistic(CH), x)
 end
 
+function update_chart!(CH::MultipleControlChart, x)
+    CH.t += 1
+    update_statistic!.(get_statistic(CH), x)
+end#FIXME: test
+
 function update_chart!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, LIM <: DynamicLimit, NOM, PH1}
     CH.t += 1
     update_limit!(CH)
     update_statistic!(get_statistic(CH), x)
 end
+
 export update_chart!
 
 update_limit!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, LIM <: DynamicLimit, NOM, PH1} = error("Not implemented for abstract interface.")
