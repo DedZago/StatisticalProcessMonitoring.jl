@@ -9,6 +9,7 @@ ti = time()
     include("limits.jl")
     include("statistics.jl")
     include("charts.jl")
+    include("algorithms.jl")
 end
 
 ti = time() - ti
