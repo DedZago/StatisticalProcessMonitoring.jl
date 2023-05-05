@@ -2,10 +2,8 @@
 module TestAlgorithms
 using SPM
 using Test
-using Random
 
 @testset "saCL" begin
-    Random.seed!(1295487)
     x = randn(500)
     NM = ARL(200)
     PH1 = Phase1Data(x)
@@ -17,7 +15,6 @@ using Random
         saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
     end
 
-    Random.seed!(1295487)
     x = randn(500)
     p = 0.5
     NM = QRL(200, p)
@@ -29,7 +26,6 @@ using Random
         saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
     end
 
-    Random.seed!(1295487)
     x = randn(500)
     p = 0.5
     NM = QRL(200, p)
@@ -41,7 +37,6 @@ using Random
         saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
     end
 
-    Random.seed!(123)
     x = randn(500)
     NM = ARL(200)
     STAT1 = EWMA(λ = 0.1)
