@@ -25,12 +25,22 @@ export calculate_limit_gradient
 
 function calculate_limit_gradient(nominal::ARL, rl)
     #FIXME: test
+    return (rl - get_value(nominal)) / get_value(nominal)
+end
+
+function calculate_limit_gradient(nominal::ARL, rl::AbstractVector)
+    #FIXME: test
     return (minimum(rl) - get_value(nominal) .+ rl .- Statistics.mean(rl)) ./ get_value(nominal)
 end
 
 function calculate_limit_gradient(nominal::QRL, rl)
     #FIXME: test
-    return -(float(rl <= get_value(nominal)) - nominal.qtl)
+    return -(float(minimum(rl) <= get_value(nominal)) - nominal.qtl)
+end
+
+function calculate_limit_gradient(nominal::QRL, rl::AbstractVector)
+    #? Penalize the quantile so each chart has the same median run length
+    return -(float(minimum(rl) <= get_value(nominal)) - nominal.qtl) .+ (rl .- mean(rl)) ./ get_value(nominal)
 end
 
 calculate_gain(D::Float64, Amin, Amax, deltaSA) = 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*deltaSA))))
@@ -43,7 +53,7 @@ calculate_limit(h::Float64, D, score, i, q, eps) = max(eps, h - D * score / (i^q
 calculate_limit(h::Vector{Float64}, D, score, i, q, eps) = @. max(eps, h - D * score / (i^q))
 
 update_score(s2::Float64, score::Real, Ndenom) = s2 + (score * score - s2) / Ndenom
-update_score(s2::Vector{Float64}, score::Vector, Ndenom) = s2 .+ (score .* score .- s2) ./ Ndenom
+update_score(s2::Vector{Float64}, score::AbstractVector, Ndenom) = s2 .+ (score .* score .- s2) ./ Ndenom
 
 """
     saCL!(CH::ControlChart; kw...)
@@ -75,7 +85,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 ### References
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
-function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, Afixed::Real=0.1, Amin::Real=0.1, Amax::Real=100.0, deltaSA::Real=0.1, q::Real=0.55, gamma::Real=0.02, Nmin::Int=1000, z::Real = 3.0, Cmrl::Real=10.0, maxiter::Real = 4e05, verbose::Bool=true)
+function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, Afixed::Real=0.1, Amin::Real=0.1, Amax::Real=100.0, deltaSA::Real=0.1, q::Real=0.55, gamma::Real=0.02, Nmin::Int=1000, z::Real = 3.0, Cmrl::Real=10.0, maxiter::Real = 1e05, verbose::Bool=true)
 
     #TODO: add checks on the rlsim function
 
@@ -132,7 +142,7 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
     conv = "Maximum number of iterations reached"
     if verbose println("Running optimization ...") end
     while i < (maxiter + Nmin)
-        if verbose && (i % floor(maxiter / 20) == 0)
+        if verbose && (i % floor(maxiter / 50) == 0)
             println("i: $(i)/$(Int(trunc(maxiter)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))")
         end
         i += 1
