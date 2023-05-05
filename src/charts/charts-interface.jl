@@ -147,7 +147,7 @@ Check whether the control chart is in control or out of control.
 """
 is_IC(CH::AbstractChart) = is_IC(get_limit(CH), get_statistic(CH))
 
-is_IC(CH::MultipleControlChart) = all(is_IC.(get_limit(CH), get_statistic(CH)))
+is_IC(CH::MultipleControlChart) = all(is_IC_vec(get_limit(CH), get_statistic(CH)))
 
 is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH) + 1, get_statistic(CH))
 
@@ -157,6 +157,16 @@ is_OC(CH::AbstractChart) = !is_IC(CH)
 export is_IC
 export is_OC
 
+"""
+    is_IC_vec(CH::MultipleControlChart)
+    is_OC_vec(CH::MultipleControlChart)
+
+
+"""
+is_IC_vec(CH::MultipleControlChart) = is_IC_vec(get_limit(CH), get_statistic(CH))
+is_OC_vec(CH::MultipleControlChart) = .!(is_IC_vec(get_limit(CH), get_statistic(CH)))
+export is_IC_vec
+export is_OC_vec
 
 """
     function set_statistic!(CH::AbstractChart, statistic::AbstractStatistic)

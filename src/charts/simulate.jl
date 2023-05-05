@@ -38,7 +38,7 @@ function run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
     @assert deltaSA >= 0.0
     CH_ = shallow_copy_sim(CH)
     maxrl = min(get_maxrl(CH_), maxiter)
-    rl = rlPlus = rlMinus = Int(round(maxrl))
+    rl = rlPlus = rlMinus = round(maxrl)
     notDoneP = notDoneM = (deltaSA > 0.0)
     notDoneRl = true
     notDone = notDoneRl + notDoneM + notDoneP
@@ -55,20 +55,72 @@ function run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
             end
         end
         if notDoneP
-            set_limit!(CH_, h .+ deltaSA)
+            set_limit!(CH_, h + deltaSA)
             if is_OC(CH_)
                 notDoneP = false
                 rlPlus = i
             end
         end
         if notDoneM
-            set_limit!(CH_, h .- deltaSA)
+            set_limit!(CH_, h - deltaSA)
             if is_OC(CH_)
                 notDoneM = false
                 rlMinus = i
             end
         end
         notDone = notDoneRl + notDoneM + notDoneP
+    end
+    set_limit!(CH_, h)
+    return (rl = rl, rlPlus = rlPlus, rlMinus = rlMinus)
+end
+
+
+function run_sim_sa(CH::MultipleControlChart, maxiter::Real, deltaSA::Real)
+    @assert deltaSA >= 0.0
+    CH_ = shallow_copy_sim(CH)
+    maxrl = min(get_maxrl(CH_), maxiter)
+    nstat = length(get_statistic(CH_))
+    rl = fill(round(maxrl), nstat)
+    rlPlus = fill(round(maxrl), nstat)
+    rlMinus = fill(round(maxrl), nstat)
+    notDoneP = [deepcopy(deltaSA > 0.0) for _ in 1:nstat]
+    notDoneM = [deepcopy(deltaSA > 0.0) for _ in 1:nstat]
+    notDoneRl = fill(true, nstat)
+    notDone = notDoneRl + notDoneM + notDoneP
+    i = 0
+    h = deepcopy(get_value(get_limit(CH_)))
+    OC_vector = BitVector(undef, nstat)
+    while i < maxrl && any(notDone .> 0)
+        i = i+1
+        update_chart!(CH_, new_data(CH_))
+        # @show get_value(CH_)
+        for j in 1:nstat
+            if notDoneRl[j]
+                set_limit!(CH_, h)
+                OC_vector[:] = is_OC_vec(CH_)
+                if OC_vector[j]
+                    notDoneRl[j] = false
+                    rl[j] = i
+                end
+            end
+            if notDoneP[j]
+                set_limit!(CH_, h .+ deltaSA)
+                OC_vector[:] = is_OC_vec(CH_)
+                if OC_vector[j]
+                    notDoneP[j] = false
+                    rlPlus[j] = i
+                end
+            end
+            if notDoneM[j]
+                set_limit!(CH_, h .- deltaSA)
+                OC_vector[:] = is_OC_vec(CH_)
+                if OC_vector[j]
+                    notDoneM[j] = false
+                    rlMinus[j] = i
+                end
+            end
+            notDone[:] = notDoneRl + notDoneM + notDoneP
+        end
     end
     set_limit!(CH_, h)
     return (rl = rl, rlPlus = rlPlus, rlMinus = rlMinus)

@@ -18,7 +18,7 @@ Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Sim
 Capizzi, G. & Masarotto, G. (2009) Bootstrap-based design of residual control charts, IIE Transactions, 41:4, 275-286, DOI: https://doi.org/10.1080/07408170802120059 
 
 """
-function calculate_limit_gradient(CH::AbstractChart, rl::Real)
+function calculate_limit_gradient(CH::AbstractChart, rl)
    return calculate_limit_gradient(get_nominal(CH), rl)
 end
 export calculate_limit_gradient
@@ -36,11 +36,14 @@ end
 calculate_gain(D::Float64, Amin, Amax, deltaSA) = 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*deltaSA))))
 calculate_gain(D::Vector{Float64}, Amin, Amax, deltaSA) = @. 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*deltaSA))))
 
+update_gain(D::Float64, scorePlus, scoreMinus, i) = D + (scorePlus - scoreMinus) / i
+update_gain(D::Vector{Float64}, scorePlus, scoreMinus, i) = D .+ (scorePlus - scoreMinus) / i
+
 calculate_limit(h::Float64, D, score, i, q, eps) = max(eps, h - D * score / (i^q))
 calculate_limit(h::Vector{Float64}, D, score, i, q, eps) = @. max(eps, h - D * score / (i^q))
 
-update_score(s2::Float64, score::Float64, Ndenom) = s2 + (score * score - s2) / Ndenom
-update_score(s2::Vector{Float64}, score::Vector{Float64}, Ndenom) = s2 .+ (score .* score .- s2) ./ Ndenom
+update_score(s2::Float64, score::Real, Ndenom) = s2 + (score * score - s2) / Ndenom
+update_score(s2::Vector{Float64}, score::Vector, Ndenom) = s2 .+ (score .* score .- s2) ./ Ndenom
 
 """
     saCL!(CH::ControlChart; kw...)
@@ -114,7 +117,8 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
         scorePlus = calculate_limit_gradient(CH, rlPlus)
         scoreMinus = calculate_limit_gradient(CH, rlMinus)
         # @show scorePlus, scoreMinus, D
-        D += (scorePlus - scoreMinus) / i
+        # println("")
+        D = update_gain(D, scorePlus, scoreMinus, i)
     end
 
     D = calculate_gain(D, Amin, Amax, deltaSA)
