@@ -20,6 +20,8 @@ mutable struct ControlChart{STAT, LIM, NOM, PH1} <: AbstractChart{STAT, LIM, NOM
 end
 export ControlChart
 
+Base.show(io::IO, CH::ControlChart) = print(io, "stat: $(get_statistic(CH))\nlimit: $(get_limit(CH))\nnominal: $(get_nominal(CH))\nphase1: $(typeof(get_phase1(CH)))\n\nt: $(get_t(CH))")
+
 const MultipleControlChart{S,L,N,P} = ControlChart{Vector{S}, Vector{L},N,P} where {S,L,N,P}
 export MultipleControlChart
 
