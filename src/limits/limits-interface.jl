@@ -3,6 +3,7 @@ get_value(L::AbstractLimit) = L.value
 get_value(L::Vector{LIM}) where LIM <: AbstractLimit = get_value.(L)
 export get_value
 set_value!(L::AbstractLimit, h::Float64) = L.value = h
+set_value!(L::AbstractLimit, h::Vector{Float64}) = L.value = h
 export set_value!
 
 function is_IC(L::AbstractLimit, stat::AbstractStatistic)
