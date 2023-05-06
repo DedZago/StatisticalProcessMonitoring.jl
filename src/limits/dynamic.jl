@@ -1,50 +1,73 @@
 abstract type DynamicLimit <: AbstractLimit end
-abstract type OneSidedDynamicLimit <: DynamicLimit end
-abstract type TwoSidedDynamicLimit <: DynamicLimit end
+abstract type BootstrapLimit <: DynamicLimit end
+# abstract type OneSidedBootstrapLimit <: DynamicLimit end
+# abstract type TwoSidedDynamicLimit <: DynamicLimit end
+
+Base.show(io::IO, L::BootstrapLimit) = print(io, "$(typeof(L))\n  value: $(get_value(L))\n  sims: $(length(L.sim))\n")
+
+mutable struct OneSidedBootstrapLimit{T} <: BootstrapLimit
+    sim::Vector{T}
+    value::T
+    upw::Bool
+
+    function OneSidedBootstrapLimit(S::AbstractStatistic, upw, B::Int)
+        T = typeof(get_value(S))
+        new{T}([deepcopy(get_value(S)) for _ in 1:B], deepcopy(get_value(S)), upw)
+    end
+end#FIXME: test
+export OneSidedBootstrapLimit
+
+mutable struct TwoSidedBootstrapLimit{T} <: BootstrapLimit
+    sim::Vector{T}
+    value::Vector{T}
+
+    function TwoSidedBootstrapLimit(S::AbstractStatistic, upw, B::Int)
+        T = typeof(get_value(S))
+        new{T}([deepcopy(get_value(S)) for _ in 1:B], [deepcopy(get_value(S)) for _ in 1:2])
+    end
+end#FIXME: test
+export TwoSidedBootstrapLimit
+
 
 """
-    get_value(L::DynamicLimit, NM::ARL)
-    get_value(L::DynamicLimit, NM::QRL)
+    get_value(L::BootstrapLimit, NM::ARL)
+    get_value(L::BootstrapLimit, NM::QRL)
 """
 
-get_value(L::DynamicLimit, NM::ARL) = get_value(L, 1.0/get_value(NM)) #FIXME: test
+update_value!(L::BootstrapLimit, NM::ARL) = update_value!(L, 1.0/get_value(NM)) #FIXME: test
 
-function get_value(L::DynamicLimit, NM::QRL)
+function update_value!(L::BootstrapLimit, NM::QRL)
     @assert NM.qtl == 0.5 "Dynamic limits for `QRL` objects are only implemented for the median."
-    get_value(L, 1.0 - 2.0^(-1.0/get_value(NM)))
+    update_value!(L, 1.0 - 2.0^(-1.0/get_value(NM)))
 end#FIXME: test
 
 
-function get_value(L::OneSidedDynamicLimit, alpha::Float64)
+function update_value!(L::OneSidedBootstrapLimit, alpha::Float64)
     if L.upw
-        return quantile(L.sim, 1.0 - alpha)       
+        return set_value!(L, quantile(L.sim, 1.0 - alpha))
     else
-        return quantile(L.sim, alpha)       
+        return set_value!(L, quantile(L.sim, alpha))
     end
 end#FIXME: test
 
 
-function get_value(L::TwoSidedDynamicLimit, alpha::Float64)
-    return quantile(L.sim, [alpha/2.0, 1.0 - alpha/2.0])       
+function update_value!(L::TwoSidedBootstrapLimit, alpha::Float64)
+    return set_value!(L, quantile(L.sim, [alpha/2.0, 1.0 - alpha/2.0]))
 end#FIXME: test
 
+function resample_sims!(L::OneSidedBootstrapLimit)
+    error("Not implemented yet.")
+end
 
-@with_kw mutable struct OneSidedBootstrapLimit{T} <: OneSidedDynamicLimit
-    sim::Vector{T}
-    upw::Bool
-end#FIXME: test
+function resample_sims!(L::TwoSidedBootstrapLimit)
+    error("Not implemented yet.")
+end
+
 
 #TODO: Define update_limit! method to perform bootstrap
 
-OneSidedBootstrapLimit(S::AbstractStatistic, upw, B::Int) = OneSidedBootstrapLimit([deepcopy(get_value(S)) for _ in 1:B], upw)
-export OneSidedBootstrapLimit
 
 
-@with_kw mutable struct TwoSidedBootstrapLimit{T} <: TwoSidedDynamicLimit
-    sim::Vector{T}
-end#FIXME: test
 
-TwoSidedBootstrapLimit(S::AbstractStatistic, B::Int) = TwoSidedBootstrapLimit([deepcopy(get_value(S)) for _ in 1:B])
-export TwoSidedBootstrapLimit
 
 #TODO: Define update_limit! method to perform bootstrap

@@ -23,6 +23,8 @@ using Test
         @test get_nominal_value(CH) == 200.0
         update_chart!(CH, 1.0)
         @test get_value(CH) == 0.2
+        update_chart(CH, 1.0)
+        @test get_value(CH) == 0.2
         update_chart!(CH, 100.0)
         @test is_OC(CH)
         @test !is_IC(CH)
