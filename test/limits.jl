@@ -64,5 +64,9 @@ using Test
         @test get_curved_value(L, 1, STAT) == h * f(1, STAT) 
         @test get_curved_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
     end
+
+    @testset "Dynamic limits" begin
+        error("TODO.") 
+    end
 end
 end

@@ -1,9 +1,9 @@
+using StatsBase
+
 abstract type DynamicLimit <: AbstractLimit end
 abstract type BootstrapLimit <: DynamicLimit end
-# abstract type OneSidedBootstrapLimit <: DynamicLimit end
-# abstract type TwoSidedDynamicLimit <: DynamicLimit end
 
-Base.show(io::IO, L::BootstrapLimit) = print(io, "$(typeof(L))\n  value: $(get_value(L))\n  sims: $(length(L.sim))\n")
+Base.show(io::IO, L::BootstrapLimit) = print(io, "$(typeof(L))\n  value: $(get_value(L))\n  Bootstrap samples: $(length(L.sim))\n")
 
 mutable struct OneSidedBootstrapLimit{T} <: BootstrapLimit
     sim::Vector{T}
@@ -55,19 +55,33 @@ function update_value!(L::TwoSidedBootstrapLimit, alpha::Float64)
     return set_value!(L, quantile(L.sim, [alpha/2.0, 1.0 - alpha/2.0]))
 end#FIXME: test
 
-function resample_sims!(L::OneSidedBootstrapLimit)
-    error("Not implemented yet.")
-end
+function is_IC(L::TwoSidedBootstrapLimit, stat::AbstractStatistic)
+    val = get_value(stat)
+    lim = get_value(L)
+    @assert all(typeof(val) .== typeof.(lim))
+    return compare_values(lim, val, L)
+end#FIXME:tests
 
-function resample_sims!(L::TwoSidedBootstrapLimit)
-    error("Not implemented yet.")
-end
+function compare_values(lim_val, stat_val, L::OneSidedBootstrapLimit)
+    for i in 1:length(lim_val)
+        if L.upw[i]
+            stat_val[i] <= lim_val[i] || return false
+        else
+            stat_val[i] >= lim_val[i] || return false
+        end
+    end
+    return true
+end#FIXME:tests
+ 
+function compare_values(lim_val, stat_val, L::TwoSidedBootstrapLimit)
+    if (stat_val < lim_val[1]) || (stat_val > lim_val[2])
+        return false
+    end
+    return true
+end#FIXME:tests
 
 
-#TODO: Define update_limit! method to perform bootstrap
-
-
-
-
-
-#TODO: Define update_limit! method to perform bootstrap
+function resample_sims!(L::BootstrapLimit)
+    idx = [compare_values(get_value(L), L.sim[b], L) for b in 1:length(L.sim)]
+    L.sim[:] = StatsBase.sample(view(L.sim, idx), length(L.sim))
+end#FIXME:tests

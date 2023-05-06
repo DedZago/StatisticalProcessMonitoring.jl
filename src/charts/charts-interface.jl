@@ -266,13 +266,15 @@ update_chart(CH::AbstractChart, x) = update_chart!(shallow_copy_sim(CH), x)
 export update_chart
 
 function update_limit!(CH::AbstractChart{S,L,N,P1}) where {S, L <: BootstrapLimit, N, P1}
-    resample_sims!(get_limit(CH))
     for b in 1:length(get_limit(CH).sim)
         get_limit(CH).sim[b] = update_statistic!(deepcopy(get_statistic(CH)), new_data(CH))
     end
     update_value!(get_limit(CH), get_nominal(CH))
+    resample_sims!(get_limit(CH))
 end
 export update_limit!#FIXME: tests
+
+#FIXME: organize functions more neatly
 
 # get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_curved_value(get_limit(CH), get_t(CH) + 1, get_statistic(CH))
 
