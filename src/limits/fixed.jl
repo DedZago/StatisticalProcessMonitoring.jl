@@ -22,9 +22,9 @@ end
 function compare_values(lim_val, stat_val, L::LIM) where LIM <: OneSidedLimit
     for i in 1:length(lim_val)
         if L.upw[i]
-            stat_val[i] < lim_val[i] || return false
+            stat_val[i] <= lim_val[i] || return false
         else
-            stat_val[i] > lim_val[i] || return false
+            stat_val[i] >= lim_val[i] || return false
         end
     end
     return true
