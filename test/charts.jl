@@ -54,7 +54,7 @@ using Test
         @test get_t(CH) == 0
         @test get_parameter(CH) == (λ = 0.2,)
         @test get_phase1(CH) == PH1
-        @test get_limit_value(CH) > 0.0
+        @test get_limit_value(CH) == 0.0
         @test get_limit_value(CH) != get_value(get_limit(CH))
         @test get_value(CH) == 0.0
         @test get_statistic(CH) == STAT

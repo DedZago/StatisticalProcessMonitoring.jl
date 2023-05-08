@@ -13,9 +13,10 @@ function run_sim(CH::AbstractChart)
     CH_ = shallow_copy_sim(CH)
     maxrl = get_maxrl(CH_)
     i = 0
-    while is_IC(CH_) && i < maxrl
+    while i < maxrl
         i = i + 1
         update_chart!(CH_, new_data(CH_))
+        is_IC(CH_) || break
     end
     return i
 end
