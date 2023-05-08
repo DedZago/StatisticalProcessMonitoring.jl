@@ -4,13 +4,7 @@ import FunctionWrappers.FunctionWrapper
 abstract type OneSidedLimit <: AbstractLimit end
 abstract type TwoSidedLimit <: AbstractLimit end
 
-function is_IC(L::AbstractLimit, t, stat::AbstractStatistic)
-    val = get_value(stat)
-    lim = get_curved_value(L, t, stat)
-    @assert typeof(val) == typeof(lim)
-    return compare_values(lim, val, L)
-end
-
+get_value(L::OneSidedLimit) = (-1.0)^(!L.upw) * L.value
 
 function compare_values(lim_val, stat_val, L::LIM) where LIM <: TwoSidedLimit
     if (stat_val > lim_val) || (stat_val < -lim_val)
@@ -78,11 +72,14 @@ Note that `value > 0` by the way it is defined.
     upw::Bool = true
     fun::FunctionWrapper{Float64, Tuple{Float64, AbstractStatistic}}
 
-    OneSidedCurvedLimit(value, upw::Bool, f::Function, stat::AbstractStatistic) = new{typeof(first(value)), typeof(stat)}(value, upw, FunctionWrapper{typeof(first(value)), Tuple{typeof(first(value)), typeof(stat)}}(f))
+    function OneSidedCurvedLimit(value, upw::Bool, f::Function, stat::AbstractStatistic)
+        @assert value > 0.0
+        new{typeof(first(value)), typeof(stat)}(value, upw, FunctionWrapper{typeof(first(value)), Tuple{typeof(first(value)), typeof(stat)}}(f))
+    end
 end
 export OneSidedCurvedLimit
 
-get_curved_value(L::OneSidedCurvedLimit, t, stat) = L.value * L.fun(t, stat)
+get_curved_value(L::OneSidedCurvedLimit, t, stat) = get_value(L) * L.fun(t, stat)
 
 
 """
@@ -99,8 +96,20 @@ Note that `value > 0` by the way it is defined.
     value::T
     fun::FunctionWrapper{Float64, Tuple{Float64, AbstractStatistic}}
 
-    TwoSidedCurvedLimit(value, f::Function, stat::AbstractStatistic) = new{typeof(first(value)), typeof(stat)}(value, FunctionWrapper{typeof(first(value)), Tuple{typeof(first(value)), typeof(stat)}}(f))
+    function TwoSidedCurvedLimit(value, f::Function, stat::AbstractStatistic)
+        @assert value > 0.0
+        new{typeof(first(value)), typeof(stat)}(value, FunctionWrapper{typeof(first(value)), Tuple{typeof(first(value)), typeof(stat)}}(f))
+    end
 end
 export TwoSidedCurvedLimit
 
-get_curved_value(L::TwoSidedCurvedLimit, t, stat) = L.value * L.fun(t, stat)
+get_curved_value(L::TwoSidedCurvedLimit, t, stat) = get_value(L) * L.fun(t, stat)
+
+
+function is_IC(L::AbstractLimit, t, stat::AbstractStatistic)
+    val = get_value(stat)
+    lim = get_curved_value(L, t, stat)
+    @assert typeof(val) == typeof(lim)
+    return compare_values(lim, val, L)
+end
+

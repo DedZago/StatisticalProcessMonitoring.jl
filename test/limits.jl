@@ -11,8 +11,13 @@ using Test
         set_value!(L, hup)
         @test get_value(L) == hup
         L = OneSidedFixedLimit(value=h, upw=false)
+        @test get_value(L) == -h
+        hup = 5.0
+        set_value!(L, hup)
+        @test get_value(L) == -hup
         OneSidedFixedLimit(-0.1, true)
     end
+    
     @testset "Two-sided fixed limit constructors" begin
         L = TwoSidedFixedLimit(h)
         @test_throws AssertionError TwoSidedFixedLimit(-0.1)
@@ -47,11 +52,12 @@ using Test
         @test get_curved_value(L, 0, STAT) == h * f(0, STAT) 
         @test get_curved_value(L, 1, STAT) == h * f(1, STAT) 
         @test get_curved_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
-        L = OneSidedCurvedLimit(-h, false, f, STAT)
+        L = OneSidedCurvedLimit(h, false, f, STAT)
         @test get_value(L) == -h
         @test get_curved_value(L, 0, STAT) == -h * f(0, STAT) 
         @test get_curved_value(L, 1, STAT) == -h * f(1, STAT) 
         @test get_curved_value(L, 10^5, STAT) == -h * sqrt(λ/(2-λ)) 
+        @test_throws AssertionError OneSidedCurvedLimit(-0.5, true, f, STAT)
     end
     @testset "Two-sided curved" begin
         f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
@@ -63,6 +69,7 @@ using Test
         @test get_curved_value(L, 0, STAT) == h * f(0, STAT) 
         @test get_curved_value(L, 1, STAT) == h * f(1, STAT) 
         @test get_curved_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
+        @test_throws MethodError TwoSidedCurvedLimit(-0.5, true, f, STAT)
     end
 
     @testset "Dynamic limits" begin
