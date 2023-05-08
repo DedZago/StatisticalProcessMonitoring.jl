@@ -4,10 +4,12 @@ import FunctionWrappers.FunctionWrapper
 abstract type OneSidedLimit <: AbstractLimit end
 abstract type TwoSidedLimit <: AbstractLimit end
 
-get_value(L::OneSidedLimit) = (-1.0)^(!L.upw) * L.value
+get_value(L::OneSidedLimit) = (-1.0)^(!L.upw) * get_h(L)
+get_value(L::TwoSidedLimit) = [-get_h(L), get_h(L)]
+#FIXME: rewrite interface to have h and value attributes, get_h and get_value as getter functions.
 
 function compare_values(lim_val, stat_val, L::LIM) where LIM <: TwoSidedLimit
-    if (stat_val > lim_val) || (stat_val < -lim_val)
+    if (stat_val < lim_val[1]) || (stat_val > lim_val[2])
         return false
     end
     return true
@@ -25,91 +27,94 @@ function compare_values(lim_val, stat_val, L::LIM) where LIM <: OneSidedLimit
 end
 
 """
-    OneSidedFixedLimit(value::Float64, upw::Bool)
+    OneSidedFixedLimit(h::Float64, upw::Bool)
 
 Classical fixed one-sided limit, such that the run length ``RL`` of a control chart is the first time ``t`` in which the statistic ``C_t`` crosses the limit.
 
-* if `upw == true`, ``RL = \\inf\\{t : C_t > value\\}``
-* if `upw == false`, ``RL = \\inf\\{t : C_t < value\\}``
+* if `upw == true`, ``RL = \\inf\\{t : C_t > h\\}``
+* if `upw == false`, ``RL = \\inf\\{t : C_t < h\\}``
 
-Note that `value > 0` by the way it is defined.
+Note that `h > 0` by the way it is defined.
 """
 @with_kw mutable struct OneSidedFixedLimit{T} <: OneSidedLimit
-    value::T
+    h::T
     upw::Bool = true
+    @assert h > 0.0
 end
 export OneSidedFixedLimit
 
+
+
 """
-    TwoSidedFixedLimit(value::Float64)
+    TwoSidedFixedLimit(h::Float64)
 
 Classical fixed two-sided limit, such that the run length ``RL`` of a control chart is the first time ``t`` in which the statistic ``C_t`` crosses the limit:
 
-``RL = \\inf\\{t > 0 : |C_t| > value\\}``.
+``RL = \\inf\\{t > 0 : |C_t| > h\\}``.
 
-Note that `value > 0` by the way it is defined.
+Note that `h > 0` by the way it is defined.
 """
 @with_kw mutable struct TwoSidedFixedLimit{T} <: TwoSidedLimit
-    value::T
-    @assert value > 0.0
+    h::T
+    @assert h > 0.0
 end
 export TwoSidedFixedLimit
 
 
+
 """
-    OneSidedCurvedLimit(value::Float64, upw::Bool)
-    OneSidedCurvedLimit(value::Vector{T}, upw::Vector{Bool})
+    OneSidedCurvedLimit(h::Float64, upw::Bool)
+    OneSidedCurvedLimit(h::Vector{T}, upw::Vector{Bool})
 
 Curved one-sided limit, such that the run length ``RL`` of a control chart is the first time ``t`` in which the statistic ``C_t`` crosses the limit.
 
-* if `upw == true`, ``RL = \\inf\\{t : C_t > value\\cdot f(t)\\}``
-* if `upw == false`, ``RL = \\inf\\{t : C_t < -value\\cdot f(t)\\}``
+* if `upw == true`, ``RL = \\inf\\{t : C_t > h\\cdot f(t)\\}``
+* if `upw == false`, ``RL = \\inf\\{t : C_t < -h\\cdot f(t)\\}``
 
-Note that `value > 0` by the way it is defined.
+Note that `h > 0` by the way it is defined.
 """
 @with_kw mutable struct OneSidedCurvedLimit{T, S} <: OneSidedLimit
-    value::T
+    h::T
     upw::Bool = true
     fun::FunctionWrapper{Float64, Tuple{Float64, AbstractStatistic}}
 
-    function OneSidedCurvedLimit(value, upw::Bool, f::Function, stat::AbstractStatistic)
-        @assert value > 0.0
-        new{typeof(first(value)), typeof(stat)}(value, upw, FunctionWrapper{typeof(first(value)), Tuple{typeof(first(value)), typeof(stat)}}(f))
+    function OneSidedCurvedLimit(h, upw::Bool, f::Function, stat::AbstractStatistic)
+        @assert h > 0.0
+        new{typeof(first(h)), typeof(stat)}(h, upw, FunctionWrapper{typeof(first(h)), Tuple{typeof(first(h)), typeof(stat)}}(f))
     end
 end
 export OneSidedCurvedLimit
 
-get_curved_value(L::OneSidedCurvedLimit, t, stat) = get_value(L) * L.fun(t, stat)
+get_value(L::OneSidedCurvedLimit, t, stat) = get_value(L) * L.fun(t, stat)
 
 
 """
-    TwoSidedCurvedLimit(value::Float64)
-    TwoSidedCurvedLimit(value::Vector{T})
+    TwoSidedCurvedLimit(h::Float64)
+    TwoSidedCurvedLimit(h::Vector{T})
 
 Curved one-sided limit, such that the run length ``RL`` of a control chart is the first time ``t`` in which the statistic ``C_t`` crosses the limit.
 
-``RL = \\inf\\{t > 0 : |C_t| > value\\cdot f(t)\\}``.
+``RL = \\inf\\{t > 0 : |C_t| > h\\cdot f(t)\\}``.
 
-Note that `value > 0` by the way it is defined.
+Note that `h > 0` by the way it is defined.
 """
 @with_kw mutable struct TwoSidedCurvedLimit{T, S} <: TwoSidedLimit
-    value::T
+    h::T
     fun::FunctionWrapper{Float64, Tuple{Float64, AbstractStatistic}}
 
-    function TwoSidedCurvedLimit(value, f::Function, stat::AbstractStatistic)
-        @assert value > 0.0
-        new{typeof(first(value)), typeof(stat)}(value, FunctionWrapper{typeof(first(value)), Tuple{typeof(first(value)), typeof(stat)}}(f))
+    function TwoSidedCurvedLimit(h, f::Function, stat::AbstractStatistic)
+        @assert h > 0.0
+        new{typeof(first(h)), typeof(stat)}(h, FunctionWrapper{typeof(first(h)), Tuple{typeof(first(h)), typeof(stat)}}(f))
     end
 end
 export TwoSidedCurvedLimit
 
-get_curved_value(L::TwoSidedCurvedLimit, t, stat) = get_value(L) * L.fun(t, stat)
+get_value(L::TwoSidedCurvedLimit, t, stat) = get_value(L) * L.fun(t, stat)
 
 
 function is_IC(L::AbstractLimit, t, stat::AbstractStatistic)
     val = get_value(stat)
-    lim = get_curved_value(L, t, stat)
-    @assert typeof(val) == typeof(lim)
+    lim = get_value(L, t, stat)
     return compare_values(lim, val, L)
 end
 
