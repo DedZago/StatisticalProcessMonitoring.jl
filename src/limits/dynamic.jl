@@ -7,7 +7,7 @@ Base.show(io::IO, L::BootstrapLimit) = print(io, "$(typeof(L))\n  value: $(get_v
 
 mutable struct OneSidedBootstrapLimit{T} <: BootstrapLimit
     sim::Vector{T}
-    value::T
+    h::T
     upw::Bool
 
     function OneSidedBootstrapLimit(S::AbstractStatistic, upw, B::Int)
@@ -19,7 +19,7 @@ export OneSidedBootstrapLimit
 
 mutable struct TwoSidedBootstrapLimit{T} <: BootstrapLimit
     sim::Vector{T}
-    value::Vector{T}
+    h::Vector{T}
 
     function TwoSidedBootstrapLimit(S::AbstractStatistic, B::Int)
         T = typeof(get_value(S))
@@ -44,15 +44,15 @@ export update_value!
 
 function update_value!(L::OneSidedBootstrapLimit, alpha::Float64)
     if L.upw
-        return set_value!(L, quantile(L.sim, 1.0 - alpha))
+        return set_h!(L, quantile(L.sim, 1.0 - alpha))
     else
-        return set_value!(L, quantile(L.sim, alpha))
+        return set_h!(L, quantile(L.sim, alpha))
     end
 end
 
 
 function update_value!(L::TwoSidedBootstrapLimit, alpha::Float64)
-    return set_value!(L, quantile(L.sim, [alpha/2.0, 1.0 - alpha/2.0]))
+    return set_h!(L, quantile(L.sim, [alpha/2.0, 1.0 - alpha/2.0]))
 end
 
 function is_IC(L::TwoSidedBootstrapLimit, stat::AbstractStatistic)

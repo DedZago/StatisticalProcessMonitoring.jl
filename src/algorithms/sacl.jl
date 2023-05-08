@@ -102,7 +102,7 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
 
     v = (z/gamma)^2
     eps = 1e-06
-    h = deepcopy(get_value(get_limit(CH)))
+    h = deepcopy(get_h(get_limit(CH)))
     score = zero(h)
     s2    = zero(h)
     D     = zero(h)

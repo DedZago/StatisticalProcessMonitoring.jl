@@ -44,7 +44,7 @@ function run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
     notDoneRl = true
     notDone = notDoneRl + notDoneM + notDoneP
     i = 0
-    h = deepcopy(get_value(get_limit(CH)))
+    h = deepcopy(get_h(get_limit(CH)))
     while i < maxrl && (notDone > 0)
         i = i+1
         update_chart!(CH_, new_data(CH_))

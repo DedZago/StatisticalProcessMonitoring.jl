@@ -1,15 +1,17 @@
 abstract type AbstractLimit end
-get_value(L::AbstractLimit) = L.value
-get_value(L::Vector{LIM}) where LIM <: AbstractLimit = get_value.(L)
+get_h(L::AbstractLimit) = L.h
+get_h(L::Vector{LIM}) where LIM <: AbstractLimit = get_h.(L)
+export get_h
+get_value(L::AbstractLimit) = get_h(L)
+get_value(L::Vector{LIM}) where LIM <: AbstractLimit = get_h(L)
 export get_value
-set_value!(L::AbstractLimit, h::Float64) = L.value = h
-set_value!(L::AbstractLimit, h::Vector{Float64}) = L.value = h
-export set_value!
+set_h!(L::AbstractLimit, h::Float64) = L.h = h
+set_h!(L::AbstractLimit, h::Vector{Float64}) = L.h = h
+export set_h!
 
 function is_IC(L::AbstractLimit, stat::AbstractStatistic)
     val = get_value(stat)
     lim = get_value(L)
-    @assert typeof(val) == typeof(lim)
     return compare_values(lim, val, L)
 end
 export is_IC

@@ -54,13 +54,13 @@ get_limit_value(CH::AbstractChart) = get_value(get_limit(CH))
 
 get_limit_value(CH::MultipleControlChart) = get_value.(get_limit(CH))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_curved_value(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_curved_value(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_curved_value.(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value.(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_curved_value.(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value.(get_limit(CH), get_t(CH), get_statistic(CH))
 export get_limit_value
 
 
@@ -211,18 +211,18 @@ function set_limit!(CH::AbstractChart, limit::AbstractLimit)
     return limit
 end
 
-function set_limit!(CH::AbstractChart, limit::Float64)
-    set_value!(get_limit(CH), limit)
+function set_limit!(CH::AbstractChart, h::Float64)
+    set_h!(get_limit(CH), h)
     return get_limit(CH)
 end
 export set_limit! 
 
-set_limit!(CH::MultipleControlChart, limit::Float64) = set_value!.(get_limit(CH), limit)
+set_limit!(CH::MultipleControlChart, h::Float64) = set_h!.(get_limit(CH), h)
 
-function set_limit!(CH::MultipleControlChart, limit::Vector{Float64})
-    @assert length(get_limit(CH)) == length(limit)
+function set_limit!(CH::MultipleControlChart, h::Vector{Float64})
+    @assert length(get_limit(CH)) == length(h)
     for i in 1:length(get_limit(CH))
-        set_value!(get_limit(CH)[i], limit[i])
+        set_h!(get_limit(CH)[i], h[i])
     end
 end
 

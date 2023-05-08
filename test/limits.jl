@@ -7,22 +7,35 @@ using StatsBase
     h = 1.0; upw = true
     @testset "One-sided fixed limit constructors" begin
         L = OneSidedFixedLimit(h, true)
-        @test get_value(L) == h
+        @test get_h(L) == h
+        @test get_h(L) == get_value(L)
         hup = 5.0
-        set_value!(L, hup)
-        @test get_value(L) == hup
-        L = OneSidedFixedLimit(value=h, upw=false)
+        set_h!(L, hup)
+        @test get_h(L) == hup
+        L = OneSidedFixedLimit(h=h, upw=false)
+        @test get_h(L) == h
+        @test get_h(L) != get_value(L)
         @test get_value(L) == -h
         hup = 5.0
-        set_value!(L, hup)
+        set_h!(L, hup)
+        @test get_h(L) == hup
+        @test get_h(L) != get_value(L)
         @test get_value(L) == -hup
-        OneSidedFixedLimit(-0.1, true)
+        @test_throws AssertionError OneSidedFixedLimit(-0.1, true)
+        @test_throws AssertionError OneSidedFixedLimit(-0.1, false)
     end
 
     @testset "Two-sided fixed limit constructors" begin
         L = TwoSidedFixedLimit(h)
-        @test_throws AssertionError TwoSidedFixedLimit(-0.1)
+        @test get_h(L) == h
+        @test [-get_h(L), get_h(L)] == get_value(L)
+        hup = 5.0
+        set_h!(L, hup)
+        @test get_h(L) == hup
+        @test [-get_h(L), get_h(L)] == get_value(L)
+        @test get_value(L) == [-hup, hup]
     end
+
     @testset "isOC statistic" begin
         STAT = EWMA(λ=0.2, value=1.0)
         L1 = OneSidedFixedLimit(1.5, true)
@@ -50,14 +63,14 @@ using StatsBase
         h = 0.5
         L = OneSidedCurvedLimit(h, true, f, STAT)
         @test get_value(L) == h
-        @test get_curved_value(L, 0, STAT) == h * f(0, STAT) 
-        @test get_curved_value(L, 1, STAT) == h * f(1, STAT) 
-        @test get_curved_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
+        @test get_value(L, 0, STAT) == h * f(0, STAT) 
+        @test get_value(L, 1, STAT) == h * f(1, STAT) 
+        @test get_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
         L = OneSidedCurvedLimit(h, false, f, STAT)
         @test get_value(L) == -h
-        @test get_curved_value(L, 0, STAT) == -h * f(0, STAT) 
-        @test get_curved_value(L, 1, STAT) == -h * f(1, STAT) 
-        @test get_curved_value(L, 10^5, STAT) == -h * sqrt(λ/(2-λ)) 
+        @test get_value(L, 0, STAT) == -h * f(0, STAT) 
+        @test get_value(L, 1, STAT) == -h * f(1, STAT) 
+        @test get_value(L, 10^5, STAT) == -h * sqrt(λ/(2-λ)) 
         @test_throws AssertionError OneSidedCurvedLimit(-0.5, true, f, STAT)
     end
     @testset "Two-sided curved" begin
@@ -66,10 +79,10 @@ using StatsBase
         STAT = EWMA(λ = λ, value = 0.0)
         h = 0.5
         L = TwoSidedCurvedLimit(h, f, STAT)
-        @test get_value(L) == h
-        @test get_curved_value(L, 0, STAT) == h * f(0, STAT) 
-        @test get_curved_value(L, 1, STAT) == h * f(1, STAT) 
-        @test get_curved_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
+        @test get_h(L) == h
+        @test get_value(L, 0, STAT) == h * f(0, STAT) * [-1, 1]
+        @test get_value(L, 1, STAT) == h * f(1, STAT) * [-1, 1]
+        @test get_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) * [-1, 1]
         @test_throws MethodError TwoSidedCurvedLimit(-0.5, true, f, STAT)
     end
 
