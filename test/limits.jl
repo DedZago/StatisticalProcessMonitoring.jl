@@ -1,6 +1,7 @@
 module TestLimits
 using SPM
 using Test
+using StatsBase
 
 @testset "Fixed" begin
     h = 1.0; upw = true
@@ -17,7 +18,7 @@ using Test
         @test get_value(L) == -hup
         OneSidedFixedLimit(-0.1, true)
     end
-    
+
     @testset "Two-sided fixed limit constructors" begin
         L = TwoSidedFixedLimit(h)
         @test_throws AssertionError TwoSidedFixedLimit(-0.1)
@@ -73,7 +74,41 @@ using Test
     end
 
     @testset "Dynamic limits" begin
-        error("TODO.") 
+        STAT = EWMA(λ = 1.0)
+        B = 1000
+        L = OneSidedBootstrapLimit(STAT, true, B)
+        @test length(L.sim) == B
+        @test get_value(L) == 0.0
+        NM = ARL(200)
+        update_value!(L, NM)
+        @test get_value(L) == 0.0
+        x = randn(B)
+        L.sim = x
+        update_value!(L, NM)
+        @test get_value(L) == quantile(x, 1.0 - 1.0/get_value(NM))
+        resample_sims!(L)
+        @test all([L.sim[b] in x for b in 1:B])
+
+        L = OneSidedBootstrapLimit(STAT, false, B)
+        NM = ARL(100)
+        update_value!(L, NM)
+        @test get_value(L) == 0.0
+        x = randn(B)
+        L.sim = x
+        update_value!(L, NM)
+        @test get_value(L) == quantile(x, 1.0/get_value(NM))
+        @test all([L.sim[b] in x for b in 1:B])
+
+        L = TwoSidedBootstrapLimit(STAT, B)
+        NM = ARL(100)
+        update_value!(L, NM)
+        @test get_value(L) == [0.0, 0.0]
+        x = randn(B)
+        L.sim = x
+        update_value!(L, NM)
+        alpha = 1.0/get_value(NM)
+        @test get_value(L) == quantile(x, [alpha/2, 1.0 - alpha/2])
+        @test all([L.sim[b] in x for b in 1:B])
     end
 end
 end
