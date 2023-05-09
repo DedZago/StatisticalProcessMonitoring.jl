@@ -25,9 +25,8 @@ get_parameter(stat::EWMA) = (λ = stat.λ,)
 set_parameter!(stat::EWMA, λ) = stat.λ = λ
 
 
-function update_statistic!(stat::EWMA, x::Real)
-    stat.value = (1.0 - stat.λ) * stat.value + stat.λ * x   
-end
+update_statistic(stat::EWMA, x::Real) = (1.0 - stat.λ) * stat.value + stat.λ * x   
+update_statistic!(stat::EWMA, x::Real) = stat.value = update_statistic(stat, x)
 
 
 """
@@ -56,10 +55,13 @@ get_parameter(stat::CUSUM) = (k = stat.k,)
 set_parameter!(stat::CUSUM, k) = stat.k = k
 
 
-function update_statistic!(stat::CUSUM, x::Real)
+function update_statistic(stat::CUSUM, x::Real)
     if stat.upw
-        stat.value = max(0.0, stat.value + x - stat.k)
+        return max(0.0, stat.value + x - stat.k)
     else
-        stat.value = min(0.0, stat.value + x + stat.k)
+        return min(0.0, stat.value + x + stat.k)
     end
 end
+
+
+update_statistic!(stat::CUSUM, x::Real) = stat.value = update_statistic(stat, x)

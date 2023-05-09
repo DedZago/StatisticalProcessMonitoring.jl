@@ -297,7 +297,7 @@ Update the dynamic control limit of a control chart inplace.
 """
 function update_limit!(CH::AbstractChart{S,L,N,P1}) where {S, L <: BootstrapLimit, N, P1}
     for b in 1:length(get_limit(CH).sim)
-        get_limit(CH).sim[b] = update_statistic!(deepcopy(get_statistic(CH)), new_data(CH))
+        get_limit(CH).sim[b] = update_statistic(get_statistic(CH), new_data(CH))
     end
     update_value!(get_limit(CH), get_nominal(CH))
     resample_sims!(get_limit(CH))
