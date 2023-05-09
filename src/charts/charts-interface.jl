@@ -260,6 +260,15 @@ export set_nominal!
 
 
 """
+    update_chart(CH::AbstractChart, x)
+    
+Update the control chart without modifying it using a new observation `x`.
+"""
+update_chart(CH::AbstractChart, x) = update_chart!(shallow_copy_sim(CH), x)
+export update_chart
+
+
+"""
     update_chart!(CH::AbstractChart, x)
     
 Update the control chart inplace using a new observation `x`.
@@ -280,14 +289,6 @@ function update_chart!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, L
     update_statistic!(get_statistic(CH), x)
 end
 export update_chart!
-
-"""
-    update_chart(CH::AbstractChart, x)
-    
-Update the control chart without modifying it using a new observation `x`.
-"""
-update_chart(CH::AbstractChart, x) = update_chart!(shallow_copy_sim(CH), x)
-export update_chart
 
 
 """

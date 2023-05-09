@@ -23,3 +23,12 @@ struct Phase1Data{T} <: AbstractPhase1{T}
 end
 export Phase1Data
 
+
+
+################# TEST TRUE DGP #################
+struct Phase2Distribution{T} <: AbstractPhase1{T}
+    dist::T
+end
+export Phase2Distribution
+
+new_data(DGP::Phase2Distribution) = rand(DGP.dist)

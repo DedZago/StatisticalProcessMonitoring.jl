@@ -1,7 +1,7 @@
 """
     run_sim(CH::AbstractChart)
 
-Simulates a run length for the control chart `CH` by sampling new data from the Phase I object.
+Simulates a run length for the control chart `CH` by sampling new data from its Phase I object.
 
 ### Inputs
 * `CH` - A control chart.
@@ -21,6 +21,30 @@ function run_sim(CH::AbstractChart)
     return i
 end
 export run_sim
+
+"""
+    run_sim(CH::AbstractChart, DGP::AbstractPhase1)
+
+Simulates a run length for the control chart `CH` by sampling new data from the provided data-generating process `DGP`.
+
+### Inputs
+* `CH` - A control chart.
+* `DGP` - An AbstractPhase1 object.
+
+### Returns
+* An `Int`.
+"""
+function run_sim(CH::AbstractChart, DGP::AbstractPhase1)
+    CH_ = shallow_copy_sim(CH)
+    maxrl = get_maxrl(CH_)
+    i = 0
+    while i < maxrl
+        i = i + 1
+        update_chart!(CH_, new_data(DGP))
+        is_IC(CH_) || break
+    end
+    return i
+end
 
 """
     run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
