@@ -73,7 +73,7 @@ function new_data!(B::BlockBootstrap, data::AbstractVecOrMat)
 end
 
 #FIXME:test
-abstract type AbstractPhase1{S,T} end
+abstract type AbstractPhase1 end
 # new_data(PH1::AbstractPhase1) = 
 new_data!(::AbstractPhase1) = error("Not implemented for abstract interface.")
 
@@ -83,7 +83,7 @@ function shallow_copy_sim(PH1::T) where T <: AbstractPhase1
 end
 
 #FIXME:test
-struct Phase1Data{S,T} <: AbstractPhase1{S,T} 
+struct Phase1Data{S,T} <: AbstractPhase1
     samp::S
     data::T
 end
@@ -106,9 +106,9 @@ export new_data!
 
 
 ################# TEST TRUE DGP #################
-# struct Phase2Distribution{T} <: AbstractPhase1{T}
-#     dist::T
-# end
-# export Phase2Distribution
+struct Phase2Distribution{T} <: AbstractPhase1
+    dist::T
+end
+export Phase2Distribution
 
-# new_data(DGP::Phase2Distribution) = rand(DGP.dist)
+new_data(DGP::Phase2Distribution) = rand(DGP.dist)
