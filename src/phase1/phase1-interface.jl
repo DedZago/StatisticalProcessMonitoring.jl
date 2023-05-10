@@ -11,39 +11,58 @@ new_data(B::Bootstrap, data::AbstractMatrix) = view(data, rand(1:size(data)[1]),
 new_data!(B::Bootstrap, data::AbstractVecOrMat) = new_data(B, data) 
 
 #FIXME:test
-struct BlockBootstrap{T} <: AbstractSampling
+mutable struct BlockBootstrap{T} <: AbstractSampling
     block::T
-    blocksize::Int
+    const blocksize::Int
     t::Int
 
-    BlockBootstrap(data::Vector{T}, blocksize::Int) where T = new{T}(zeros(T, blocksize), blocksize, 0)
-    BlockBootstrap(data::Matrix{T}, blocksize::Int) where T = new{T}(zeros(T, blocksize, size(data)[2]), blocksize, 1)
+    BlockBootstrap(data::Vector{T}, blocksize::Int) where T = new{Vector{T}}(zeros(T, blocksize), blocksize, 0)
+    BlockBootstrap(data::Matrix{T}, blocksize::Int) where T = new{Matrix{T}}(zeros(T, blocksize, size(data)[2]), blocksize, 0)
 end
 export BlockBootstrap
 
 #FIXME:test
-new_data(B::BlockBootstrap, data::AbstractVector) = view(B.block, B.t)
+new_data(B::BlockBootstrap, data::AbstractVector) = B.block[B.t]
 new_data(B::BlockBootstrap, data::AbstractMatrix) = view(B.block, B.t, :)
 
 #FIXME:implement and test
 function update_block!(B::BlockBootstrap, data::AbstractVector)
-    error("Not implemented yet.")
+    B.t = B.t % B.blocksize + 1
+    if B.t == 1
+        bb = sample(1:length(data))
+        for i in 1:B.blocksize
+            # wrap around the circle
+            B.block[i] = data[(bb + i - 1) % length(data) + 1]
+        end
+    end
 end
+
 function update_block!(B::BlockBootstrap, data::AbstractMatrix)
-    error("Not implemented yet.")
+    B.t = B.t % B.blocksize + 1
+    if B.t == 1
+        bb = sample(1:length(data))
+        for i in 1:B.blocksize
+            # wrap around the circle
+            B.block[i] = data[(bb + i - 1) % length(data) + 1, :]
+        end
+    end
 end
 
 #FIXME:test
-function new_data!(B::BlockBootstrap, data::Abstract)
-    ret = new_data(B, data) 
+function new_data!(B::BlockBootstrap, data::AbstractVecOrMat)
     update_block!(B, data)
-    return ret
+    return new_data(B, data) 
 end
 
 #FIXME:test
 abstract type AbstractPhase1{S,T} end
 # new_data(PH1::AbstractPhase1) = 
-new_data!(PH1::AbstractPhase1) = error("Not implemented for abstract interface.")
+new_data!(::AbstractPhase1) = error("Not implemented for abstract interface.")
+
+#FIXME:test
+function shallow_copy_sim(PH1::T) where T <: AbstractPhase1
+    return T(deepcopy(PH1.samp), PH1.data)
+end
 
 #FIXME:test
 struct Phase1Data{S,T} <: AbstractPhase1{S,T} 
