@@ -5,7 +5,7 @@ using Test
 @testset "Charts" begin
     x = randn(100)
     NM = ARL(200)
-    PH1 = Phase1Data(x)
+    PH1 = Phase1Data(Bootstrap(), x)
     LIM = TwoSidedFixedLimit(1.0)
     STAT = EWMA(λ = 0.2)
     @testset "constructor" begin
@@ -42,7 +42,7 @@ using Test
 
     x = randn(100)
     NM = ARL(200)
-    PH1 = Phase1Data(x)
+    PH1 = Phase1Data(Bootstrap(), x)
     λ = 0.2
     STAT = EWMA(λ = λ)
     f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
@@ -84,7 +84,7 @@ using Test
 
     @testset "Multiple charts" begin
         NM = QRL(200, 0.2)
-        PH1 = Phase1Data(x)
+        PH1 = Phase1Data(Bootstrap(), x)
         h = 1.0
         LIM = OneSidedFixedLimit(h, true)
         λ1 = 0.2
@@ -132,7 +132,7 @@ using Test
     @testset "shallow copy" begin
         @testset "ControlChart" begin
             NM = ARL(200)
-            PH1 = Phase1Data(x)
+            PH1 = Phase1Data(Bootstrap(), x)
             h = 1.0
             LIM = TwoSidedFixedLimit(h)
             k = 0.5
@@ -161,7 +161,7 @@ using Test
 
         @testset "MultipleChart" begin
             NM = ARL(200)
-            PH1 = Phase1Data(x)
+            PH1 = Phase1Data(Bootstrap(), x)
             h = 1.0
             LIM = TwoSidedFixedLimit(h)
             k = 0.5

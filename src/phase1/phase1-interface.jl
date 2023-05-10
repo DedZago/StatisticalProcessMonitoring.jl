@@ -16,42 +16,60 @@ mutable struct BlockBootstrap{T} <: AbstractSampling
     const blocksize::Int
     t::Int
 
-    BlockBootstrap(data::Vector{T}, blocksize::Int) where T = new{Vector{T}}(zeros(T, blocksize), blocksize, 0)
-    BlockBootstrap(data::Matrix{T}, blocksize::Int) where T = new{Matrix{T}}(zeros(T, blocksize, size(data)[2]), blocksize, 0)
+    # Initialized with t=0 so that update_block! updates the block the first time it is called
+    function BlockBootstrap(blocksize::Int, data::Vector{T}) where T
+        @assert blocksize > 0
+        out = new{Vector{T}}(zeros(T, blocksize), blocksize, 0)
+        update_block!(out, data)
+        return out
+    end
+
+    function BlockBootstrap(blocksize::Int, data::Matrix{T}) where T 
+        @assert blocksize > 0
+        out = new{Matrix{T}}(zeros(T, blocksize, size(data)[2]), blocksize, 0)
+        update_block!(out, data)
+        return out
+    end
 end
 export BlockBootstrap
 
+get_block(B::BlockBootstrap) = B.block
+export get_block
+get_blocksize(B::BlockBootstrap) = B.blocksize
+export get_blocksize
+
 #FIXME:test
-new_data(B::BlockBootstrap, data::AbstractVector) = B.block[B.t]
-new_data(B::BlockBootstrap, data::AbstractMatrix) = view(B.block, B.t, :)
+new_data(B::BlockBootstrap, data::AbstractVector) = get_block(B)[B.t]
+new_data(B::BlockBootstrap, data::AbstractMatrix) = view(get_block(B), B.t, :)
 
 #FIXME:implement and test
 function update_block!(B::BlockBootstrap, data::AbstractVector)
-    B.t = B.t % B.blocksize + 1
+    B.t = B.t % get_blocksize(B) + 1
     if B.t == 1
         bb = sample(1:length(data))
-        for i in 1:B.blocksize
+        for i in 1:get_blocksize(B)
             # wrap around the circle
-            B.block[i] = data[(bb + i - 1) % length(data) + 1]
+            get_block(B)[i] = data[(bb + i - 1) % length(data) + 1]
         end
     end
 end
 
 function update_block!(B::BlockBootstrap, data::AbstractMatrix)
-    B.t = B.t % B.blocksize + 1
+    B.t = B.t % get_blocksize(B) + 1
     if B.t == 1
         bb = sample(1:length(data))
-        for i in 1:B.blocksize
+        for i in 1:get_blocksize(B)
             # wrap around the circle
-            B.block[i] = data[(bb + i - 1) % length(data) + 1, :]
+            get_block(B)[i, :] = data[(bb + i - 1) % size(data)[2] + 1, :]
         end
     end
 end
 
 #FIXME:test
 function new_data!(B::BlockBootstrap, data::AbstractVecOrMat)
+    ret = new_data(B, data) 
     update_block!(B, data)
-    return new_data(B, data) 
+    return ret
 end
 
 #FIXME:test
