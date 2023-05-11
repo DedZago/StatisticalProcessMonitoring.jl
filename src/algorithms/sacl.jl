@@ -87,7 +87,10 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 """
 function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, Afixed::Real=0.1, Amin::Real=0.1, Amax::Real=100.0, deltaSA::Real=0.1, q::Real=0.55, gamma::Real=0.02, Nmin::Int=1000, z::Real = 3.0, Cmrl::Real=10.0, maxiter::Real = 1e05, verbose::Bool=true)
 
-    #TODO: add checks on the rlsim function
+    tmp = rlsim(CH; maxiter=1, deltaSA=0.0)
+    @assert haskey(tmp, :rl) "rlsim function must have key :rl"
+    @assert haskey(tmp, :rlPlus) "rlsim function must have key :rlPlus"
+    @assert haskey(tmp, :rlMinus) "rlsim function must have key :rlMinus"
 
     @assert Nfixed > 0 "Nfixed must be positive"
     @assert Amin > 0 "Amin must be positive"
