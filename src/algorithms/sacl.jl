@@ -65,7 +65,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * `kw...` - Keyword arguments that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see Capizzi and Masarotto (2016).
 
 ### Keyword arguments:
-* `rlsim` - A function that generates new data with signature `rlsim(CH, maxiter, deltaSA)`. If left unspecified, defaults to `new_data_sa`. See the help for `new_data_sa` for more information.
+* `rlsim` - A function that generates new data with signature `rlsim(CH, maxiter, deltaSA)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information.
 * `Nfixed` - The number of iterations for the gain estimation stage.
 * `Afixed` - The fixed gain during the gain estimation stage.
 * `Amin` - The minimum allowed value of gain.
