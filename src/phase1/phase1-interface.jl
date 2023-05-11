@@ -20,14 +20,12 @@ mutable struct BlockBootstrap{T} <: AbstractSampling
     function BlockBootstrap(blocksize::Int, data::Vector{T}) where T
         @assert blocksize > 0
         out = new{Vector{T}}(zeros(T, blocksize), blocksize, 0)
-        update_block!(out, data)
         return out
     end
 
     function BlockBootstrap(blocksize::Int, data::Matrix{T}) where T 
         @assert blocksize > 0
         out = new{Matrix{T}}(zeros(T, blocksize, size(data)[2]), blocksize, 0)
-        update_block!(out, data)
         return out
     end
 end
@@ -49,7 +47,7 @@ new_data(B::BlockBootstrap, data::AbstractMatrix) = view(get_block(B), get_count
 #FIXME:implement and test
 function update_block!(B::BlockBootstrap, data::AbstractVector)
     set_counter!(B, (get_counter(B) % get_blocksize(B)) + 1)
-    if get_counter(B) == 1
+    if get_counter(B) <= 1
         bb = sample(1:length(data))
         for i in 1:get_blocksize(B)
             # wrap around the circle
@@ -60,7 +58,7 @@ end
 
 function update_block!(B::BlockBootstrap, data::AbstractMatrix)
     set_counter!(B, get_counter(B) % get_blocksize(B) + 1)
-    if get_counter(B) == 1
+    if get_counter(B) <= 1
         bb = sample(1:length(data))
         for i in 1:get_blocksize(B)
             # wrap around the circle
@@ -71,9 +69,8 @@ end
 
 #FIXME:test
 function new_data!(B::BlockBootstrap, data::AbstractVecOrMat)
-    ret = new_data(B, data) 
     update_block!(B, data)
-    return ret
+    return new_data(B, data) 
 end
 
 #FIXME:test

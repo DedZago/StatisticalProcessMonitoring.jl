@@ -44,7 +44,7 @@ using Test
         CH = ControlChart(STAT, LIM, NM, PH1)
         run_sim(CH)
         @test run_sim(CH, maxiter = 1) == 1
-        rsa = run_sim_sa(CH, Inf, 0.0)
+        rsa = run_sim_sa(CH, maxiter=Inf, deltaSA=0.0)
         @test length(rsa) == 3
         @test allequal(collect(rsa))
     end
