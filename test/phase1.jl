@@ -3,7 +3,7 @@ using SPM
 using Test
 
 @testset "Phase1Data" begin
-    x = randn(15)
+    x = randn(100)
     xmat = randn(15, 5)
     @testset "Bootstrap" begin
         BB = Bootstrap()
@@ -17,7 +17,7 @@ using Test
         BB = BlockBootstrap(blocksize, x)
         @test get_blocksize(BB) == blocksize
         @test length(get_block(BB)) == blocksize
-        @test BB.t == 1
+        @test get_counter(BB) == 1
         @test issubset(BB.block, x)
         y = new_data(BB, x)
         @test y in x
@@ -25,10 +25,40 @@ using Test
         BB = BlockBootstrap(blocksize, xmat)
         @test get_blocksize(BB) == blocksize
         @test size(get_block(BB)) == (blocksize, size(xmat)[2])
-        @test BB.t == 1
+        @test get_counter(BB) == 1
         @test new_data(BB, xmat) in eachrow(xmat)
         BB = BlockBootstrap(1, xmat)
         @test get_block(BB)[1, :] in eachrow(xmat)
+    end
+
+    @testset "Block bootstrap generation" begin
+        blocksize = 5
+        BB = BlockBootstrap(blocksize, x)
+        initblock = deepcopy(x[1:blocksize])
+        BB.block = initblock
+        y = new_data!(BB, x)
+        @test y == x[1]
+        @test get_block(BB) == initblock
+        @test get_counter(BB) == 2
+        y = new_data!(BB, x)
+        @test y == x[2]
+        @test get_block(BB) == initblock
+        @test get_counter(BB) == 3
+        y = new_data!(BB, x)
+        @test y == x[3]
+        @test get_block(BB) == initblock
+        @test get_counter(BB) == 4
+        y = new_data!(BB, x)
+        @test y == x[4]
+        @test get_block(BB) == initblock
+        @test get_counter(BB) == 5
+        y = new_data!(BB, x)
+        @test y == x[5]
+        @test get_block(BB) == initblock
+        y = new_data!(BB, x)
+        @test get_counter(BB) == 2
+        @test y != x[1]
+        @test get_block(BB) != initblock
     end
     @testset "Phase 1" begin
         PH1 = Phase1Data(Bootstrap(), x)

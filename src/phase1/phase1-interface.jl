@@ -37,15 +37,19 @@ get_block(B::BlockBootstrap) = B.block
 export get_block
 get_blocksize(B::BlockBootstrap) = B.blocksize
 export get_blocksize
+get_counter(B::BlockBootstrap) = B.t
+export get_counter
+set_counter!(B::BlockBootstrap, t) = B.t = t
+export set_counter!
 
 #FIXME:test
-new_data(B::BlockBootstrap, data::AbstractVector) = get_block(B)[B.t]
-new_data(B::BlockBootstrap, data::AbstractMatrix) = view(get_block(B), B.t, :)
+new_data(B::BlockBootstrap, data::AbstractVector) = get_block(B)[get_counter(B)]
+new_data(B::BlockBootstrap, data::AbstractMatrix) = view(get_block(B), get_counter(B), :)
 
 #FIXME:implement and test
 function update_block!(B::BlockBootstrap, data::AbstractVector)
-    B.t = B.t % get_blocksize(B) + 1
-    if B.t == 1
+    set_counter!(B, (get_counter(B) % get_blocksize(B)) + 1)
+    if get_counter(B) == 1
         bb = sample(1:length(data))
         for i in 1:get_blocksize(B)
             # wrap around the circle
@@ -55,8 +59,8 @@ function update_block!(B::BlockBootstrap, data::AbstractVector)
 end
 
 function update_block!(B::BlockBootstrap, data::AbstractMatrix)
-    B.t = B.t % get_blocksize(B) + 1
-    if B.t == 1
+    set_counter!(B, get_counter(B) % get_blocksize(B) + 1)
+    if get_counter(B) == 1
         bb = sample(1:length(data))
         for i in 1:get_blocksize(B)
             # wrap around the circle
@@ -88,6 +92,11 @@ struct Phase1Data{S,T} <: AbstractPhase1
     data::T
 end
 export Phase1Data
+
+get_sampler(PH1::Phase1Data) = PH1.samp
+export get_sampler
+get_data(PH1::Phase1Data) = PH1.data
+export get_data
 
 
 
