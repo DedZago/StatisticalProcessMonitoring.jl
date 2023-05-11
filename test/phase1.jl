@@ -1,9 +1,11 @@
 module TestPhase1
 using SPM
 using Test
+using Random
 
 @testset "Phase1Data" begin
-    x = randn(100)
+    Random.seed!(123)
+    x = randn(1000)
     xmat = randn(15, 5)
     @testset "Bootstrap" begin
         BB = Bootstrap()
@@ -32,14 +34,16 @@ using Test
     end
 
     @testset "Block bootstrap generation" begin
+        Random.seed!(123)
         blocksize = 5
         BB = BlockBootstrap(blocksize, x)
         initblock = deepcopy(x[1:blocksize])
-        BB.block = initblock
+        BB.block = deepcopy(initblock)
+        @test get_block(BB) == initblock
         y = new_data!(BB, x)
         @test y == x[1]
-        @test get_block(BB) == initblock
         @test get_counter(BB) == 2
+        @test get_block(BB) == initblock
         y = new_data!(BB, x)
         @test y == x[2]
         @test get_block(BB) == initblock
@@ -54,10 +58,10 @@ using Test
         @test get_counter(BB) == 5
         y = new_data!(BB, x)
         @test y == x[5]
-        @test get_block(BB) == initblock
+        @test get_block(BB) != initblock
         y = new_data!(BB, x)
         @test get_counter(BB) == 2
-        @test y != x[1]
+        @test !(y in initblock)
         @test get_block(BB) != initblock
     end
     @testset "Phase 1" begin

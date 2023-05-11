@@ -9,11 +9,11 @@ Simulates a run length for the control chart `CH` by sampling new data from its 
 ### Returns
 * An `Int`.
 """
-function run_sim(CH::AbstractChart)
+function run_sim(CH::AbstractChart; maxiter::Real = Inf)
     CH_ = shallow_copy_sim(CH)
     maxrl = get_maxrl(CH_)
-    i = 0
-    while i < maxrl
+    i = 0.0
+    while i < maxiter && i < maxrl
         i = i + 1
         update_chart!(CH_, new_data(CH_))
         is_IC(CH_) || break
@@ -37,7 +37,7 @@ Simulates a run length for the control chart `CH` by sampling new data from the 
 function run_sim(CH::AbstractChart, DGP::AbstractPhase1)
     CH_ = shallow_copy_sim(CH)
     maxrl = get_maxrl(CH_)
-    i = 0
+    i = 0.0
     while i < maxrl
         i = i + 1
         update_chart!(CH_, new_data(DGP))
@@ -67,7 +67,7 @@ function run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
     notDoneP = notDoneM = (deltaSA > 0.0)
     notDoneRl = true
     notDone = notDoneRl + notDoneM + notDoneP
-    i = 0
+    i = 0.0
     h = deepcopy(get_h(get_limit(CH)))
     while i < maxrl && (notDone > 0)
         i = i+1
@@ -96,6 +96,10 @@ function run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
         notDone = notDoneRl + notDoneM + notDoneP
     end
     set_limit!(CH_, h)
+    if deltaSA == 0.0
+        rlPlus = rl
+        rlMinus = rl
+    end
     return (rl = rl, rlPlus = rlPlus, rlMinus = rlMinus)
 end
 

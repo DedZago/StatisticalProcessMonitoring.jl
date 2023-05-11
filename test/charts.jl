@@ -40,6 +40,15 @@ using Test
         @test new_data(CH) in x
     end
 
+    @testset "run_sim" begin
+        CH = ControlChart(STAT, LIM, NM, PH1)
+        run_sim(CH)
+        @test run_sim(CH, maxiter = 1) == 1
+        rsa = run_sim_sa(CH, Inf, 0.0)
+        @test length(rsa) == 3
+        @test allequal(collect(rsa))
+    end
+
     x = randn(100)
     NM = ARL(200)
     PH1 = Phase1Data(Bootstrap(), x)
