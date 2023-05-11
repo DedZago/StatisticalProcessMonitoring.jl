@@ -65,7 +65,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * `kw...` - Keyword arguments that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see Capizzi and Masarotto (2016).
 
 ### Keyword arguments:
-* `rlsim` - A function that generates new data with signature `rlsim(CH, maxiter, deltaSA)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information.
+* `rlsim` - A function that generates new data with signature `rlsim(CH; maxiter, deltaSA)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information.
 * `Nfixed` - The number of iterations for the gain estimation stage.
 * `Afixed` - The fixed gain during the gain estimation stage.
 * `Amin` - The minimum allowed value of gain.
@@ -120,7 +120,7 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
     if verbose println("Running adaptive gain ...") end
     for i in 1:Nfixed
         set_limit!(CH, h)
-        rl, rlPlus, rlMinus = rlsim(CH, Cmrl * Arl0 * sqrt(i + Nfixed), deltaSA)
+        rl, rlPlus, rlMinus = rlsim(CH, maxiter=Cmrl * Arl0 * sqrt(i + Nfixed), deltaSA=deltaSA)
         # @show rl, rlPlus, rlMinus, h
         score = calculate_limit_gradient(CH, rl)
         h = calculate_limit(h, Afixed, score, i, q, eps)
@@ -143,11 +143,11 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
     if verbose println("Running optimization ...") end
     while i < (maxiter + Nmin)
         if verbose && (i % floor(maxiter / 50) == 0)
-            println("i: $(i)/$(Int(trunc(maxiter)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))")
+            println("i: $(i)/$(Int(trunc(maxiter + Nmin)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))")
         end
         i += 1
         set_limit!(CH, h)
-        rl, _, _ = rlsim(CH, Cmrl * Arl0 * sqrt(i + Nfixed), 0.0)
+        rl, _, _ = rlsim(CH, maxiter=Cmrl * Arl0 * sqrt(i + Nfixed), deltaSA=0.0)
         score = calculate_limit_gradient(CH, rl)
         h = calculate_limit(h, D, score, i, q, eps)
         if i > Nmin

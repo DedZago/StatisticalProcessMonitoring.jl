@@ -59,7 +59,7 @@ Simulates a run length for the control chart `CH` by sampling new data from the 
 ### Returns
 * A `NamedTuple` containing the simulated run length, `rl`, the simulated run length with control limit shifted by `deltaSA`, `rlPlus`, and the simulated run length with control limit shifted by `-deltaSA`, `rlMinus`.
 """
-function run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
+function run_sim_sa(CH::AbstractChart; maxiter::Real = Inf, deltaSA::Real = 0.0)
     @assert deltaSA >= 0.0
     CH_ = shallow_copy_sim(CH)
     maxrl = min(get_maxrl(CH_), maxiter)
@@ -104,7 +104,7 @@ function run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
 end
 
 
-function run_sim_sa(CH::MultipleControlChart, maxiter::Real, deltaSA::Real)
+function run_sim_sa(CH::MultipleControlChart; maxiter::Real = Inf, deltaSA::Real = 0.0)
     @assert deltaSA >= 0.0
     CH_ = shallow_copy_sim(CH)
     maxrl = min(get_maxrl(CH_), maxiter)
