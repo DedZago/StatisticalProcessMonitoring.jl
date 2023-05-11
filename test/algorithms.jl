@@ -3,7 +3,7 @@ module TestAlgorithms
 using SPM
 using Test
 
-@testset "saCL" begin
+@testset "control limit opt" begin
     x = randn(500)
     NM = ARL(200)
     PH1 = Phase1Data(Bootstrap(), x)
@@ -13,6 +13,8 @@ using Test
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
         saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
+        bisectionCL(CH, verbose=false, hmax=3.0, maxiter=1, nsims=10)
+        combinedCL(CH, verbose=false, maxiter_sa=1, maxiter_bi=1, nsims_bi=1)
     end
 
     x = randn(500)
@@ -24,6 +26,8 @@ using Test
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
         saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
+        bisectionCL(CH, verbose=false, hmax=3.0, maxiter=1, nsims=10)
+        combinedCL(CH, verbose=false, maxiter_sa=1, maxiter_bi=1, nsims_bi=1)
     end
 
     x = randn(500)
@@ -35,6 +39,8 @@ using Test
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
         saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
+        bisectionCL(CH, verbose=false, hmax=3.0, maxiter=1, nsims=10)
+        combinedCL(CH, verbose=false, maxiter_sa=1, maxiter_bi=1, nsims_bi=1)
     end
 
     x = randn(500)
