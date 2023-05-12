@@ -58,7 +58,7 @@ function bisectionCL!(CH::ControlChart; rlsim::Function = run_sim, hmin::Float64
         for j in 1:nsims_i
             RLs[j] = first(rlsim(CH, maxiter=trunc))
         end
-        E_RL = measure(RLs, CH, verbose)
+        E_RL = measure(RLs, CH, verbose=verbose)
         if E_RL > target
             hmax = h
         else
@@ -98,13 +98,13 @@ end
 export bisectionCL
 
 
-function measure(RLs, CH::ControlChart{S,L,N,P}, verbose) where {S,L,N<:ARL,P}
+function measure(RLs, CH::ControlChart{S,L,N,P}; verbose=true) where {S,L,N<:ARL,P}
     ret = mean(RLs)
     if verbose println("E[RL] = $(ret)") end
     return ret
 end
 
-function measure(RLs, CH::ControlChart{S,L,N,P}, verbose) where {S,L,N<:QRL,P}
+function measure(RLs, CH::ControlChart{S,L,N,P}; verbose=true) where {S,L,N<:QRL,P}
     ret = quantile(RLs, get_nominal(CH).qtl)
     if verbose println("q$(get_nominal(CH).qtl)[RL] = $(ret)") end
     return ret
