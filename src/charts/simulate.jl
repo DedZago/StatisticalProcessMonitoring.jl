@@ -15,7 +15,7 @@ function run_sim(CH::AbstractChart; maxiter::Real = Inf)
     i = 0.0
     while i < maxiter && i < maxrl
         i = i + 1
-        update_chart!(CH_, new_data(CH_))
+        update_chart!(CH_, new_data!(CH_))
         is_IC(CH_) || break
     end
     return i
@@ -40,7 +40,7 @@ function run_sim(CH::AbstractChart, DGP::AbstractPhase1)
     i = 0.0
     while i < maxrl
         i = i + 1
-        update_chart!(CH_, new_data(DGP))
+        update_chart!(CH_, new_data!(DGP))
         is_IC(CH_) || break
     end
     return i
@@ -71,7 +71,7 @@ function run_sim_sa(CH::AbstractChart; maxiter::Real = Inf, deltaSA::Real = 0.0)
     h = deepcopy(get_h(get_limit(CH)))
     while i < maxrl && (notDone > 0)
         i = i+1
-        update_chart!(CH_, new_data(CH_))
+        update_chart!(CH_, new_data!(CH_))
         if notDoneRl
             set_limit!(CH_, h)
             if is_OC(CH_)
@@ -121,7 +121,7 @@ function run_sim_sa(CH::MultipleControlChart; maxiter::Real = Inf, deltaSA::Real
     OC_vector = BitVector(undef, nstat)
     while i < maxrl && any(notDone .> 0)
         i = i+1
-        update_chart!(CH_, new_data(CH_))
+        update_chart!(CH_, new_data!(CH_))
         # @show get_value(CH_)
         for j in 1:nstat
             if notDoneRl[j]

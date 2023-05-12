@@ -2,6 +2,21 @@ module TestCharts
 using SPM
 using Test
 
+# ASSUMTION: `e1` and `e2` have the same run-time type
+# CHECK FIELDS ARE EQUAL BETWEEN TWO STRUCTS
+@generated structEqual(e1, e2) = begin
+    if fieldcount(e1) == 0
+        return :(true)
+    end
+    mkEq    = fldName -> :(e1.$fldName == e2.$fldName)
+    # generate individual equality checks
+    eqExprs = map(mkEq, fieldnames(e1))
+    # construct &&-expression for chaining all checks
+    mkAnd   = (expr, acc) -> Expr(:&&, expr, acc)
+    # no need in initial accumulator because eqExprs is not empty
+    foldr(mkAnd, eqExprs)
+end
+
 @testset "Charts" begin
     x = randn(100)
     NM = ARL(200)
@@ -41,9 +56,39 @@ using Test
     end
 
     @testset "run_sim" begin
+        x = randn(100)
+        NM = ARL(200)
+        PH1 = Phase1Data(Bootstrap(), x)
+        LIM = TwoSidedFixedLimit(1.0)
+        STAT = EWMA(λ = 0.2)
         CH = ControlChart(STAT, LIM, NM, PH1)
+        CH_ = deepcopy(CH)
         run_sim(CH)
         @test run_sim(CH, maxiter = 1) == 1
+        @test structEqual(get_statistic(CH), get_statistic(CH_))
+        @test structEqual(get_limit(CH), get_limit(CH_))
+        @test structEqual(get_nominal(CH), get_nominal(CH_))
+        @test structEqual(get_sampler(get_phase1(CH)), get_sampler(get_phase1(CH_)))
+        @test structEqual(get_data(get_phase1(CH)), get_data(get_phase1(CH_)))
+        rsa = run_sim_sa(CH, maxiter=Inf, deltaSA=0.0)
+        @test length(rsa) == 3
+        @test allequal(collect(rsa))
+
+        # --- Block bootstrap
+        x = randn(100)
+        NM = ARL(200)
+        PH1 = Phase1Data(BlockBootstrap(5, x), x)
+        LIM = TwoSidedFixedLimit(1.0)
+        STAT = EWMA(λ = 0.2)
+        CH = ControlChart(STAT, LIM, NM, PH1)
+        CH_ = deepcopy(CH)
+        run_sim(CH)
+        @test run_sim(CH, maxiter = 1) == 1
+        @test structEqual(get_statistic(CH), get_statistic(CH_))
+        @test structEqual(get_limit(CH), get_limit(CH_))
+        @test structEqual(get_nominal(CH), get_nominal(CH_))
+        @test structEqual(get_sampler(get_phase1(CH)), get_sampler(get_phase1(CH_)))
+        @test structEqual(get_data(get_phase1(CH)), get_data(get_phase1(CH_)))
         rsa = run_sim_sa(CH, maxiter=Inf, deltaSA=0.0)
         @test length(rsa) == 3
         @test allequal(collect(rsa))

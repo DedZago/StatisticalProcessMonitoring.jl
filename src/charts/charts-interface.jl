@@ -245,6 +245,14 @@ Simulate a new observation for the control chart from the Phase 1 data.
 """
 new_data(CH::AbstractChart) = new_data(get_phase1(CH))
 export new_data
+
+"""
+    new_data(CH::AbstractChart)
+
+Simulate a new observation for the control chart from the Phase 1 data, eventually modifying the underlying phase 1 object.
+"""
+new_data!(CH::AbstractChart) = new_data!(get_phase1(CH))
+export new_data
     
 
 """
