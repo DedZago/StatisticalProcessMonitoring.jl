@@ -10,4 +10,5 @@ include("charts/charts-interface.jl")
 include("charts/retrospective.jl")
 include("algorithms/sacl.jl")
 include("algorithms/bisectioncl.jl")
+include("algorithms/grid-search.jl")
 end

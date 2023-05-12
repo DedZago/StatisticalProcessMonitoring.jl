@@ -155,3 +155,28 @@ function run_sim_sa(CH::MultipleControlChart; maxiter::Real = Inf, deltaSA::Real
     return (rl = rl, rlPlus = rlPlus, rlMinus = rlMinus)
 end
 export run_sim_sa
+
+"""
+    run_sim_oc(CH::AbstractChart; shift = 0.0)
+
+Simulates a run length under location shift for the control chart `CH` by sampling new data from its Phase I object.
+
+### Inputs
+* `CH` - A control chart.
+* `shift` - A location shift.
+
+### Returns
+* An `Int`.
+"""
+function run_sim_oc(CH::AbstractChart; shift = 0.0, maxiter::Real = Inf)
+    CH_ = shallow_copy_sim(CH)
+    maxrl = get_maxrl(CH_)
+    i = 0.0
+    while i < maxiter && i < maxrl
+        i = i + 1
+        update_chart!(CH_, new_data!(CH_) .+ shift)
+        is_IC(CH_) || break
+    end
+    return i
+end
+export run_sim_oc

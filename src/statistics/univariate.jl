@@ -22,7 +22,8 @@ export EWMA
 
 
 get_parameter(stat::EWMA) = (λ = stat.λ,)
-set_parameter!(stat::EWMA, λ) = stat.λ = λ
+set_parameter!(stat::EWMA, λ::Float64) = stat.λ = λ
+set_parameter!(stat::EWMA, λ::Vector{Float64}) = stat.λ = λ[1]
 
 
 update_statistic(stat::EWMA, x::Real) = (1.0 - stat.λ) * stat.value + stat.λ * x   
@@ -52,7 +53,8 @@ export CUSUM
 
 
 get_parameter(stat::CUSUM) = (k = stat.k,)
-set_parameter!(stat::CUSUM, k) = stat.k = k
+set_parameter!(stat::CUSUM, k::Float64) = stat.k = k
+set_parameter!(stat::CUSUM, k::Vector{Float64}) = stat.k = k[1]
 
 
 function update_statistic(stat::CUSUM, x::Real)
