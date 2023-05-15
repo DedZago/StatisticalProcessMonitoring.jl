@@ -42,9 +42,9 @@ function optimize_grid(CH::ControlChart, rlconstr::Function, settings::OptSettin
             break
         end
         for w in 1:p
-            if par_current[w] == maxpar_opt[w]
+            if par_current[w] == max_par[w]
                 par_current[w] -= step[w]/m_grid
-            elseif par_current[w] == minpar_opt[w]
+            elseif par_current[w] == min_par[w]
                 par_current[w] += step[w]/m_grid
             end
             max_par[w] = par_current[w] + step[w]/m_grid
