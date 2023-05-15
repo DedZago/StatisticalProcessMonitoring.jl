@@ -1,4 +1,5 @@
 #FIXME: test
+#FIXME: documentation
 function optimize_parameter!(CH, rlsim_oc; settings = OptSettings())
     CH_ = shallow_copy_sim(CH)
     @unpack nsims_opt, trace, method_opt = settings
