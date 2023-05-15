@@ -1,24 +1,25 @@
-function optimize_parameter!(CH; settings)
+#FIXME: test
+function optimize_parameter!(CH, rlsim_oc; settings = OptSettings())
     CH_ = shallow_copy_sim(CH)
     @unpack nsims_opt, trace, method_opt = settings
 
     function rlconstr(par::Vector, grad::Vector)::Float64
         set_parameter!(CH_, par)
-        optimizeLimit!(CH_, settings)
-        if trace_opt > 0
+        optimize_limit!(CH_, settings=settings)
+        if trace > 0
             print("$(round.(par, digits=6))\t")
         end
-        ret = SPM.measure([rlsim_oc(CH_) for _ in 1:nsims_opt], CH_, verbose=trace_opt > 0)
+        ret = SPM.measure([rlsim_oc(CH_) for _ in 1:nsims_opt], CH_, verbose=trace > 0)
         return ret
     end
 
-    #FIXME: from here
     if method_opt == :Grid
-        set_parameter!(CH, optimize_grid(CH, rlconstr, minpar, maxpar, x_tol, maxiter))
+        set_parameter!(CH, optimize_grid(CH, rlconstr, settings))
     elseif method_opt == :SPSA
-        set_parameter!(CH, optimize_SPSA(CH, rlconstr, minpar, maxpar, x_tol, maxiter))
+        #TODO: implement SPSA
+        set_parameter!(CH, optimize_SPSA(CH, rlconstr, settings))
     else
-        set_parameter!(CH, optimize_nlopt(CH, rlconstr, minpar, maxpar, x_tol, maxiter, method_opt))
+        set_parameter!(CH, optimize_nlopt(CH, rlconstr, settings))
     end
     set_h!(get_limit(CH), get_h(get_limit(CH_)))
     return get_parameter(CH)

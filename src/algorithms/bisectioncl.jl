@@ -159,8 +159,8 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 
 """
 function combinedCL!(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptSettings = OptSettings(Nfixed_sa = 200, Nmin_sa = 200, maxiter_sa = 200))
-    h, _, _ = saCL(CH, rlsim = rlsim, settings=settings)
-    bisectionCL!(CH, rlsim = rlsim, settings = OptSettings(settings, hmax_bi = settings.inflate_bi * 2.0 * h))
+    h, _, _ = saCL(CH, settings=settings)
+    bisectionCL!(CH, settings = OptSettings(settings, hmax_bi = settings.inflate_bi * 2.0 * h))
 end
 export combinedCL!
 
