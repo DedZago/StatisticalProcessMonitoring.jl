@@ -61,6 +61,7 @@ export TwoSidedFixedLimit
 
 
 
+#TODO: Fix documentation
 """
     OneSidedCurvedLimit(h::Float64, upw::Bool)
     OneSidedCurvedLimit(h::Vector{T}, upw::Vector{Bool})
@@ -72,15 +73,12 @@ Curved one-sided limit, such that the run length ``RL`` of a control chart is th
 
 Note that `h > 0` by the way it is defined.
 """
-@with_kw mutable struct OneSidedCurvedLimit{T, S} <: OneSidedLimit{T}
+@with_kw mutable struct OneSidedCurvedLimit{T, F <: Function} <: OneSidedLimit{T}
     h::T
     upw::Bool = true
-    fun::FunctionWrapper{Float64, Tuple{Float64, AbstractStatistic}}
+    fun::F
 
-    function OneSidedCurvedLimit(h, upw::Bool, f::Function, stat::AbstractStatistic)
-        @assert h > 0.0
-        new{typeof(first(h)), typeof(stat)}(h, upw, FunctionWrapper{typeof(first(h)), Tuple{typeof(first(h)), typeof(stat)}}(f))
-    end
+    @assert h > 0.0
 end
 export OneSidedCurvedLimit
 
@@ -88,6 +86,7 @@ get_value(L::OneSidedCurvedLimit, t, stat) = get_value(L) * L.fun(t, stat)
 
 
 
+#TODO: Fix documentation
 """
     TwoSidedCurvedLimit(h::Float64)
     TwoSidedCurvedLimit(h::Vector{T})
@@ -98,14 +97,11 @@ Curved one-sided limit, such that the run length ``RL`` of a control chart is th
 
 Note that `h > 0` by the way it is defined.
 """
-@with_kw mutable struct TwoSidedCurvedLimit{T, S} <: TwoSidedLimit{T}
+@with_kw mutable struct TwoSidedCurvedLimit{T, F <: Function} <: TwoSidedLimit{T}
     h::T
-    fun::FunctionWrapper{Float64, Tuple{Float64, AbstractStatistic}}
+    fun::F
 
-    function TwoSidedCurvedLimit(h, f::Function, stat::AbstractStatistic)
-        @assert h > 0.0
-        new{typeof(first(h)), typeof(stat)}(h, FunctionWrapper{typeof(first(h)), Tuple{typeof(first(h)), typeof(stat)}}(f))
-    end
+    @assert h > 0.0
 end
 export TwoSidedCurvedLimit
 

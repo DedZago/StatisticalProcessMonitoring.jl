@@ -61,29 +61,29 @@ using StatsBase
         λ = 0.2
         STAT = EWMA(λ = λ, value = 0.0)
         h = 0.5
-        L = OneSidedCurvedLimit(h, true, f, STAT)
+        L = OneSidedCurvedLimit(h, true, f)
         @test get_value(L) == h
         @test get_value(L, 0, STAT) == h * f(0, STAT) 
         @test get_value(L, 1, STAT) == h * f(1, STAT) 
         @test get_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
-        L = OneSidedCurvedLimit(h, false, f, STAT)
+        L = OneSidedCurvedLimit(h, false, f)
         @test get_value(L) == -h
         @test get_value(L, 0, STAT) == -h * f(0, STAT) 
         @test get_value(L, 1, STAT) == -h * f(1, STAT) 
         @test get_value(L, 10^5, STAT) == -h * sqrt(λ/(2-λ)) 
-        @test_throws AssertionError OneSidedCurvedLimit(-0.5, true, f, STAT)
+        @test_throws AssertionError OneSidedCurvedLimit(-0.5, true, f)
     end
     @testset "Two-sided curved" begin
         f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
         λ = 0.2
         STAT = EWMA(λ = λ, value = 0.0)
         h = 0.5
-        L = TwoSidedCurvedLimit(h, f, STAT)
+        L = TwoSidedCurvedLimit(h, f)
         @test get_h(L) == h
         @test get_value(L, 0, STAT) == h * f(0, STAT) * [-1, 1]
         @test get_value(L, 1, STAT) == h * f(1, STAT) * [-1, 1]
         @test get_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) * [-1, 1]
-        @test_throws MethodError TwoSidedCurvedLimit(-0.5, true, f, STAT)
+        @test_throws MethodError TwoSidedCurvedLimit(-0.5, true, f)
     end
 
     @testset "Dynamic limits" begin

@@ -15,7 +15,7 @@ end
     PH1 = Phase1Data(Bootstrap(), x)
     STAT = EWMA(λ = 0.2)
     f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
-    LIM = TwoSidedCurvedLimit(2.0, f, STAT)
+    LIM = TwoSidedCurvedLimit(2.0, f)
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
         saCL(CH, settings=OptSettings(Nmin_sa=1, maxiter_sa=1, Nfixed_sa=1))
@@ -53,7 +53,7 @@ end
     NM = ARL(200)
     STAT1 = EWMA(λ = 0.1)
     STAT2 = CUSUM(k = 1.0)
-    LIM1 = TwoSidedCurvedLimit(2.0, f, STAT)
+    LIM1 = TwoSidedCurvedLimit(2.0, f)
     LIM2 = OneSidedFixedLimit(2.3, true)
     PH1 = Phase1Data(Bootstrap(), x)
     CH = ControlChart([STAT1, STAT2], [LIM1, LIM2], NM, PH1)

@@ -100,7 +100,7 @@ end
     λ = 0.2
     STAT = EWMA(λ = λ)
     f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
-    LIM = OneSidedCurvedLimit(1.0, true, f, STAT)
+    LIM = OneSidedCurvedLimit(1.0, true, f)
 
     @testset "Curved chart" begin
         CH = ControlChart(STAT, LIM, NM, PH1)
