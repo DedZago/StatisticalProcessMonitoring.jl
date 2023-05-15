@@ -1,7 +1,7 @@
 function optimize_parameter!(CH; settings)
     CH_ = shallow_copy_sim(CH)
-    nsims_opt = settings.nsims_opt
-    trace = settings.trace
+    @unpack nsims_opt, trace, method_opt = settings
+
     function rlconstr(par::Vector, grad::Vector)::Float64
         set_parameter!(CH_, par)
         optimizeLimit!(CH_, settings)
@@ -13,12 +13,12 @@ function optimize_parameter!(CH; settings)
     end
 
     #FIXME: from here
-    if method == :Grid
+    if method_opt == :Grid
         set_parameter!(CH, optimize_grid(CH, rlconstr, minpar, maxpar, x_tol, maxiter))
-    elseif method == :SPSA
+    elseif method_opt == :SPSA
         set_parameter!(CH, optimize_SPSA(CH, rlconstr, minpar, maxpar, x_tol, maxiter))
     else
-        set_parameter!(CH, optimize_nlopt(CH, rlconstr, minpar, maxpar, x_tol, maxiter, method))
+        set_parameter!(CH, optimize_nlopt(CH, rlconstr, minpar, maxpar, x_tol, maxiter, method_opt))
     end
     set_h!(get_limit(CH), get_h(get_limit(CH_)))
     return get_parameter(CH)

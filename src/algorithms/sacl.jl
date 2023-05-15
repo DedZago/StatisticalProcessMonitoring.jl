@@ -86,8 +86,8 @@ The following settings control the behaviour of the algorithm:
 ### References
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
-function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptSettings = OptSettings())
-    @unpack hmin_sa, Nfixed_sa, Afixed_sa, Amin_sa, Amax_sa, delta_sa, q_sa, gamma_sa, Nmin_sa, z_sa, Cmrl_sa, maxiter_sa, verbose_sa = settings
+function saCL!(CH::ControlChart; settings::OptSettings = OptSettings())
+    @unpack rlsim, hmin_sa, Nfixed_sa, Afixed_sa, Amin_sa, Amax_sa, delta_sa, q_sa, gamma_sa, Nmin_sa, z_sa, Cmrl_sa, maxiter_sa, verbose_sa = settings
 
     tmp = rlsim(CH; maxiter=1, deltaSA=0.0)
     @assert haskey(tmp, :rl) "rlsim function must have key :rl"
@@ -182,7 +182,7 @@ See the documentation of `saCL!` for more information about the algorithm and th
 ### References
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
-function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptSettings = OptSettings())
+function saCL(CH::ControlChart; settings::OptSettings = OptSettings())
     CH_ = shallow_copy_sim(CH)
     return saCL!(CH_, settings=settings)
 end

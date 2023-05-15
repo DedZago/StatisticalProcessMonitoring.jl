@@ -1,9 +1,10 @@
 using Parameters 
 
-@with_kw struct OptSettings{F, I, S, B} 
+@with_kw struct OptSettings{F, I, S, B, F1} 
     # Global options
     trace::I = 0
     ic_solver::S = :SA
+    rlsim::F1 = ifelse(ic_solver == :Bisection, run_sim, run_sim_sa)
 
     # saCL options
     hmin_sa::F = sqrt(eps())

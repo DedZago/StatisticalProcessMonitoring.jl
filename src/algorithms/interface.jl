@@ -1,6 +1,6 @@
 #FIXME: test
-function optimize_limit!(CH::ControlChart; rlsim::Function = run_sim_sa, settings = OptSettings())
-    ic_solver = settings.ic_solver
+function optimize_limit!(CH::ControlChart; settings = OptSettings())
+    @unpack ic_solver, rlsim = settings
     if ic_solver == :SA
         return saCL!(CH, rlsim=rlsim, settings = settings)
     elseif ic_solver == :Bisection
@@ -14,8 +14,8 @@ end
 export optimize_limit!
 
 #FIXME: test
-function optimize_limit(CH::ControlChart; rlsim::Function = run_sim_sa, settings = OptSettings())
+function optimize_limit(CH::ControlChart; settings = OptSettings())
     CH_ = deepcopy(CH)
-    optimize_limit!(CH_, rlsim=rlsim, settings=settings)
+    optimize_limit!(CH_, settings=settings)
 end
 export optimize_limit

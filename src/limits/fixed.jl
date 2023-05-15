@@ -1,6 +1,3 @@
-using FunctionWrappers
-import FunctionWrappers.FunctionWrapper
-
 abstract type OneSidedLimit{T} <: AbstractLimit{T} end
 abstract type TwoSidedLimit{T} <: AbstractLimit{T} end
 

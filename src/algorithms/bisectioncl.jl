@@ -32,7 +32,7 @@ function bisectionCL!(CH::ControlChart; rlsim::Function = run_sim, settings::Opt
 
     #TODO: consider trunc_biation of the control chart run lengths
 
-    @unpack hmin_bi, hmax_bi, maxiter_bi, nsims_bi, trunc_bi, x_tol_bi, f_tol_bi, verbose_bi = settings
+    @unpack rlsim, hmin_bi, hmax_bi, maxiter_bi, nsims_bi, trunc_bi, x_tol_bi, f_tol_bi, verbose_bi = settings
 
     @assert hmin_bi > 0 "hmin_bi must be positive"
     @assert hmax_bi > 0 "hmax_bi must be positive"
