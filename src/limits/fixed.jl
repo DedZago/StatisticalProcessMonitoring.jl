@@ -1,21 +1,21 @@
 using FunctionWrappers
 import FunctionWrappers.FunctionWrapper
 
-abstract type OneSidedLimit <: AbstractLimit end
-abstract type TwoSidedLimit <: AbstractLimit end
+abstract type OneSidedLimit{T} <: AbstractLimit{T} end
+abstract type TwoSidedLimit{T} <: AbstractLimit{T} end
 
 get_value(L::OneSidedLimit) = (-1.0)^(!L.upw) * get_h(L)
 get_value(L::TwoSidedLimit) = [-get_h(L), get_h(L)]
 #FIXME: rewrite interface to have h and value attributes, get_h and get_value as getter functions.
 
-function compare_values(lim_val, stat_val, L::LIM) where LIM <: TwoSidedLimit
+function compare_values(lim_val, stat_val, L::TwoSidedLimit)
     if (stat_val < lim_val[1]) || (stat_val > lim_val[2])
         return false
     end
     return true
 end
 
-function compare_values(lim_val, stat_val, L::LIM) where LIM <: OneSidedLimit
+function compare_values(lim_val, stat_val, L::OneSidedLimit)
     for i in 1:length(lim_val)
         if L.upw[i]
             stat_val[i] <= lim_val[i] || return false
@@ -36,13 +36,12 @@ Classical fixed one-sided limit, such that the run length ``RL`` of a control ch
 
 Note that `h > 0` by the way it is defined.
 """
-@with_kw mutable struct OneSidedFixedLimit{T} <: OneSidedLimit
+@with_kw mutable struct OneSidedFixedLimit{T} <: OneSidedLimit{T}
     h::T
     upw::Bool = true
     @assert h > 0.0
 end
 export OneSidedFixedLimit
-
 
 
 """
@@ -54,7 +53,7 @@ Classical fixed two-sided limit, such that the run length ``RL`` of a control ch
 
 Note that `h > 0` by the way it is defined.
 """
-@with_kw mutable struct TwoSidedFixedLimit{T} <: TwoSidedLimit
+@with_kw mutable struct TwoSidedFixedLimit{T} <: TwoSidedLimit{T}
     h::T
     @assert h > 0.0
 end
@@ -73,7 +72,7 @@ Curved one-sided limit, such that the run length ``RL`` of a control chart is th
 
 Note that `h > 0` by the way it is defined.
 """
-@with_kw mutable struct OneSidedCurvedLimit{T, S} <: OneSidedLimit
+@with_kw mutable struct OneSidedCurvedLimit{T, S} <: OneSidedLimit{T}
     h::T
     upw::Bool = true
     fun::FunctionWrapper{Float64, Tuple{Float64, AbstractStatistic}}
@@ -88,6 +87,7 @@ export OneSidedCurvedLimit
 get_value(L::OneSidedCurvedLimit, t, stat) = get_value(L) * L.fun(t, stat)
 
 
+
 """
     TwoSidedCurvedLimit(h::Float64)
     TwoSidedCurvedLimit(h::Vector{T})
@@ -98,7 +98,7 @@ Curved one-sided limit, such that the run length ``RL`` of a control chart is th
 
 Note that `h > 0` by the way it is defined.
 """
-@with_kw mutable struct TwoSidedCurvedLimit{T, S} <: TwoSidedLimit
+@with_kw mutable struct TwoSidedCurvedLimit{T, S} <: TwoSidedLimit{T}
     h::T
     fun::FunctionWrapper{Float64, Tuple{Float64, AbstractStatistic}}
 
@@ -117,4 +117,3 @@ function is_IC(L::AbstractLimit, t, stat::AbstractStatistic)
     lim = get_value(L, t, stat)
     return compare_values(lim, val, L)
 end
-

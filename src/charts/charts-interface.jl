@@ -138,7 +138,7 @@ set_parameter!(CH::AbstractChart, par) = set_parameter!(get_statistic(CH), par)
 
 set_parameter!(CH::MultipleControlChart, par) = set_parameter!.(get_statistic(CH), par)
 
-function set_parameter!(CH::MultipleControlChart, par::AbstractVector)
+function set_parameter!(CH::MultipleControlChart, par::Vector{T}) where T
     @assert length(get_statistic(CH)) == length(par)
     for i in 1:length(get_statistic(CH))
         set_parameter!(get_statistic(CH)[i], par[i])

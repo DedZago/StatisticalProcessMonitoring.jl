@@ -117,7 +117,7 @@ function run_sim_sa(CH::MultipleControlChart; maxiter::Real = Inf, deltaSA::Real
     notDoneRl = fill(true, nstat)
     notDone = notDoneRl + notDoneM + notDoneP
     i = 0
-    h = deepcopy(get_value(get_limit(CH_)))
+    h = deepcopy(get_h(get_limit(CH_)))
     OC_vector = BitVector(undef, nstat)
     while i < maxrl && any(notDone .> 0)
         i = i+1

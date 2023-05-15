@@ -1,11 +1,11 @@
 using StatsBase
 
-abstract type DynamicLimit <: AbstractLimit end
-abstract type BootstrapLimit <: DynamicLimit end
+abstract type DynamicLimit{T} <: AbstractLimit{T} end
+abstract type BootstrapLimit{T} <: DynamicLimit{T} end
 
 Base.show(io::IO, L::BootstrapLimit) = print(io, "$(typeof(L))\n  value: $(get_value(L))\n  Bootstrap samples: $(length(L.sim))\n")
 
-mutable struct OneSidedBootstrapLimit{T} <: BootstrapLimit
+mutable struct OneSidedBootstrapLimit{T} <: BootstrapLimit{T}
     sim::Vector{T}
     h::T
     upw::Bool
@@ -17,7 +17,7 @@ mutable struct OneSidedBootstrapLimit{T} <: BootstrapLimit
 end
 export OneSidedBootstrapLimit
 
-mutable struct TwoSidedBootstrapLimit{T} <: BootstrapLimit
+mutable struct TwoSidedBootstrapLimit{T} <: BootstrapLimit{T}
     sim::Vector{T}
     h::Vector{T}
 
