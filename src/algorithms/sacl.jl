@@ -56,28 +56,29 @@ update_score(s2::Float64, score::Real, Ndenom) = s2 + (score * score - s2) / Nde
 update_score(s2::Vector{Float64}, score::AbstractVector, Ndenom) = s2 .+ (score .* score .- s2) ./ Ndenom
 
 """
-    saCL!(CH::ControlChart; kw...)
+    saCL!(CH::ControlChart[; rlsim::Function, settings::OptimizationSettings])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the stochastic approximation algorithm described in Capizzi and Masarotto (2016).
 
 ### Inputs
 * `CH` - A control chart.
-* `kw...` - Keyword arguments that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see Capizzi and Masarotto (2016).
+* `rlsim` - A function that generates new data with signature `rlsim(CH; maxiter, deltaSA)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information about the signature of the function.
+* `settings` - An `OptimizationSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see Capizzi and Masarotto (2016).
 
-### Keyword arguments:
-* `rlsim` - A function that generates new data with signature `rlsim(CH; maxiter, deltaSA)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information.
-* `Nfixed` - The number of iterations for the gain estimation stage.
-* `Afixed` - The fixed gain during the gain estimation stage.
-* `Amin` - The minimum allowed value of gain.
-* `Amax` - The maximum allowed value of gain.
-* `deltaSA` - The shift in control limit used during the gain estimation stage.
-* `q` - The power that controls the denominator in the Robbins-Monro algorithm.
-* `gamma` - The precision parameter for the stopping criterion of the algorithm.
-* `Nmin` - The minimum number of iterations required for the algorithm to end.
-* `z` - The quantile of the `Normal(0,1)` that controls the probability of the stopping criterion being satisfied.
-* `Cmrl` - The inflation factor for the maximum number of iterations the run length may run for.
-* `maxiter` - Maximum number of iterations before the algorithm is forcibly ended.
-* `verbose` - Whether to print information to the user about the state of the optimization.
+### Settings
+The following settings control the behaviour of the algorithm: 
+* `Nfixed_sa` - The number of iterations for the gain estimation stage.
+* `Afixed_sa` - The fixed gain during the gain estimation stage.
+* `Amin_sa` - The minimum allowed value of gain.
+* `Amax_sa` - The maximum allowed value of gain.
+* `deltaSA_sa` - The shift in control limit used during the gain estimation stage.
+* `q_sa` - The power that controls the denominator in the Robbins-Monro algorithm.
+* `gamma_sa` - The precision parameter for the stopping criterion of the algorithm.
+* `Nmin_sa` - The minimum number of iterations required for the algorithm to end.
+* `z_sa` - The quantile of the `Normal(0,1)` that controls the probability of the stopping criterion being satisfied.
+* `Cmrl_sa` - The inflation factor for the maximum number of iterations the run length may run for.
+* `maxiter_sa` - Maximum number of iterations before the algorithm is forcibly ended.
+* `verbose_sa` - Whether to print information to the user about the state of the optimization.
 
 ### Returns
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
@@ -85,32 +86,32 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 ### References
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
-function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, Afixed::Real=0.1, Amin::Real=0.1, Amax::Real=100.0, deltaSA::Real=0.1, q::Real=0.55, gamma::Real=0.02, Nmin::Int=1000, z::Real = 3.0, Cmrl::Real=10.0, maxiter::Real = 1e05, verbose::Bool=true)
+function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptimizationSettings = OptimizationSettings())
+    @unpack hmin_sa, Nfixed_sa, Afixed_sa, Amin_sa, Amax_sa, delta_sa, q_sa, gamma_sa, Nmin_sa, z_sa, Cmrl_sa, maxiter_sa, verbose_sa = settings
 
     tmp = rlsim(CH; maxiter=1, deltaSA=0.0)
     @assert haskey(tmp, :rl) "rlsim function must have key :rl"
     @assert haskey(tmp, :rlPlus) "rlsim function must have key :rlPlus"
     @assert haskey(tmp, :rlMinus) "rlsim function must have key :rlMinus"
 
-    @assert Nfixed > 0 "Nfixed must be positive"
-    @assert Amin > 0 "Amin must be positive"
-    @assert Amax > 0 "Amax must be positive"
-    @assert deltaSA > 0 "deltaSA must be positive"
-    @assert 0 < q < 1 "q must be a number between 0 and 1"
-    @assert 0 < gamma < 1 "gamma must be a number between 0 and 1"
-    @assert Nmin > 0 "Nmin must be positive"
-    @assert z > 0 "z must be positive"
-    @assert Cmrl > 0 "Cmrl must be positive"
-    @assert maxiter > 0 "maxiter must be positive"
+    @assert Nfixed_sa > 0 "Nfixed_sa must be positive"
+    @assert Amin_sa > 0 "Amin_sa must be positive"
+    @assert Amax_sa > 0 "Amax_sa must be positive"
+    @assert delta_sa > 0 "deltaSA_sa must be positive"
+    @assert 0 < q_sa < 1 "q_sa must be a number between 0 and 1"
+    @assert 0 < gamma_sa < 1 "gamma_sa must be a number between 0 and 1"
+    @assert Nmin_sa > 0 "Nmin_sa must be positive"
+    @assert z_sa > 0 "z_sa must be positive"
+    @assert Cmrl_sa > 0 "Cmrl_sa must be positive"
+    @assert maxiter_sa > 0 "maxiter_sa must be positive"
 
-    v = (z/gamma)^2
-    eps = 1e-06
+    v = (z_sa/gamma_sa)^2
     h = deepcopy(get_h(get_limit(CH)))
     score = zero(h)
     s2    = zero(h)
     D     = zero(h)
 
-    if verbose println("Running SA ...") end
+    if verbose_sa println("Running SA ...") end
 
     # Stage 1 - adaptive gain estimation
     D          = zero(h)
@@ -120,13 +121,13 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
     scorePlus  = zero(h)
     scoreMinus = zero(h)
     Arl0 = get_nominal_value(CH)
-    if verbose println("Running adaptive gain ...") end
-    for i in 1:Nfixed
+    if verbose_sa println("Running adaptive gain ...") end
+    for i in 1:Nfixed_sa
         set_limit!(CH, h)
-        rl, rlPlus, rlMinus = rlsim(CH, maxiter=Cmrl * Arl0 * sqrt(i + Nfixed), deltaSA=deltaSA)
+        rl, rlPlus, rlMinus = rlsim(CH, maxiter=Cmrl_sa * Arl0 * sqrt(i + Nfixed_sa), deltaSA=delta_sa)
         # @show rl, rlPlus, rlMinus, h
         score = calculate_limit_gradient(CH, rl)
-        h = calculate_limit(h, Afixed, score, i, q, eps)
+        h = calculate_limit(h, Afixed_sa, score, i, q_sa, hmin_sa)
         scorePlus = calculate_limit_gradient(CH, rlPlus)
         scoreMinus = calculate_limit_gradient(CH, rlMinus)
         # @show scorePlus, scoreMinus, D
@@ -134,32 +135,32 @@ function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, 
         D = update_gain(D, scorePlus, scoreMinus, i)
     end
 
-    D = calculate_gain(D, Amin, Amax, deltaSA)
+    D = calculate_gain(D, Amin_sa, Amax_sa, delta_sa)
 
-    if verbose println("Estimated gain D = $(D)") end
+    if verbose_sa println("Estimated gain D = $(D)") end
 
 
     # Stage 2 - Stochastic approximations
     hm = zero(h)
     i = 0
     conv = "Maximum number of iterations reached"
-    if verbose println("Running optimization ...") end
-    while i < (maxiter + Nmin)
-        if verbose && (i % floor(maxiter / 50) == 0)
-            println("i: $(i)/$(Int(trunc(maxiter + Nmin)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))")
+    if verbose_sa println("Running optimization ...") end
+    while i < (maxiter_sa + Nmin_sa)
+        if verbose_sa && (i % floor(maxiter_sa / 50) == 0)
+            println("i: $(i)/$(Int(trunc(maxiter_sa + Nmin_sa)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))")
         end
         i += 1
         set_limit!(CH, h)
-        rl, _, _ = rlsim(CH, maxiter=Cmrl * Arl0 * sqrt(i + Nfixed), deltaSA=0.0)
+        rl, _, _ = rlsim(CH, maxiter=Cmrl_sa * Arl0 * sqrt(i + Nfixed_sa), deltaSA=0.0)
         score = calculate_limit_gradient(CH, rl)
-        h = calculate_limit(h, D, score, i, q, eps)
-        if i > Nmin
-            Ndenom = (i - Nmin)
+        h = calculate_limit(h, D, score, i, q_sa, hmin_sa)
+        if i > Nmin_sa
+            Ndenom = (i - Nmin_sa)
             hm = hm + (h - hm) / Ndenom 
             s2 = update_score(s2, score, Ndenom)
         end
-        if (i > Nmin) && (i > v * maximum(s2))
-            if verbose println("i: $(i)/$(Int(trunc(maxiter)))\tConvergence!\n") end
+        if (i > Nmin_sa) && (i > v * maximum(s2))
+            if verbose_sa println("i: $(i)/$(Int(trunc(maxiter_sa)))\tConvergence!\n") end
             conv = "Convergence"
             break
         end
@@ -170,10 +171,10 @@ end
 export saCL!
 
 """
-    saCL(CH::ControlChart; kw...)
+    saCL(CH::ControlChart[; rlsim::Function, settings::OptimizationSettings])
 
 Applies the stochastic approximation algorithm of Capizzi and Masarotto (2016) without modifying the control chart object `CH`.
-See the documentation of `saCL!` for more information about the algorithm and keyword arguments.
+See the documentation of `saCL!` for more information about the algorithm and the keyword arguments.
 
 ### Returns
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
@@ -181,8 +182,8 @@ See the documentation of `saCL!` for more information about the algorithm and ke
 ### References
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
-function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, Nfixed::Int=500, Afixed::Real=0.1, Amin::Real=0.1, Amax::Real=100.0, deltaSA::Real=0.1, q::Real=0.55, gamma::Real=0.02, Nmin::Int=1000, z::Real = 3.0, Cmrl::Real=10.0, maxiter::Real = 4e05, verbose::Bool=true)
+function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptimizationSettings = OptimizationSettings())
     CH_ = shallow_copy_sim(CH)
-    return saCL!(CH_, rlsim = rlsim, Nfixed = Nfixed, Afixed = Afixed, Amin = Amin, Amax = Amax, deltaSA = deltaSA, q = q, gamma = gamma, Nmin = Nmin, z = z, Cmrl = Cmrl, maxiter = maxiter, verbose = verbose)
+    return saCL!(CH_, settings=settings)
 end
 export saCL

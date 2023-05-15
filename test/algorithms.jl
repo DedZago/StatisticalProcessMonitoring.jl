@@ -3,6 +3,12 @@ module TestAlgorithms
 using SPM
 using Test
 
+@testset "settings" begin
+    @testset "constructor" begin
+        OptimizationSettings()
+    end
+end
+
 @testset "control limit opt" begin
     x = randn(500)
     NM = ARL(200)
@@ -12,9 +18,9 @@ using Test
     LIM = TwoSidedCurvedLimit(2.0, f, STAT)
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
-        saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
-        bisectionCL(CH, verbose=false, hmax=3.0, maxiter=1, nsims=10)
-        combinedCL(CH, verbose=false, maxiter_sa=1, maxiter_bi=1, nsims_bi=1)
+        saCL(CH, settings=OptimizationSettings(Nmin_sa=1, maxiter_sa=1, Nfixed_sa=1))
+        bisectionCL(CH, settings=OptimizationSettings(hmax_bi=1.0, maxiter_bi=1, nsims_bi = 10))
+        combinedCL(CH, settings=OptimizationSettings(maxiter_bi=1, maxiter_sa=1, nsims_bi=1))
     end
 
     x = randn(500)
@@ -25,9 +31,9 @@ using Test
     LIM = OneSidedFixedLimit(2.0, true)
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
-        saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
-        bisectionCL(CH, verbose=false, hmax=3.0, maxiter=1, nsims=10)
-        combinedCL(CH, verbose=false, maxiter_sa=1, maxiter_bi=1, nsims_bi=1)
+        saCL(CH, settings=OptimizationSettings(Nmin_sa=1, maxiter_sa=1, Nfixed_sa=1))
+        bisectionCL(CH, settings=OptimizationSettings(hmax_bi=1.0, maxiter_bi=1, nsims_bi = 10))
+        combinedCL(CH, settings=OptimizationSettings(maxiter_bi=1, maxiter_sa=1, nsims_bi=1))
     end
 
     x = randn(500)
@@ -38,9 +44,9 @@ using Test
     LIM = OneSidedFixedLimit(2.0, true)
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
-        saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
-        bisectionCL(CH, verbose=false, hmax=3.0, maxiter=1, nsims=10)
-        combinedCL(CH, verbose=false, maxiter_sa=1, maxiter_bi=1, nsims_bi=1)
+        saCL(CH, settings=OptimizationSettings(Nmin_sa=1, maxiter_sa=1, Nfixed_sa=1))
+        bisectionCL(CH, settings=OptimizationSettings(hmax_bi=1.0, maxiter_bi=1, nsims_bi = 10))
+        combinedCL(CH, settings=OptimizationSettings(maxiter_bi=1, maxiter_sa=1, nsims_bi=1))
     end
 
     x = randn(500)
@@ -52,7 +58,7 @@ using Test
     PH1 = Phase1Data(Bootstrap(), x)
     CH = ControlChart([STAT1, STAT2], [LIM1, LIM2], NM, PH1)
     @testset "call" begin
-        saCL(CH, verbose=false, Nmin=1, maxiter=1, Nfixed=1)
+        saCL(CH, settings=OptimizationSettings(Nmin_sa=1, maxiter_sa=1, Nfixed_sa=1))
     end
 end
 end#module
