@@ -56,14 +56,14 @@ update_score(s2::Float64, score::Real, Ndenom) = s2 + (score * score - s2) / Nde
 update_score(s2::Vector{Float64}, score::AbstractVector, Ndenom) = s2 .+ (score .* score .- s2) ./ Ndenom
 
 """
-    saCL!(CH::ControlChart[; rlsim::Function, settings::OptimizationSettings])
+    saCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the stochastic approximation algorithm described in Capizzi and Masarotto (2016).
 
 ### Inputs
 * `CH` - A control chart.
 * `rlsim` - A function that generates new data with signature `rlsim(CH; maxiter, deltaSA)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information about the signature of the function.
-* `settings` - An `OptimizationSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see Capizzi and Masarotto (2016).
+* `settings` - An `OptSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see Capizzi and Masarotto (2016).
 
 ### Settings
 The following settings control the behaviour of the algorithm: 
@@ -86,7 +86,7 @@ The following settings control the behaviour of the algorithm:
 ### References
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
-function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptimizationSettings = OptimizationSettings())
+function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptSettings = OptSettings())
     @unpack hmin_sa, Nfixed_sa, Afixed_sa, Amin_sa, Amax_sa, delta_sa, q_sa, gamma_sa, Nmin_sa, z_sa, Cmrl_sa, maxiter_sa, verbose_sa = settings
 
     tmp = rlsim(CH; maxiter=1, deltaSA=0.0)
@@ -171,7 +171,7 @@ end
 export saCL!
 
 """
-    saCL(CH::ControlChart[; rlsim::Function, settings::OptimizationSettings])
+    saCL(CH::ControlChart[; rlsim::Function, settings::OptSettings])
 
 Applies the stochastic approximation algorithm of Capizzi and Masarotto (2016) without modifying the control chart object `CH`.
 See the documentation of `saCL!` for more information about the algorithm and the keyword arguments.
@@ -182,7 +182,7 @@ See the documentation of `saCL!` for more information about the algorithm and th
 ### References
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
-function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptimizationSettings = OptimizationSettings())
+function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptSettings = OptSettings())
     CH_ = shallow_copy_sim(CH)
     return saCL!(CH_, settings=settings)
 end

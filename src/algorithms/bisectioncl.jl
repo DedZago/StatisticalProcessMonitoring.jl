@@ -1,14 +1,14 @@
 using Statistics
 
 """
-    bisectionCL!(CH::ControlChart[; rlsim::Function, settings::OptimizationSettings])
+    bisectionCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm (see for instance Qiu, 2013)
 
 ### Inputs
 * `CH` - A control chart.
 * `rlsim` - A function that generates a run length for the control chart with signature `rlsim(CH; maxiter)`. If left unspecified, defaults to `run_sim`. See the help for `run_sim` for more information about the signature of the function.
-* `settings` - An `OptimizationSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see for instance Qiu (2013).
+* `settings` - An `OptSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see for instance Qiu (2013).
 
 ### Accepted settings:
 * `hmin_bi` - The minimum value of the control limit, defaults to `sqrt(eps())`.
@@ -28,7 +28,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function bisectionCL!(CH::ControlChart; rlsim::Function = run_sim, settings::OptimizationSettings = OptimizationSettings())
+function bisectionCL!(CH::ControlChart; rlsim::Function = run_sim, settings::OptSettings = OptSettings())
 
     #TODO: consider trunc_biation of the control chart run lengths
 
@@ -94,7 +94,7 @@ See the documentation of `bisectionCL!` for more information about the algorithm
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function bisectionCL(CH::ControlChart; rlsim::Function = run_sim, settings::OptimizationSettings = OptimizationSettings())
+function bisectionCL(CH::ControlChart; rlsim::Function = run_sim, settings::OptSettings = OptSettings())
     CH_ = shallow_copy_sim(CH)
     return bisectionCL!(CH_; rlsim = rlsim, settings = settings)
 end
@@ -115,14 +115,14 @@ end
 
 
 """
-    combinedCL!(CH::ControlChart[; rlsim::Function, settings::OptimizationSettings])
+    combinedCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm (see for instance Qiu, 2013). The control limit upper bound `hmax_bi` for the bisection algorithm is found using the stochastic approximation algorithm of Capizzi and Masarotto (2016)
 
 ### Inputs
 * `CH` - A control chart.
 * `rlsim` - A function that generates a run length for the control chart with signature `rlsim(CH; maxiter)`. If left unspecified, defaults to `run_sim`. See the help for `run_sim` for more information about the signature of the function.
-* `settings` - An `OptimizationSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see for instance Qiu (2013).
+* `settings` - An `OptSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see for instance Qiu (2013).
 
 ### Accepted settings
 #### Bisection algorithm
@@ -158,9 +158,9 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Capizzi, G., & Masarotto, G. (2016). Efficient control chart calibration by simulated stochastic approximation. IIE Transactions, 48(1), 57-65. https://doi.org/10.1080/0740817X.2015.1055392
 
 """
-function combinedCL!(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptimizationSettings = OptimizationSettings(Nfixed_sa = 200, Nmin_sa = 200, maxiter_sa = 200))
+function combinedCL!(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptSettings = OptSettings(Nfixed_sa = 200, Nmin_sa = 200, maxiter_sa = 200))
     h, _, _ = saCL(CH, rlsim = rlsim, settings=settings)
-    bisectionCL!(CH, rlsim = rlsim, settings = OptimizationSettings(settings, hmax_bi = settings.inflate_bi * 2.0 * h))
+    bisectionCL!(CH, rlsim = rlsim, settings = OptSettings(settings, hmax_bi = settings.inflate_bi * 2.0 * h))
 end
 export combinedCL!
 
@@ -181,7 +181,7 @@ See the documentation of `combinedCL!` for more information about the algorithm 
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 * Capizzi, G., & Masarotto, G. (2016). Efficient control chart calibration by simulated stochastic approximation. IIE Transactions, 48(1), 57-65. https://doi.org/10.1080/0740817X.2015.1055392
 """
-function combinedCL(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptimizationSettings = OptimizationSettings(Nfixed_sa = 200, Nmin_sa = 200, maxiter_sa = 200))
+function combinedCL(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptSettings = OptSettings(Nfixed_sa = 200, Nmin_sa = 200, maxiter_sa = 200))
     CH_ = shallow_copy_sim(CH)
     return combinedCL!(CH_, rlsim=rlsim, settings=settings)
 end
