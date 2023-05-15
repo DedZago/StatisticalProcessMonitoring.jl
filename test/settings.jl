@@ -1,71 +1,136 @@
 using SPM
 using Test
 
-# Test OptSettings struct
+# Unit tests for OptSettings struct
 @testset "OptSettings struct" begin
-    # Happy path
-    @testset "Happy path" begin
-        opt = OptSettings(trace=1, ic_solver=:SA)
-        @test opt.trace == 1
-        @test opt.ic_solver == :SA
-        @test opt.rlsim == run_sim_sa
-        @test opt.hmin_sa == sqrt(eps())
-        @test opt.Nfixed_sa == 500
-        @test opt.Afixed_sa == 0.1
-        @test opt.Amin_sa == 0.1
-        @test opt.Amax_sa == 100.0
-        @test opt.delta_sa == 0.1
-        @test opt.q_sa == 0.55
-        @test opt.gamma_sa == 0.02
-        @test opt.Nmin_sa == 1000
-        @test opt.z_sa == 3.0
-        @test opt.Cmrl_sa == 10.0
-        @test opt.maxiter_sa == 100_000
-        @test opt.hmin_bi == sqrt(eps())
-        @test opt.hmax_bi == 50.0
-        @test opt.maxiter_bi == 50
-        @test opt.nsims_bi == 10_000
-        @test opt.trunc_bi == 10_000
-        @test opt.x_tol_bi == 1e-06
-        @test opt.f_tol_bi == 1.0
-        @test opt.inflate_bi == 1.05
-        @test opt.x_tol_opt == 1e-05
-        @test opt.nsims_opt == 10_000
-        @test opt.maxiter_opt == 100
-        @test opt.method_opt == :LN_BOBYQA
-        @test opt.verbose_opt == 1
-        @test opt.minpar_opt == [-Inf]
-        @test opt.maxpar_opt == [Inf]
-        @test opt.m_grid == 10
+    # Global options
+    @testset "Global options" begin
+        settings = OptSettings(trace = 2, ic_solver = :Bisection)
+        @test settings.trace == 2
+        @test settings.ic_solver == :Bisection
+        @test settings.rlsim === run_sim
     end
 
-    # Edge cases
-    @testset "Edge cases" begin
-        # trace is negative
-        @test_throws AssertionError OptSettings(trace=-1, ic_solver=:SA)
+    # saCL options
+    @testset "saCL options" begin
+        settings = OptSettings(
+            hmin_sa = 0.1,
+            Nfixed_sa = 200,
+            Afixed_sa = 0.2,
+            Amin_sa = 0.05,
+            Amax_sa = 50.0,
+            delta_sa = 0.05,
+            q_sa = 0.6,
+            gamma_sa = 0.01,
+            Nmin_sa = 2000,
+            z_sa = 2.0,
+            Cmrl_sa = 5.0,
+            maxiter_sa = 200_000,
+            verbose_sa = true
+        )
+        @test settings.hmin_sa ≈ 0.1
+        @test settings.Nfixed_sa == 200
+        @test settings.Afixed_sa ≈ 0.2
+        @test settings.Amin_sa ≈ 0.05
+        @test settings.Amax_sa ≈ 50.0
+        @test settings.delta_sa ≈ 0.05
+        @test settings.q_sa ≈ 0.6
+        @test settings.gamma_sa ≈ 0.01
+        @test settings.Nmin_sa == 2000
+        @test settings.z_sa ≈ 2.0
+        @test settings.Cmrl_sa ≈ 5.0
+        @test settings.maxiter_sa == 200_000
+        @test settings.verbose_sa === true
+    end
 
-        # ic_solver is not a symbol
-        @test_throws MethodError OptSettings(trace=1, ic_solver="SA")
+    # Bisection options
+    @testset "Bisection options" begin
+        settings = OptSettings(
+            hmin_bi = 0.01,
+            hmax_bi = 100.0,
+            maxiter_bi = 100,
+            nsims_bi = 20_000,
+            trunc_bi = 5_000,
+            x_tol_bi = 1e-07,
+            f_tol_bi = 2.0,
+            verbose_bi = false,
+            inflate_bi = 1.1
+        )
+        @test settings.hmin_bi ≈ 0.01
+        @test settings.hmax_bi ≈ 100.0
+        @test settings.maxiter_bi == 100
+        @test settings.nsims_bi == 20_000
+        @test settings.trunc_bi == 5_000
+        @test settings.x_tol_bi ≈ 1e-07
+        @test settings.f_tol_bi ≈ 2.0
+        @test settings.verbose_bi === false
+        @test settings.inflate_bi ≈ 1.1
+    end
 
-        # ic_solver is not a valid option
-        @test_throws AssertionError OptSettings(trace=1, ic_solver=:invalid)
+    # Global parameter optimization options
+    @testset "Global parameter optimization options" begin
+        settings = OptSettings(
+            x_tol_opt = 1e-06,
+            nsims_opt = 5_000,
+            maxiter_opt = 500,
+            method_opt = :LN_BOBYQA,
+            verbose_opt = 2,
+            minpar_opt = [0.0, -Inf],
+            maxpar_opt = [10.0, Inf])
 
-        # hmin_sa is negative
-        @test_throws AssertionError OptSettings(trace=1, ic_solver=:SA, hmin_sa=-1.0)
+        @test settings.x_tol_opt ≈ 1e-06
+        @test settings.nsims_opt == 5_000
+        @test settings.maxiter_opt == 500
+        @test settings.method_opt == :LN_BOBYQA
+        @test settings.verbose_opt == 2
+        @test settings.minpar_opt ≈ [0.0, -Inf]
+        @test settings.maxpar_opt ≈ [10.0, Inf]
+    end
 
-        # Nfixed_sa is negative
-        @test_throws AssertionError OptSettings(trace=1, ic_solver=:SA, Nfixed_sa=-1)
+    # Grid settings
+    @testset "Grid settings" begin
+        settings = OptSettings(m_grid = 5)
+        @test settings.m_grid == 5
+    end
 
-        # Afixed_sa is negative
-        @test_throws AssertionError OptSettings(trace=1, ic_solver=:SA, Afixed_sa=-1.0)
+    # SPSA settings
+    @testset "SPSA settings" begin
+        settings = OptSettings(
+            initial_step_size_spsa = 0.1,
+            expected_n_loss_eval_spsa = 500,
+            n_adaptive_gain_spsa = 10,
+            gamma_spsa = 0.05
+        )
+        @test settings.initial_step_size_spsa ≈ 0.1
+        @test settings.expected_n_loss_eval_spsa == 500
+        @test settings.n_adaptive_gain_spsa == 10
+        @test settings.gamma_spsa ≈ 0.05
+    end
 
-        # Amin_sa is negative
-        @test_throws AssertionError OptSettings(trace=1, ic_solver=:SA, Amin_sa=-1.0)
+    # Constraint validations
+    @testset "Constraint validations" begin
+        @test_throws AssertionError OptSettings(trace = -1)
+        @test_throws AssertionError OptSettings(ic_solver = :InvalidSolver)
+        @test_throws AssertionError OptSettings(hmin_sa = 0.0)
+        @test_throws AssertionError OptSettings(Nfixed_sa = 0)
+        @test_throws AssertionError OptSettings(Afixed_sa = 0.0)
+        @test_throws AssertionError OptSettings(Amin_sa = 0.0)
+        @test_throws AssertionError OptSettings(Amax_sa = 0.0)
+        @test_throws AssertionError OptSettings(delta_sa = 0.0)
 
-        # Amax_sa is negative
-        @test_throws AssertionError OptSettings(trace=1, ic_solver=:SA, Amax_sa=-1.0)
+        @test_throws AssertionError OptSettings(hmin_bi = 0.0)
+        @test_throws AssertionError OptSettings(hmin_bi = 1.0, hmax_bi=0.5)
+        @test_throws AssertionError OptSettings(maxiter_bi = 0)
+        @test_throws MethodError OptSettings(nsims_bi = 0.0)
+        @test_throws AssertionError OptSettings(nsims_bi = 0)
+        @test_throws MethodError OptSettings(trunc_bi = 0.0)
+        @test_throws AssertionError OptSettings(trunc_bi = 0)
+        @test_throws AssertionError OptSettings(x_tol_bi= 0.0)
+        @test_throws AssertionError OptSettings(f_tol_bi = 0.0)
 
-        # delta_sa is negative
-        @test_throws AssertionError OptSettings(trace=1, ic_solver=:SA, delta_sa=-1.0)
+        @test_throws AssertionError OptSettings(initial_step_size_spsa = 0.0)
+        @test_throws AssertionError OptSettings(expected_n_loss_eval_spsa = 0)
+        @test_throws AssertionError OptSettings(n_adaptive_gain_spsa = 0)
+        @test_throws AssertionError OptSettings(gamma_spsa = 0.0)
     end
 end

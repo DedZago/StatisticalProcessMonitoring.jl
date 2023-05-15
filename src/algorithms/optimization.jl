@@ -27,6 +27,7 @@ function optimize_parameter!(CH, rlsim_oc; settings = OptSettings())
     end
 
     if method_opt == :Grid
+        #FIXME: test parameter spaces are not unbounded
         set_parameter!(CH, optimize_grid(CH, rlconstr, settings))
     elseif method_opt == :SPSA
         #TODO: implement SPSA
