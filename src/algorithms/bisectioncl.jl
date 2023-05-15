@@ -28,7 +28,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function bisectionCL!(CH::ControlChart; rlsim::Function = run_sim, settings::OptSettings = OptSettings())
+function bisectionCL!(CH::ControlChart; settings::OptSettings = OptSettings())
 
     #TODO: consider trunc_biation of the control chart run lengths
 
@@ -94,9 +94,9 @@ See the documentation of `bisectionCL!` for more information about the algorithm
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function bisectionCL(CH::ControlChart; rlsim::Function = run_sim, settings::OptSettings = OptSettings())
+function bisectionCL(CH::ControlChart; settings::OptSettings = OptSettings())
     CH_ = shallow_copy_sim(CH)
-    return bisectionCL!(CH_; rlsim = rlsim, settings = settings)
+    return bisectionCL!(CH_; settings = settings)
 end
 export bisectionCL
 
@@ -158,7 +158,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Capizzi, G., & Masarotto, G. (2016). Efficient control chart calibration by simulated stochastic approximation. IIE Transactions, 48(1), 57-65. https://doi.org/10.1080/0740817X.2015.1055392
 
 """
-function combinedCL!(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptSettings = OptSettings(Nfixed_sa = 200, Nmin_sa = 200, maxiter_sa = 200))
+function combinedCL!(CH::ControlChart; settings::OptSettings = OptSettings(Nfixed_sa = 200, Nmin_sa = 200, maxiter_sa = 200))
     h, _, _ = saCL(CH, settings=settings)
     bisectionCL!(CH, settings = OptSettings(settings, hmax_bi = settings.inflate_bi * 2.0 * h))
 end
@@ -181,8 +181,8 @@ See the documentation of `combinedCL!` for more information about the algorithm 
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 * Capizzi, G., & Masarotto, G. (2016). Efficient control chart calibration by simulated stochastic approximation. IIE Transactions, 48(1), 57-65. https://doi.org/10.1080/0740817X.2015.1055392
 """
-function combinedCL(CH::ControlChart; rlsim::Function = run_sim_sa, settings::OptSettings = OptSettings(Nfixed_sa = 200, Nmin_sa = 200, maxiter_sa = 200))
+function combinedCL(CH::ControlChart; settings::OptSettings = OptSettings(Nfixed_sa = 200, Nmin_sa = 200, maxiter_sa = 200))
     CH_ = shallow_copy_sim(CH)
-    return combinedCL!(CH_, rlsim=rlsim, settings=settings)
+    return combinedCL!(CH_, settings=settings)
 end
 export combinedCL

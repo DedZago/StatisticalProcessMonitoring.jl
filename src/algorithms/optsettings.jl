@@ -43,5 +43,14 @@ using Parameters
 
     # Grid settings
     m_grid::I = 10
+
+    @assert trace >= 0
+    @assert ic_solver in [:SA, :Bisection, :Combined]
+    @assert hmin_sa > 0
+    @assert Nfixed_sa > 0
+    @assert Afixed_sa > 0
+    @assert Amin_sa > 0
+    @assert Amax_sa > Amin_sa
+    @assert delta_sa > 0
 end
 export OptSettings
