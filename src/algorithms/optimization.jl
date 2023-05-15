@@ -4,12 +4,12 @@
 
 Optimizes the parameter of a simulation `CH` with respect to a given objective function `rlsim_oc`. 
 
-#### Arguments
+### Arguments
 - `CH` : The simulation to optimize.
 - `rlsim_oc` : The objective function.
 - `settings` (optional, default=OptSettings()) : Optimization settings.
 
-#### Returns
+### Returns
 - `get_parameter(CH)` : The optimized parameter.
 """
 function optimize_parameter!(CH, rlsim_oc; settings = OptSettings())
@@ -44,14 +44,13 @@ export optimize_parameter!
 
 Optimize a parameter using the specified CH and rlsim_oc.
 
-### Args:
+### Args
     `CH`: the CH parameter.
     `rlsim_oc`: the rlsim_oc parameter.
     `settings`: the optimization settings.
 
-### Returns:
+### Returns
     The optimized parameter values.
-
 """
 function optimize_parameter(CH, rlsim_oc; settings = OptSettings())
     CH_ = deepcopy(CH)
