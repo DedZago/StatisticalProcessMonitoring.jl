@@ -25,3 +25,9 @@ function optimize_parameter!(CH, rlsim_oc; settings = OptSettings())
     return get_parameter(CH)
 end
 export optimize_parameter!
+
+function optimize_parameter(CH, rlsim_oc; settings = OptSettings())
+    CH_ = deepcopy(CH)
+    optimize_parameter!(CH_, rlsim_oc, settings=settings)
+end
+export optimize_parameter
