@@ -1,4 +1,22 @@
 #FIXME: test
+"""
+    optimize_limit!(CH::ControlChart[; settings = OptSettings()])
+
+Optimizes the control limit of a ControlChart object.
+
+### Args
+* CH (ControlChart): The ControlChart object to optimize.
+* settings (OptSettings, optional): Optimization settings. Defaults to OptSettings().
+
+### Returns
+    The optimized control limit value.
+
+### Raises
+    ValueError: If the optimization method specified in settings is unknown.
+
+### Example
+    optimize_limit!(my_chart, settings=OptSettings(ic_solver=:SA))
+"""
 function optimize_limit!(CH::ControlChart; settings = OptSettings())
     @unpack ic_solver, rlsim = settings
     if ic_solver == :SA
@@ -13,7 +31,24 @@ function optimize_limit!(CH::ControlChart; settings = OptSettings())
 end
 export optimize_limit!
 
-#FIXME: test
+"""
+    optimize_limit(CH::ControlChart[; settings = OptSettings()])
+
+Optimizes the control limit of a ControlChart object, without modifying the original ControlChart object.
+
+### Args
+* CH (ControlChart): The ControlChart object to optimize.
+* settings (OptSettings, optional): Optimization settings. Defaults to OptSettings().
+
+### Returns
+    The optimized control limit value.
+
+### Raises
+    ValueError: If the optimization method specified in settings is unknown.
+
+### Example
+    optimize_limit(my_chart, settings=OptSettings(ic_solver=:SA))
+"""
 function optimize_limit(CH::ControlChart; settings = OptSettings())
     CH_ = deepcopy(CH)
     optimize_limit!(CH_, settings=settings)

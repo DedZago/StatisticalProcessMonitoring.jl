@@ -1,8 +1,14 @@
 """
     optimize_grid(CH::ControlChart, rlconstr::Function, settings::OptSettings)
+Optimizes a control chart by finding the best set of parameters using a grid search.
 
-#FIXME: docstring
-#FIXME: test
+### Args
+- CH: the control chart to optimize.
+- rlconstr: the function that evaluates the OC performance of the control chart.
+- settings: the optimization settings.
+
+### Returns
+- par_current (Vector{Float64}): the best set of parameters found by the optimization algorithm.
 """
 function optimize_grid(CH::ControlChart, rlconstr::Function, settings::OptSettings)
     @unpack minpar_opt, maxpar_opt, maxiter_opt, nsims_opt, m_grid, x_tol_opt = settings

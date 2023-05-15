@@ -3,7 +3,20 @@ using NLopt
 """
     optimize_nlopt(CH::ControlChart, rlconstr::Function, settings::OptSettings)
 
-#FIXME: docstring
+Optimizes the Control Chart design parameter using the NLOpt library.
+
+### Args
+* `CH`: The ControlChart object to be optimized.
+* `rlconstr`: The objective function to be minimized.
+* `settings`: The settings for the optimization process. Includes:
+    - `minpar_opt`: The lower bounds for the parameters.
+    - `maxpar_opt`: The upper bounds for the parameters.
+    - `x_tol_opt`: The relative tolerance for convergence.
+    - `maxiter_opt`: The maximum number of iterations.
+    - `method_opt`: The optimization method to be used.
+
+### Returns
+* `minx::Vector{Float64}`: The set of optimal parameters for the Control Chart.
 """
 function optimize_nlopt(CH::ControlChart, rlconstr::Function, settings::OptSettings)
     @unpack minpar_opt, maxpar_opt, x_tol_opt, maxiter_opt, method_opt = settings
