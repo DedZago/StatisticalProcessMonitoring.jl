@@ -27,7 +27,7 @@ export is_IC
 is_OC(L::AbstractLimit, stat::AbstractStatistic) = !is_IC(L, stat)
 export is_OC
 
-is_IC_vec(L::Vector{AbstractLimit{T}}, stat::Vector{STAT}) where {T, STAT <: AbstractStatistic} = is_IC.(L, stat)
+is_IC_vec(L::Vector{LIM}, stat::Vector{STAT}) where {LIM <: AbstractLimit, STAT <: AbstractStatistic} = is_IC.(L, stat)
 export is_IC_vec
 
 export get_curved_value
