@@ -17,7 +17,7 @@ Optimizes the control limit of a ControlChart object.
 ### Example
     optimize_limit!(my_chart, settings=OptSettings(ic_solver=:SA))
 """
-function optimize_limit!(CH::ControlChart; settings = OptSettings())
+function optimize_limit!(CH::ControlChart; settings::OptSettings = OptSettings())
     @unpack ic_solver, rlsim = settings
     if ic_solver == :SA
         return saCL!(CH, settings = settings)
@@ -49,7 +49,7 @@ Optimizes the control limit of a ControlChart object, without modifying the orig
 ### Example
     optimize_limit(my_chart, settings=OptSettings(ic_solver=:SA))
 """
-function optimize_limit(CH::ControlChart; settings = OptSettings())
+function optimize_limit(CH::ControlChart; settings::OptSettings = OptSettings())
     CH_ = deepcopy(CH)
     optimize_limit!(CH_, settings=settings)
 end
