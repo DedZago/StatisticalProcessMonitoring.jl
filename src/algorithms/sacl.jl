@@ -35,7 +35,7 @@ end
 
 function calculate_limit_gradient(nominal::QRL, rl)
     #FIXME: test
-    return -(float(minimum(rl) <= get_value(nominal)) - nominal.qtl)
+    return -(float(rl <= get_value(nominal)) - nominal.qtl)
 end
 
 function calculate_limit_gradient(nominal::QRL, rl::AbstractVector)
