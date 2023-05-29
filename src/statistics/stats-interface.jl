@@ -1,9 +1,9 @@
 abstract type AbstractStatistic end
 
-get_parameter(::AbstractStatistic) = @NamedTuple{}
-export get_parameter
-set_parameter!(::AbstractStatistic) = @NamedTuple{}
-export set_parameter!
+get_design(::AbstractStatistic) = @NamedTuple{}
+export get_design
+set_design!(::AbstractStatistic) = @NamedTuple{}
+export set_design!
 get_value(stat::AbstractStatistic) = stat.value
 export get_value
 update_statistic!(stat::AbstractStatistic, x) = error("Not implemented for abstract class.")

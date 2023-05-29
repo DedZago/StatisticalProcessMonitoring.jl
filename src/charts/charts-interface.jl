@@ -119,32 +119,32 @@ export get_t
 
 
 """
-    get_parameter(CH::AbstractChart)
+    get_design(CH::AbstractChart)
     
-Get the parameters of the control chart statistic.
+Get the designs of the control chart statistic.
 """
-get_parameter(CH::AbstractChart) = get_parameter(get_statistic(CH))
+get_design(CH::AbstractChart) = get_design(get_statistic(CH))
 
-get_parameter(CH::MultipleControlChart) = get_parameter.(get_statistic(CH))
-export get_parameter
+get_design(CH::MultipleControlChart) = get_design.(get_statistic(CH))
+export get_design
 
 
 """
-    get_parameter(CH::AbstractChart)
+    get_design(CH::AbstractChart)
     
-Set the parameters of the control chart statistic.
+Set the designs of the control chart statistic.
 """
-set_parameter!(CH::AbstractChart, par) = set_parameter!(get_statistic(CH), par)
+set_design!(CH::AbstractChart, par) = set_design!(get_statistic(CH), par)
 
-set_parameter!(CH::MultipleControlChart, par) = set_parameter!.(get_statistic(CH), par)
+set_design!(CH::MultipleControlChart, par) = set_design!.(get_statistic(CH), par)
 
-function set_parameter!(CH::MultipleControlChart, par::Vector{T}) where T
+function set_design!(CH::MultipleControlChart, par::Vector{T}) where T
     @assert length(get_statistic(CH)) == length(par)
     for i in 1:length(get_statistic(CH))
-        set_parameter!(get_statistic(CH)[i], par[i])
+        set_design!(get_statistic(CH)[i], par[i])
     end
 end
-export set_parameter!
+export set_design!
 
 
 

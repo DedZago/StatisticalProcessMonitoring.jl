@@ -8,7 +8,7 @@ struct ProcessControl{D<:AbstractVecOrMat, S, A, L}
 end
 export ProcessControl
 
-Base.show(io::IO, P::ProcessControl) = println(io, "ProcessControl of length $(length(P.stat))")
+Base.show(io::IO, P::ProcessControl) = print(io, "ProcessControl of length $(length(P.stat))\n x: $(typeof(P.x))\n stat: $(typeof(P.stat))\n is_OC: $(typeof(P.is_OC))\n lim: $(typeof(P.lim))")
 
 
 """

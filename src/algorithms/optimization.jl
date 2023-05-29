@@ -1,6 +1,6 @@
 #FIXME: test
 """
-    optimize_parameter!(CH, rlsim_oc[; settings = OptSettings()])
+    optimize_design!(CH, rlsim_oc[; settings = OptSettings()])
 
 Optimizes the parameter of a simulation `CH` with respect to a given objective function `rlsim_oc`. 
 
@@ -12,12 +12,12 @@ Optimizes the parameter of a simulation `CH` with respect to a given objective f
 ### Returns
 - `get_parameter(CH)` : The optimized parameter.
 """
-function optimize_parameter!(CH, rlsim_oc; settings::OptSettings = OptSettings())
+function optimize_design!(CH, rlsim_oc; settings::OptSettings = OptSettings())
     CH_ = shallow_copy_sim(CH)
     @unpack nsims_opt, trace, method_opt = settings
 
     function rlconstr(par::Vector, grad::Vector)::Float64
-        set_parameter!(CH_, par)
+        set_design!(CH_, par)
         optimize_limit!(CH_, settings=settings)
         if trace > 0
             print("$(round.(par, digits=6))\t")
@@ -38,10 +38,10 @@ function optimize_parameter!(CH, rlsim_oc; settings::OptSettings = OptSettings()
     set_h!(get_limit(CH), get_h(get_limit(CH_)))
     return get_parameter(CH)
 end
-export optimize_parameter!
+export optimize_design!
 
 """
-    optimize_parameter(CH, rlsim_oc[; settings = OptSettings()])
+    optimize_design(CH, rlsim_oc[; settings = OptSettings()])
 
 Optimize a parameter using the specified CH and rlsim_oc.
 
@@ -53,8 +53,8 @@ Optimize a parameter using the specified CH and rlsim_oc.
 ### Returns
     The optimized parameter values.
 """
-function optimize_parameter(CH, rlsim_oc; settings::OptSettings = OptSettings())
+function optimize_design(CH, rlsim_oc; settings::OptSettings = OptSettings())
     CH_ = deepcopy(CH)
-    optimize_parameter!(CH_, rlsim_oc, settings=settings)
+    optimize_design!(CH_, rlsim_oc, settings=settings)
 end
-export optimize_parameter
+export optimize_design

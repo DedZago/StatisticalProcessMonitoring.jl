@@ -3,7 +3,7 @@ abstract type UnivariateStatistic <: AbstractStatistic end
 """
     EWMA(λ, value)
 
-Exponentially weighted moving average with parameter `λ` and initial value `value`.
+Exponentially weighted moving average with design parameter `λ` and initial value `value`.
 
 The update mechanism based on a new observation `x` is given by
 
@@ -15,25 +15,27 @@ The update mechanism based on a new observation `x` is given by
 @with_kw mutable struct EWMA{L,V} <: UnivariateStatistic 
     λ::L = 0.1
     value::V = 0.0
+    μ::L = 0.0
+    σ::L = 1.0
     @assert 0.0 < λ <= 1.0
     @assert !isinf(value)
 end
 export EWMA
 
 
-get_parameter(stat::EWMA) = (λ = stat.λ,)
-set_parameter!(stat::EWMA, λ::Float64) = stat.λ = λ
-set_parameter!(stat::EWMA, λ::Vector{Float64}) = stat.λ = λ[1]
+get_design(stat::EWMA) = (λ = stat.λ,)
+set_design!(stat::EWMA, λ::Float64) = stat.λ = λ
+set_design!(stat::EWMA, λ) = stat.λ = λ[1]
 
 
-update_statistic(stat::EWMA, x::Real) = (1.0 - stat.λ) * stat.value + stat.λ * x   
+update_statistic(stat::EWMA, x::Real) = (1.0 - stat.λ) * stat.value + stat.λ * (x - stat.μ)/stat.σ   
 update_statistic!(stat::EWMA, x::Real) = stat.value = update_statistic(stat, x)
 
 
 """
     CUSUM(k, value, upw::Bool)
 
-CUSUM statistic with parameter `k` and initial value `value`.
+CUSUM statistic with design parameter `k` and initial value `value`.
 
 The update mechanism based on a new observation `x` is given by:
 * if `upw == true`, then ``value = \\max\\{0, value + x - k\\}``;
@@ -46,24 +48,74 @@ The update mechanism based on a new observation `x` is given by:
     k::K = 1.0
     value::V = 0.0
     upw::Bool = true
+    μ::K = 0.0
+    σ::K = 1.0
     @assert !isinf(value)
     @assert (k > 0.0) && !isinf(k)
 end
 export CUSUM
 
 
-get_parameter(stat::CUSUM) = (k = stat.k,)
-set_parameter!(stat::CUSUM, k::Float64) = stat.k = k
-set_parameter!(stat::CUSUM, k::Vector{Float64}) = stat.k = k[1]
+get_design(stat::CUSUM) = (k = stat.k,)
+set_design!(stat::CUSUM, k::Float64) = stat.k = k
+set_design!(stat::CUSUM, k) = stat.k = k[1]
 
 
 function update_statistic(stat::CUSUM, x::Real)
     if stat.upw
-        return max(0.0, stat.value + x - stat.k)
+        return max(0.0, stat.value + (x - stat.μ)/stat.σ - stat.k)
     else
-        return min(0.0, stat.value + x + stat.k)
+        return min(0.0, stat.value + (x - stat.μ)/stat.σ + stat.k)
     end
 end
 
 
 update_statistic!(stat::CUSUM, x::Real) = stat.value = update_statistic(stat, x)
+
+
+"""
+    AEWMA(λ, k, value)
+
+Adaptive exponentially weighted moving average with design parameters `λ`, `k`, and initial value `value`.
+
+The update mechanism based on a new observation `x` is given by
+
+``value = (1-phi(e))*value + phi(e) * x``,
+
+where `phi(e)` is a forecast error function based on the Huber function.
+
+### References 
+Capizzi, G. & Masarotto, G. (2003). An Adaptive Exponentially Weighted Moving Average Control Chart. Technometrics, 45(3), 199-207.
+"""
+@with_kw mutable struct AEWMA{L,V} <: UnivariateStatistic 
+    λ::L = 0.1
+    k::L = 3.0
+    value::V = 0.0
+    @assert 0.0 < λ <= 1.0
+    @assert 0.0 < k
+    @assert !isinf(value)
+end
+export AEWMA
+
+
+get_design(stat::AEWMA) = (λ = stat.λ, k = stat.k)
+
+function set_design!(stat::AEWMA, par)
+    @assert length(par) == 2
+    stat.λ = par[1]
+    stat.k = par[2]   
+    return par
+end
+ 
+function huber(e, λ, k)
+    if abs(e) <= k
+        return λ*e
+    elseif e > k
+        return e - (1-λ)*k
+    else
+        return e + (1-λ)*k
+    end
+end
+
+update_statistic(stat::AEWMA, x::Real) = stat.value + huber(x - stat.value, stat.λ, stat.k)
+update_statistic!(stat::AEWMA, x::Real) = stat.value = update_statistic(stat, x)

@@ -29,7 +29,7 @@ end
         @test is_IC(CH)
         @test !is_OC(CH)
         @test get_t(CH) == 0
-        @test get_parameter(CH) == (λ = 0.2,)
+        @test get_design(CH) == (λ = 0.2,)
         @test get_phase1(CH) == PH1
         @test get_limit_value(CH) == 1.0 * [-1, 1]
         @test get_value(CH) == 0.0
@@ -49,8 +49,8 @@ end
         set_limit!(CH, LIM)
         set_limit!(CH, 0.1)
         @test get_limit_value(CH) == 0.1 * [-1, 1]
-        set_parameter!(CH, 0.3)
-        @test get_parameter(CH)[1] == 0.3
+        set_design!(CH, 0.3)
+        @test get_design(CH)[1] == 0.3
         @test get_maxrl(CH) == Inf
         @test new_data(CH) in x
     end
@@ -106,7 +106,7 @@ end
         CH = ControlChart(STAT, LIM, NM, PH1)
         CH = ControlChart(STAT, LIM, NM, PH1, 0)
         @test get_t(CH) == 0
-        @test get_parameter(CH) == (λ = 0.2,)
+        @test get_design(CH) == (λ = 0.2,)
         @test get_phase1(CH) == PH1
         @test get_limit_value(CH) == 0.0
         @test get_limit_value(CH) != get_value(get_limit(CH))
@@ -129,8 +129,8 @@ end
         set_limit!(CH, 0.1)
         @test get_limit_value(CH) != 0.0
         @test get_limit_value(CH) != get_value(get_limit(CH))
-        set_parameter!(CH, 0.3)
-        @test get_parameter(CH)[1] == 0.3
+        set_design!(CH, 0.3)
+        @test get_design(CH)[1] == 0.3
         @test get_maxrl(CH) == Inf
         @test new_data(CH) in x
         
@@ -147,10 +147,10 @@ end
         STAT2 = EWMA(λ = λ2)
         CH = ControlChart([STAT1, STAT2], [deepcopy(LIM), deepcopy(LIM)], NM, PH1)
         @test get_t(CH) == 0
-        @test typeof(get_parameter(CH)) <: Vector
-        @test length(get_parameter(CH)) == 2
-        @test get_parameter(CH)[1] == (λ = λ1,)
-        @test get_parameter(CH)[2] == (λ = λ2,)
+        @test typeof(get_design(CH)) <: Vector
+        @test length(get_design(CH)) == 2
+        @test get_design(CH)[1] == (λ = λ1,)
+        @test get_design(CH)[2] == (λ = λ2,)
         @test get_phase1(CH) == PH1
         @test get_limit_value(CH) == fill(h, 2)
         @test isa(get_limit_value(CH), Vector)
@@ -177,9 +177,9 @@ end
         newh = [0.1, 0.5]
         set_limit!(CH, newh)
         @test get_limit_value(CH) == newh
-        set_parameter!(CH, [0.5, 0.7])
-        @test get_parameter(CH)[1][1] == 0.5
-        @test get_parameter(CH)[2][1] == 0.7
+        set_design!(CH, [0.5, 0.7])
+        @test get_design(CH)[1][1] == 0.5
+        @test get_design(CH)[2][1] == 0.7
         @test get_maxrl(CH) == Inf
         @test new_data(CH) in x
     end
@@ -195,15 +195,15 @@ end
             CH = ControlChart(STAT, LIM, NM, PH1)
             CH_ = shallow_copy_sim(CH)
             knew = 0.2
-            set_parameter!(CH_, knew)
+            set_design!(CH_, knew)
             xnew = 1.0
             update_chart!(CH_, xnew)
             set_limit!(CH_, h*0.5)
             set_nominal!(CH_, ARL(300))
             @test get_value(CH) == val
-            @test get_parameter(CH)[1] == k
+            @test get_design(CH)[1] == k
             @test get_value(CH) != get_value(CH_)
-            @test get_parameter(CH) != get_parameter(CH_)
+            @test get_design(CH) != get_design(CH_)
             @test get_nominal(CH) != get_nominal(CH_)
             @test get_nominal(CH) != get_nominal(CH_)
             update_chart!(CH_, 10^5)
@@ -227,16 +227,16 @@ end
             CH_ = shallow_copy_sim(CH)
             knew = 0.2
             λnew = 0.5
-            set_parameter!(CH_, [knew, λnew])
+            set_design!(CH_, [knew, λnew])
             xnew = 1.0
             update_chart!(CH_, xnew)
             set_limit!(CH_, h*0.5)
             set_nominal!(CH_, ARL(300))
             @test get_value(CH) == [val, val]
-            @test get_parameter(CH)[1][1] == k
-            @test get_parameter(CH)[2][1] == λ
+            @test get_design(CH)[1][1] == k
+            @test get_design(CH)[2][1] == λ
             @test get_value(CH) != get_value(CH_)
-            @test get_parameter(CH) != get_parameter(CH_)
+            @test get_design(CH) != get_design(CH_)
             @test get_nominal(CH) != get_nominal(CH_)
             @test get_nominal(CH) != get_nominal(CH_)
             update_chart!(CH_, 10^5)
