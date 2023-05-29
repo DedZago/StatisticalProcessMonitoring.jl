@@ -15,8 +15,6 @@ The update mechanism based on a new observation `x` is given by
 @with_kw mutable struct EWMA{L,V} <: UnivariateStatistic 
     λ::L = 0.1
     value::V = 0.0
-    μ::L = 0.0
-    σ::L = 1.0
     @assert 0.0 < λ <= 1.0
     @assert !isinf(value)
 end
@@ -28,7 +26,7 @@ set_design!(stat::EWMA, λ::Float64) = stat.λ = λ
 set_design!(stat::EWMA, λ) = stat.λ = λ[1]
 
 
-update_statistic(stat::EWMA, x::Real) = (1.0 - stat.λ) * stat.value + stat.λ * (x - stat.μ)/stat.σ   
+update_statistic(stat::EWMA, x::Real) = (1.0 - stat.λ) * stat.value + stat.λ * x
 update_statistic!(stat::EWMA, x::Real) = stat.value = update_statistic(stat, x)
 
 
@@ -48,8 +46,6 @@ The update mechanism based on a new observation `x` is given by:
     k::K = 1.0
     value::V = 0.0
     upw::Bool = true
-    μ::K = 0.0
-    σ::K = 1.0
     @assert !isinf(value)
     @assert (k > 0.0) && !isinf(k)
 end
@@ -63,9 +59,9 @@ set_design!(stat::CUSUM, k) = stat.k = k[1]
 
 function update_statistic(stat::CUSUM, x::Real)
     if stat.upw
-        return max(0.0, stat.value + (x - stat.μ)/stat.σ - stat.k)
+        return max(0.0, stat.value + x - stat.k)
     else
-        return min(0.0, stat.value + (x - stat.μ)/stat.σ + stat.k)
+        return min(0.0, stat.value + x + stat.k)
     end
 end
 
@@ -96,6 +92,7 @@ Capizzi, G. & Masarotto, G. (2003). An Adaptive Exponentially Weighted Moving Av
     @assert !isinf(value)
 end
 export AEWMA
+#TODO: test
 
 
 get_design(stat::AEWMA) = (λ = stat.λ, k = stat.k)

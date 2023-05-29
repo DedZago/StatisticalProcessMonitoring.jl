@@ -6,7 +6,7 @@ using Test
     λ = 0.1; value = 0.0
     @testset "constructors" begin
         EWMA(λ = 0.2)
-        STAT = EWMA(λ, value, 0.0, 1.0)
+        STAT = EWMA(λ, value)
         @test_throws AssertionError EWMA(λ=-0.1, value=0.0)
         @test_throws AssertionError EWMA(λ=1.2, value=0.0)
         @test_throws AssertionError EWMA(λ=0.1, value=Inf)
@@ -17,7 +17,7 @@ using Test
     end
     @testset "update" begin
         x = 1.0
-        STAT = EWMA(λ, value, 0.0, 1.0)
+        STAT = EWMA(λ, value)
         update_statistic!(STAT, x)
         @test get_value(STAT) == λ * x
         lnew = 0.999
@@ -31,7 +31,7 @@ end
     k = 0.1; value = 0.0
     @testset "constructors" begin
         CUSUM(k = 0.2)
-        STAT = CUSUM(k, value, true, 0.0, 1.0)
+        STAT = CUSUM(k, value, true)
         @test_throws AssertionError CUSUM(k=-0.1)
         @test_throws AssertionError CUSUM(k=0.0)
         @test_throws AssertionError CUSUM(k=Inf)
@@ -43,7 +43,7 @@ end
     end
     @testset "update" begin
         x = 1.0
-        STAT = CUSUM(k, value, true, 0.0, 1.0)
+        STAT = CUSUM(k, value, true)
         update_statistic!(STAT, x)
         @test get_value(STAT) == x - k
         knew = 0.999
