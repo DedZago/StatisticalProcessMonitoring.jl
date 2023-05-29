@@ -47,24 +47,24 @@ function run_sim(CH::AbstractChart, DGP::AbstractPhase1)
 end
 
 """
-    run_sim_sa(CH::AbstractChart, maxiter::Real, deltaSA::Real)
+    run_sim_sa(CH::AbstractChart, maxiter::Real, delta::Real)
 
 Simulates a run length for the control chart `CH` by sampling new data from the Phase I object, to be used by the stochastic approximation algorithm implemented in the `saCL!` function.
 
 ### Inputs
 * `CH` - A control chart.
 * `maxiter` - The maximum value of the run length.
-* `deltaSA` - A value controlling how much the control limit must be shifted for the gain estimation during the first stage.
+* `delta` - A value controlling how much the control limit must be shifted for the gain estimation during the first stage.
 
 ### Returns
-* A `NamedTuple` containing the simulated run length, `rl`, the simulated run length with control limit shifted by `deltaSA`, `rlPlus`, and the simulated run length with control limit shifted by `-deltaSA`, `rlMinus`.
+* A `NamedTuple` containing the simulated run length, `rl`, the simulated run length with control limit shifted by `delta`, `rlPlus`, and the simulated run length with control limit shifted by `-delta`, `rlMinus`.
 """
-function run_sim_sa(CH::AbstractChart; maxiter::Real = Inf, deltaSA::Real = 0.0)
-    @assert deltaSA >= 0.0
+function run_sim_sa(CH::AbstractChart; maxiter::Real = Inf, delta::Real = 0.0)
+    @assert delta >= 0.0
     CH_ = shallow_copy_sim(CH)
     maxrl = min(get_maxrl(CH_), maxiter)
     rl = rlPlus = rlMinus = round(maxrl)
-    notDoneP = notDoneM = (deltaSA > 0.0)
+    notDoneP = notDoneM = (delta > 0.0)
     notDoneRl = true
     notDone = notDoneRl + notDoneM + notDoneP
     i = 0.0
@@ -80,14 +80,14 @@ function run_sim_sa(CH::AbstractChart; maxiter::Real = Inf, deltaSA::Real = 0.0)
             end
         end
         if notDoneP
-            set_limit!(CH_, h + deltaSA)
+            set_limit!(CH_, h + delta)
             if is_OC(CH_)
                 notDoneP = false
                 rlPlus = i
             end
         end
         if notDoneM
-            set_limit!(CH_, h - deltaSA)
+            set_limit!(CH_, h - delta)
             if is_OC(CH_)
                 notDoneM = false
                 rlMinus = i
@@ -96,7 +96,7 @@ function run_sim_sa(CH::AbstractChart; maxiter::Real = Inf, deltaSA::Real = 0.0)
         notDone = notDoneRl + notDoneM + notDoneP
     end
     set_limit!(CH_, h)
-    if deltaSA == 0.0
+    if delta == 0.0
         rlPlus = rl
         rlMinus = rl
     end
@@ -104,16 +104,16 @@ function run_sim_sa(CH::AbstractChart; maxiter::Real = Inf, deltaSA::Real = 0.0)
 end
 
 
-function run_sim_sa(CH::MultipleControlChart; maxiter::Real = Inf, deltaSA::Real = 0.0)
-    @assert deltaSA >= 0.0
+function run_sim_sa(CH::MultipleControlChart; maxiter::Real = Inf, delta::Real = 0.0)
+    @assert delta >= 0.0
     CH_ = shallow_copy_sim(CH)
     maxrl = min(get_maxrl(CH_), maxiter)
     nstat = length(get_statistic(CH_))
     rl = fill(round(maxrl), nstat)
     rlPlus = fill(round(maxrl), nstat)
     rlMinus = fill(round(maxrl), nstat)
-    notDoneP = [deepcopy(deltaSA > 0.0) for _ in 1:nstat]
-    notDoneM = [deepcopy(deltaSA > 0.0) for _ in 1:nstat]
+    notDoneP = [deepcopy(delta > 0.0) for _ in 1:nstat]
+    notDoneM = [deepcopy(delta > 0.0) for _ in 1:nstat]
     notDoneRl = fill(true, nstat)
     notDone = notDoneRl + notDoneM + notDoneP
     i = 0
@@ -133,7 +133,7 @@ function run_sim_sa(CH::MultipleControlChart; maxiter::Real = Inf, deltaSA::Real
                 end
             end
             if notDoneP[j]
-                set_limit!(CH_, h .+ deltaSA)
+                set_limit!(CH_, h .+ delta)
                 OC_vector[:] = is_OC_vec(CH_)
                 if OC_vector[j]
                     notDoneP[j] = false
@@ -141,7 +141,7 @@ function run_sim_sa(CH::MultipleControlChart; maxiter::Real = Inf, deltaSA::Real
                 end
             end
             if notDoneM[j]
-                set_limit!(CH_, h .- deltaSA)
+                set_limit!(CH_, h .- delta)
                 OC_vector[:] = is_OC_vec(CH_)
                 if OC_vector[j]
                     notDoneM[j] = false

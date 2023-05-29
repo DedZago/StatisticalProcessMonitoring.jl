@@ -29,12 +29,10 @@ function calculate_limit_gradient(nominal::ARL, rl)
 end
 
 function calculate_limit_gradient(nominal::ARL, rl::AbstractVector)
-    #FIXME: test
     return (minimum(rl) - get_value(nominal) .+ rl .- Statistics.mean(rl)) ./ get_value(nominal)
 end
 
 function calculate_limit_gradient(nominal::QRL, rl)
-    #FIXME: test
     return -(float(rl <= get_value(nominal)) - nominal.qtl)
 end
 
@@ -43,8 +41,8 @@ function calculate_limit_gradient(nominal::QRL, rl::AbstractVector)
     return -(float(minimum(rl) <= get_value(nominal)) - nominal.qtl) .+ (rl .- mean(rl)) ./ get_value(nominal)
 end
 
-calculate_gain(D::Float64, Amin, Amax, deltaSA) = 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*deltaSA))))
-calculate_gain(D::Vector{Float64}, Amin, Amax, deltaSA) = @. 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*deltaSA))))
+calculate_gain(D::Float64, Amin, Amax, delta) = 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*delta))))
+calculate_gain(D::Vector{Float64}, Amin, Amax, delta) = @. 1.0 / (max(1.0/Amax, min(1.0/Amin, D/(2.0*delta))))
 
 update_gain(D::Float64, scorePlus, scoreMinus, i) = D + (scorePlus - scoreMinus) / i
 update_gain(D::Vector{Float64}, scorePlus, scoreMinus, i) = D .+ (scorePlus - scoreMinus) / i
@@ -62,7 +60,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 
 ### Inputs
 * `CH` - A control chart.
-* `rlsim` - A function that generates new data with signature `rlsim(CH; maxiter, deltaSA)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information about the signature of the function.
+* `rlsim` - A function that generates new data with signature `rlsim(CH; maxiter, delta)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information about the signature of the function.
 * `settings` - An `OptSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see Capizzi and Masarotto (2016).
 
 ### Settings
@@ -71,10 +69,10 @@ The following settings control the behaviour of the algorithm:
 * `Afixed_sa` - The fixed gain during the gain estimation stage.
 * `Amin_sa` - The minimum allowed value of gain.
 * `Amax_sa` - The maximum allowed value of gain.
-* `deltaSA_sa` - The shift in control limit used during the gain estimation stage.
+* `delta_sa` - The shift in control limit used during the gain estimation stage.
 * `q_sa` - The power that controls the denominator in the Robbins-Monro algorithm.
 * `gamma_sa` - The precision parameter for the stopping criterion of the algorithm.
-* `Nmin_sa` - The minimum number of iterations required for the algorithm to end.
+* `Nmin_sa` - The minimum number of iterations to avoid early terminations.
 * `z_sa` - The quantile of the `Normal(0,1)` that controls the probability of the stopping criterion being satisfied.
 * `Cmrl_sa` - The inflation factor for the maximum number of iterations the run length may run for.
 * `maxiter_sa` - Maximum number of iterations before the algorithm is forcibly ended.
@@ -89,7 +87,7 @@ The following settings control the behaviour of the algorithm:
 function saCL!(CH::ControlChart; settings::OptSettings = OptSettings())
     @unpack rlsim, hmin_sa, Nfixed_sa, Afixed_sa, Amin_sa, Amax_sa, delta_sa, q_sa, gamma_sa, Nmin_sa, z_sa, Cmrl_sa, maxiter_sa, verbose_sa = settings
 
-    tmp = rlsim(CH; maxiter=1, deltaSA=0.0)
+    tmp = rlsim(CH; maxiter=1, delta=0.0)
     @assert haskey(tmp, :rl) "rlsim function must have key :rl"
     @assert haskey(tmp, :rlPlus) "rlsim function must have key :rlPlus"
     @assert haskey(tmp, :rlMinus) "rlsim function must have key :rlMinus"
@@ -97,7 +95,7 @@ function saCL!(CH::ControlChart; settings::OptSettings = OptSettings())
     @assert Nfixed_sa > 0 "Nfixed_sa must be positive"
     @assert Amin_sa > 0 "Amin_sa must be positive"
     @assert Amax_sa > 0 "Amax_sa must be positive"
-    @assert delta_sa > 0 "deltaSA_sa must be positive"
+    @assert delta_sa > 0 "delta_sa must be positive"
     @assert 0 < q_sa < 1 "q_sa must be a number between 0 and 1"
     @assert 0 < gamma_sa < 1 "gamma_sa must be a number between 0 and 1"
     @assert Nmin_sa > 0 "Nmin_sa must be positive"
@@ -124,7 +122,7 @@ function saCL!(CH::ControlChart; settings::OptSettings = OptSettings())
     if verbose_sa println("Running adaptive gain ...") end
     for i in 1:Nfixed_sa
         set_limit!(CH, h)
-        rl, rlPlus, rlMinus = rlsim(CH, maxiter=Cmrl_sa * Arl0 * sqrt(i + Nfixed_sa), deltaSA=delta_sa)
+        rl, rlPlus, rlMinus = rlsim(CH, maxiter=Cmrl_sa * Arl0 * sqrt(i + Nfixed_sa), delta=delta_sa)
         # @show rl, rlPlus, rlMinus, h
         score = calculate_limit_gradient(CH, rl)
         h = calculate_limit(h, Afixed_sa, score, i, q_sa, hmin_sa)
@@ -143,23 +141,22 @@ function saCL!(CH::ControlChart; settings::OptSettings = OptSettings())
     # Stage 2 - Stochastic approximations
     hm = zero(h)
     i = 0
+    criter = 0.0
     conv = "Maximum number of iterations reached"
     if verbose_sa println("Running optimization ...") end
-    while i < (maxiter_sa + Nmin_sa)
+    while i < maxiter_sa
         if verbose_sa && (i % floor(maxiter_sa / 50) == 0)
-            println("i: $(i)/$(Int(trunc(maxiter_sa + Nmin_sa)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))")
+            println("i: $(i)/$(Int(trunc(maxiter_sa)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))\tstop: $(criter)")
         end
         i += 1
         set_limit!(CH, h)
-        rl, _, _ = rlsim(CH, maxiter=Cmrl_sa * Arl0 * sqrt(i + Nfixed_sa), deltaSA=0.0)
+        rl, _, _ = rlsim(CH, maxiter=Cmrl_sa * Arl0 * sqrt(i + Nfixed_sa), delta=0.0)
         score = calculate_limit_gradient(CH, rl)
         h = calculate_limit(h, D, score, i, q_sa, hmin_sa)
-        if i > Nmin_sa
-            Ndenom = (i - Nmin_sa)
-            hm = hm + (h - hm) / Ndenom 
-            s2 = update_score(s2, score, Ndenom)
-        end
-        if (i > Nmin_sa) && (i > v * maximum(s2))
+        hm = hm + (h - hm) / i 
+        s2 = update_score(s2, score, i)
+        criter = v * maximum(s2)
+        if (i > Nmin_sa) && (i > criter)
             if verbose_sa println("i: $(i)/$(Int(trunc(maxiter_sa)))\tConvergence!\n") end
             conv = "Convergence"
             break

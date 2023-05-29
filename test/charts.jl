@@ -70,7 +70,7 @@ end
         @test structEqual(get_nominal(CH), get_nominal(CH_))
         @test structEqual(get_sampler(get_phase1(CH)), get_sampler(get_phase1(CH_)))
         @test structEqual(get_data(get_phase1(CH)), get_data(get_phase1(CH_)))
-        rsa = run_sim_sa(CH, maxiter=Inf, deltaSA=0.0)
+        rsa = run_sim_sa(CH, maxiter=Inf, delta=0.0)
         @test length(rsa) == 3
         @test allequal(collect(rsa))
 
@@ -89,7 +89,7 @@ end
         @test structEqual(get_nominal(CH), get_nominal(CH_))
         @test structEqual(get_sampler(get_phase1(CH)), get_sampler(get_phase1(CH_)))
         @test structEqual(get_data(get_phase1(CH)), get_data(get_phase1(CH_)))
-        rsa = run_sim_sa(CH, maxiter=Inf, deltaSA=0.0)
+        rsa = run_sim_sa(CH, maxiter=Inf, delta=0.0)
         @test length(rsa) == 3
         @test allequal(collect(rsa))
     end
