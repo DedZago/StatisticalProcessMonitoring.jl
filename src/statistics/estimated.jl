@@ -13,7 +13,10 @@ set_design!(S::EstimatedStatistic, par) = set_design!(S.stat, par)
     σ::F = 0.0
 end
 export LocationScaleEstimatedStatistic
-#FIXME: test
+#FIXME: test all
+
+LocationScaleEstimatedStatistic(stat, x::AbstractVector) = LocationScaleEstimatedStatistic(stat, mean(x), std(x))
+    
 
 update_statistic(S::EstimatedStatistic, x) = update_statistic(get_statistic(S), (x - S.μ)/S.σ)
 update_statistic!(S::EstimatedStatistic, x) = update_statistic!(get_statistic(S), (x - S.μ)/S.σ)
