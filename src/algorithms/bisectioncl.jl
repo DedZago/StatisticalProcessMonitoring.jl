@@ -45,32 +45,38 @@ function bisectionCL!(CH::ControlChart; settings::OptSettings = OptSettings())
 
     if verbose_bi println("Running bisection with endpoints [$(hmin_bi), $(hmax_bi)] ...") end
 
-    hold = hmax_bi + 1
-    nsims_bi_i = Int(nsims_bi)
-    RLs = Vector{Float64}(undef, nsims_bi_i)
-    target = get_nominal_value(CH)
-    E_RL = 0.0
-    h = deepcopy(get_h(get_limit(CH)))
+    hold = hmax_bi + x_tol_bi + 1.0                 # Starting value to assess convergence
+    nsims_bi_i = Int(nsims_bi)                      # Number of simulated run lengts
+    RLs = Vector{Float64}(undef, nsims_bi_i)        # Vector of simulated run lenghts
+    target = get_nominal_value(CH)                  # Target nominal ARL/QRL/...
+    E_RL = 0.0                                      # Estimated ARL/QRL/...
+    h = deepcopy(get_h(get_limit(CH)))              # Initialize control limit value
     conv = "Maximum number of iterations reached"
     i = 0
     while i < maxiter_bi
         i = i+1
         h = (hmin_bi + hmax_bi) / 2
         if verbose_bi print("i: $(i)/$(maxiter_bi),\th: $(h)\t") end
+        # Set control limit value
         set_limit!(CH, h)
+        # Simulate run lengths 
         for j in 1:nsims_bi_i
             RLs[j] = first(rlsim(CH, maxiter=trunc_bi))
         end
+        # Calculate nominal measure (ARL/QRL/...) 
         E_RL = measure(RLs, CH, verbose=verbose_bi)
+        # Apply bisection algorithm
         if E_RL > target
             hmax_bi = h
         else
             hmin_bi = h
         end
+        # Assess convergence in the run length value
         if abs(E_RL - target) < f_tol_bi
             conv = "Convergence (target)"
             break
         end
+        # Assess convergence in the control limit value
         if abs(hold - h) < x_tol_bi
             conv = "Convergence (limit)"
             break
