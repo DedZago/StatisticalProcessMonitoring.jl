@@ -6,7 +6,6 @@ export new_data!
 struct Bootstrap <: AbstractSampling end
 export Bootstrap
 
-#FIXME:test
 new_data(B::Bootstrap, data::AbstractVector) = data[rand(1:length(data))]
 new_data(B::Bootstrap, data::AbstractMatrix) = view(data, rand(1:size(data)[1]), :)
 new_data!(B::Bootstrap, data::AbstractVecOrMat) = new_data(B, data) 
@@ -15,17 +14,14 @@ new_data!(B::Bootstrap, data::AbstractVecOrMat) = new_data(B, data)
 include("tsboot.jl")
 
 
-#FIXME:test
 abstract type AbstractPhase1 end
 # new_data(PH1::AbstractPhase1) = 
 new_data!(::AbstractPhase1) = error("Not implemented for abstract interface.")
 
-#FIXME:test
 function shallow_copy_sim(PH1::T) where T <: AbstractPhase1
     return T(deepcopy(PH1.samp), PH1.data)
 end
 
-#FIXME:test
 struct Phase1Data{S,T} <: AbstractPhase1
     samp::S
     data::T
@@ -47,7 +43,6 @@ export get_data
 Generates a new observation based on the observed Phase I (in-control) data.
 If it is not overloaded, then it defaults to generating data using a nonparametric bootstrap.
 """
-#FIXME:test
 new_data(P1::Phase1Data) = new_data(P1.samp, P1.data)
 new_data!(P1::Phase1Data) = new_data!(P1.samp, P1.data)
 export new_data!

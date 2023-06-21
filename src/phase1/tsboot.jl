@@ -1,4 +1,5 @@
-#FIXME:test
+using Distributions 
+
 """
     BlockBootstrap{T} <: AbstractSampling
 
@@ -42,11 +43,9 @@ export get_counter
 set_counter!(B::BlockBootstrap, t) = B.t = t
 export set_counter!
 
-#FIXME:test
-new_data(B::BlockBootstrap, data::AbstractVector) = get_block(B)[get_counter(B)]
-new_data(B::BlockBootstrap, data::AbstractMatrix) = view(get_block(B), get_counter(B), :)
+sample_obs(B::BlockBootstrap, data::AbstractVector) = get_block(B)[get_counter(B)]
+sample_obs(B::BlockBootstrap, data::AbstractMatrix) = view(get_block(B), get_counter(B), :)
 
-#FIXME:implement and test
 function update_block!(B::BlockBootstrap, data::AbstractVector)
     set_counter!(B, (get_counter(B) % get_blocksize(B)) + 1)
     if get_counter(B) <= 1
@@ -58,7 +57,6 @@ function update_block!(B::BlockBootstrap, data::AbstractVector)
     end
 end
 
-#FIXME: rewrite so that the block update is more general and can be reused by other methods
 function update_block!(B::BlockBootstrap, data::AbstractMatrix)
     set_counter!(B, get_counter(B) % get_blocksize(B) + 1)
     if get_counter(B) <= 1
@@ -70,16 +68,12 @@ function update_block!(B::BlockBootstrap, data::AbstractMatrix)
     end
 end
 
-#FIXME:test
 function new_data!(B::BlockBootstrap, data::AbstractVecOrMat)
     update_block!(B, data)
-    return new_data(B, data) 
+    return sample_obs(B, data) 
 end
 
 
-#! Implement the stationary bootstrap method
-#TODO: from here
-#FIXME:test
 """
     StationaryBootstrap{T} <: AbstractSampling
 
@@ -120,21 +114,18 @@ get_blocksize(B::StationaryBootstrap) = B.blocksize
 get_counter(B::StationaryBootstrap) = B.t
 set_counter!(B::StationaryBootstrap, t) = B.t = t
 
-#FIXME:test
-new_data(B::StationaryBootstrap, data::AbstractVector) = get_block(B)[get_counter(B)]
-new_data(B::StationaryBootstrap, data::AbstractMatrix) = view(get_block(B), get_counter(B), :)
+sample_obs(B::StationaryBootstrap, data::AbstractVector) = get_block(B)[get_counter(B)]
+sample_obs(B::StationaryBootstrap, data::AbstractMatrix) = view(get_block(B), get_counter(B), :)
 
-#FIXME:test
 function new_data!(B::StationaryBootstrap, data::AbstractVecOrMat)
     update_block!(B, data)
-    return new_data(B, data) 
+    return sample_obs(B, data) 
 end
 
-#FIXME:implement and test
 function update_block!(B::StationaryBootstrap, data::AbstractVector)
     set_counter!(B, (get_counter(B) % length(get_block(B))) + 1)
     if get_counter(B) <= 1
-        ll = rand(Geometric(get_blocksize(B)))
+        ll = rand(1 + Geometric(1.0/get_blocksize(B)))
         set_block!(B, zeros(ll))
         bb = sample(1:length(data))
         for i in 1:ll
@@ -147,7 +138,7 @@ end
 function update_block!(B::StationaryBootstrap, data::AbstractMatrix)
     set_counter!(B, (get_counter(B) % size(get_block(B))[1]) + 1)
     if get_counter(B) <= 1
-        ll = rand(Geometric(get_blocksize(B)))
+        ll = rand(1 + Geometric(1.0/get_blocksize(B)))
         set_block!(B, zeros(ll, size(data)[2]))
         bb = sample(1:length(data))
         for i in 1:ll

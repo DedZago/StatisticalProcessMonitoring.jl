@@ -65,6 +65,28 @@ using Random
         @test !(y in initblock)
         @test get_block(BB) != initblock
     end
+
+    @testset "Stationary (geometric) bootstrap generation" begin
+        Random.seed!(123)
+        expected_blocksize = 10
+        BB = StationaryBootstrap(expected_blocksize, x)
+        y = new_data!(BB, x)
+        idx = findfirst(==(y), x)
+        initblock = deepcopy(x[idx:(idx+length(get_block(BB))-1)])
+        @test get_block(BB) == initblock
+        for i in 1:(length(get_block(BB)) - 1)
+            @test y == x[idx + i - 1]
+            @test get_counter(BB) == i
+            @test get_block(BB) == initblock
+            y = new_data!(BB, x)
+        end
+        y = new_data!(BB, x)
+        @test get_counter(BB) == 1
+        @test length(get_block(BB)) != length(initblock)
+        @test !(y in initblock)
+        @test get_block(BB) != initblock
+    end
+
     @testset "Phase 1" begin
         PH1 = Phase1Data(Bootstrap(), x)
         y = new_data(PH1)
