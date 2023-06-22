@@ -4,8 +4,9 @@ abstract type EstimatedStatistic <: AbstractStatistic end
 
 get_statistic(S::EstimatedStatistic) = S.stat
 get_value(S::EstimatedStatistic) = get_value(get_statistic(S))
-get_design(S::EstimatedStatistic) = get_design(S.stat)
-set_design!(S::EstimatedStatistic, par) = set_design!(S.stat, par)
+get_design(S::EstimatedStatistic) = get_design(get_statistic(S))
+set_design!(S::EstimatedStatistic, par) = set_design!(get_statistic(S), par)
+get_maxrl(S::EstimatedStatistic) = get_maxrl(get_statistic(S))
 
 @with_kw mutable struct LocationScaleEstimatedStatistic{S, F} <: EstimatedStatistic
     stat::S
@@ -13,7 +14,6 @@ set_design!(S::EstimatedStatistic, par) = set_design!(S.stat, par)
     σ::F = 0.0
 end
 export LocationScaleEstimatedStatistic
-#FIXME: test all
 
 LocationScaleEstimatedStatistic(stat, x::AbstractVector) = LocationScaleEstimatedStatistic(stat, mean(x), std(x))
     

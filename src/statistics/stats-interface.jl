@@ -2,7 +2,7 @@ abstract type AbstractStatistic end
 
 get_design(::AbstractStatistic) = @NamedTuple{}
 export get_design
-set_design!(::AbstractStatistic) = @NamedTuple{}
+set_design!(::AbstractStatistic) = error("Not implemented for abstract class.") 
 export set_design!
 get_value(stat::AbstractStatistic) = stat.value
 export get_value

@@ -1,6 +1,8 @@
 module TestStatistics
 using SPM
 using Test
+using Random
+using StatsBase
 
 @testset "EWMA" begin
     λ = 0.1; value = 0.0
@@ -52,5 +54,36 @@ end
     end
 end
 
+@testset "Estimated statistics" begin
+    @testset "Location scale" begin
+        @testset "EWMA" begin
+            Random.seed!(123)
+            x = randn(500)
+            E = EWMA(λ = 0.2)
+            STAT = LocationScaleEstimatedStatistic(E, x)
+            @test get_design(STAT) == get_design(E)
+            @test get_statistic(STAT) == E 
+            @test get_value(STAT) == get_value(E)
+            @test get_maxrl(STAT) == get_maxrl(E)
+            xnew = randn()
+            znew = (xnew - mean(x)) / std(x)
+            @test update_statistic(STAT, xnew) == update_statistic(E, znew)
+        end
+
+        @testset "CUSUM" begin
+            Random.seed!(123)
+            x = randn(500)
+            E = CUSUM(k = 0.5)
+            STAT = LocationScaleEstimatedStatistic(E, x)
+            @test get_design(STAT) == get_design(E)
+            @test get_statistic(STAT) == E 
+            @test get_value(STAT) == get_value(E)
+            @test get_maxrl(STAT) == get_maxrl(E)
+            xnew = randn()
+            znew = (xnew - mean(x)) / std(x)
+            @test update_statistic(STAT, xnew) == update_statistic(E, znew)
+        end
+    end
+end
 
 end#module
