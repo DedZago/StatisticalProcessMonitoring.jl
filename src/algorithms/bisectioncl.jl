@@ -30,7 +30,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 """
 function bisectionCL!(CH::ControlChart; settings::OptSettings = OptSettings())
 
-    #TODO: consider trunc_biation of the control chart run lengths
+    #TODO: consider trunc_bi of the control chart run lengths when calculating the control limit?
 
     @unpack rlsim, hmin_bi, hmax_bi, maxiter_bi, nsims_bi, trunc_bi, x_tol_bi, f_tol_bi, verbose_bi = settings
 

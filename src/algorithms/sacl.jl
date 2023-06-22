@@ -24,7 +24,6 @@ end
 export calculate_limit_gradient
 
 function calculate_limit_gradient(nominal::ARL, rl)
-    #FIXME: test
     return (rl - get_value(nominal)) / get_value(nominal)
 end
 

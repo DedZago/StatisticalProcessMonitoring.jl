@@ -8,7 +8,7 @@ Optimizes a control chart by finding the best set of parameters using a grid sea
 - settings: the optimization settings.
 
 ### Returns
-- par_current (Vector{Float64}): the best set of parameters found by the optimization algorithm.
+- par_current (Vector{Float64}): the optimal set of parameters found by the optimization algorithm.
 """
 function optimize_grid(CH::ControlChart, rlconstr::Function, settings::OptSettings)
     @unpack minpar_opt, maxpar_opt, maxiter_opt, nsims_opt, m_grid, x_tol_opt = settings
