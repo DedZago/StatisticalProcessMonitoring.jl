@@ -43,8 +43,8 @@ export get_counter
 set_counter!(B::BlockBootstrap, t) = B.t = t
 export set_counter!
 
-sample_obs(B::BlockBootstrap, data::AbstractVector) = get_block(B)[get_counter(B)]
-sample_obs(B::BlockBootstrap, data::AbstractMatrix) = view(get_block(B), get_counter(B), :)
+new_data(B::BlockBootstrap, data::AbstractVector) = get_block(B)[get_counter(B)]
+new_data(B::BlockBootstrap, data::AbstractMatrix) = view(get_block(B), get_counter(B), :)
 
 function update_block!(B::BlockBootstrap, data::AbstractVector)
     set_counter!(B, (get_counter(B) % get_blocksize(B)) + 1)
@@ -70,7 +70,7 @@ end
 
 function new_data!(B::BlockBootstrap, data::AbstractVecOrMat)
     update_block!(B, data)
-    return sample_obs(B, data) 
+    return new_data(B, data) 
 end
 
 
@@ -114,12 +114,12 @@ get_blocksize(B::StationaryBootstrap) = B.blocksize
 get_counter(B::StationaryBootstrap) = B.t
 set_counter!(B::StationaryBootstrap, t) = B.t = t
 
-sample_obs(B::StationaryBootstrap, data::AbstractVector) = get_block(B)[get_counter(B)]
-sample_obs(B::StationaryBootstrap, data::AbstractMatrix) = view(get_block(B), get_counter(B), :)
+new_data(B::StationaryBootstrap, data::AbstractVector) = get_block(B)[get_counter(B)]
+new_data(B::StationaryBootstrap, data::AbstractMatrix) = view(get_block(B), get_counter(B), :)
 
 function new_data!(B::StationaryBootstrap, data::AbstractVecOrMat)
     update_block!(B, data)
-    return sample_obs(B, data) 
+    return new_data(B, data) 
 end
 
 function update_block!(B::StationaryBootstrap, data::AbstractVector)
