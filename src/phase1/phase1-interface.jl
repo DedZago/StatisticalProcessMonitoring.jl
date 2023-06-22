@@ -22,6 +22,11 @@ function shallow_copy_sim(PH1::T) where T <: AbstractPhase1
     return T(deepcopy(PH1.samp), PH1.data)
 end
 
+#TODO: see if an abstraction is needed to avoid defining shallow_copy_sim for every type <: AbstractPhase1 that has to be defined.
+function shallow_copy_sim(PH1::Phase2Distribution) 
+    return Phase2Distribution(deepcopy(PH1.dist))
+end
+
 """
 `Phase1Data` is a struct that holds the reference sample data and a sampling method to generate new observations from the reference data. 
 
@@ -33,9 +38,9 @@ end
 x = randn(500)
 PH1 = Phase1Data(data = x)
 """
-@with_kw struct Phase1Data{T,S <: AbstractSampling} <: AbstractPhase1
-    data::T
+@with_kw struct Phase1Data{S <: AbstractSampling, T} <: AbstractPhase1
     samp::S = Bootstrap()
+    data::T
 end
 export Phase1Data
 
