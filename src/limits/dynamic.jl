@@ -33,7 +33,7 @@ export TwoSidedBootstrapLimit
     get_value(L::BootstrapLimit, NM::ARL)
     get_value(L::BootstrapLimit, NM::QRL)
 """
-update_value!(L::BootstrapLimit, NM::ARL) = update_value!(L, 1.0/get_value(NM)) #FIXME: test
+update_value!(L::BootstrapLimit, NM::ARL) = update_value!(L, 1.0/get_value(NM))
 
 function update_value!(L::BootstrapLimit, NM::QRL)
     @assert NM.qtl == 0.5 "Dynamic limits for `QRL` objects are only implemented for the median."
@@ -83,6 +83,6 @@ end
 
 function resample_sims!(L::BootstrapLimit)
     idx = [compare_values(get_value(L), L.sim[b], L) for b in 1:length(L.sim)]
-    L.sim[:] = StatsBase.sample(view(L.sim, idx), length(L.sim))
+    L.sim .= StatsBase.sample(view(L.sim, idx), length(L.sim))
 end
 export resample_sims!
