@@ -20,7 +20,7 @@ Optimizes the Control Chart design parameter using the NLOpt library.
 """
 function optimize_nlopt(CH::ControlChart, rlconstr::Function, settings::OptSettings)
     @unpack minpar_opt, maxpar_opt, x_tol_opt, maxiter_opt, method_opt = settings
-    par0 = collect(get_parameter(CH))
+    par0 = collect(get_design(CH))
     opt = NLopt.Opt(method_opt, length(par0))
     opt.lower_bounds = minpar_opt
     opt.upper_bounds = maxpar_opt
