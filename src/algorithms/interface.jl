@@ -1,4 +1,3 @@
-#FIXME: test
 """
     optimize_limit!(CH::ControlChart[; settings = OptSettings()])
 

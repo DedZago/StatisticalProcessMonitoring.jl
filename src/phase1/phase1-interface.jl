@@ -70,8 +70,8 @@ A struct representing Phase II observations, it is used to generate and monitor 
 A method `rand(::T)` is required to generate new data from `dist`.
 
 # Example
-DGP = Phase2Distribution(Normal(0,1))
-new_data(DGP)
+    DGP = Phase2Distribution(Normal(0,1))
+    new_data(DGP)
 """
 struct Phase2Distribution{T} <: AbstractPhase1
     dist::T
