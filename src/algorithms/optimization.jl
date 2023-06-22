@@ -1,4 +1,3 @@
-#FIXME: test
 """
     optimize_design!(CH, rlsim_oc[; settings = OptSettings()])
 
@@ -10,7 +9,7 @@ Optimizes the parameter of a simulation `CH` with respect to a given objective f
 - `settings` (optional, default=OptSettings()) : Optimization settings.
 
 ### Returns
-- `get_parameter(CH)` : The optimized parameter.
+- `get_design(CH)` : The optimized parameter.
 """
 function optimize_design!(CH, rlsim_oc; settings::OptSettings = OptSettings())
     CH_ = shallow_copy_sim(CH)
@@ -27,16 +26,15 @@ function optimize_design!(CH, rlsim_oc; settings::OptSettings = OptSettings())
     end
 
     if method_opt == :Grid
-        #FIXME: test parameter spaces are not unbounded
-        set_parameter!(CH, optimize_grid(CH, rlconstr, settings))
+        set_design!(CH, optimize_grid(CH, rlconstr, settings))
     elseif method_opt == :SPSA
         #TODO: implement SPSA
-        set_parameter!(CH, optimize_SPSA(CH, rlconstr, settings))
+        set_design!(CH, optimize_SPSA(CH, rlconstr, settings))
     else
-        set_parameter!(CH, optimize_nlopt(CH, rlconstr, settings))
+        set_design!(CH, optimize_nlopt(CH, rlconstr, settings))
     end
     set_h!(get_limit(CH), get_h(get_limit(CH_)))
-    return get_parameter(CH)
+    return get_design(CH)
 end
 export optimize_design!
 
