@@ -22,9 +22,20 @@ function shallow_copy_sim(PH1::T) where T <: AbstractPhase1
     return T(deepcopy(PH1.samp), PH1.data)
 end
 
-struct Phase1Data{S,T} <: AbstractPhase1
-    samp::S
+"""
+`Phase1Data` is a struct that holds the reference sample data and a sampling method to generate new observations from the reference data. 
+
+# Arguments
+- `data`: The data obtained by phase 1.
+- `samp = Bootstrap()`: The sampling method to be used to generate new observations. Defaults to `Bootstrap()`.
+
+# Examples
+x = randn(500)
+PH1 = Phase1Data(data = x)
+"""
+@with_kw struct Phase1Data{T,S <: AbstractSampling} <: AbstractPhase1
     data::T
+    samp::S = Bootstrap()
 end
 export Phase1Data
 
@@ -49,9 +60,23 @@ export new_data!
 
 
 ################# TEST TRUE DGP #################
+
+"""
+    Phase2Distribution{T} <: AbstractPhase1
+
+A struct representing Phase II observations, it is used to generate and monitor new data from the true data-generating process. It contains a field `dist` of type `T`, which represents the underlying data-generating process.
+
+# Notes
+A method `rand(::T)` is required to generate new data from `dist`.
+
+# Example
+DGP = Phase2Distribution(Normal(0,1))
+new_data(DGP)
+"""
 struct Phase2Distribution{T} <: AbstractPhase1
     dist::T
 end
-export Phase2Distribution
+export Phase2Distribution #FIXME: test
 
 new_data(DGP::Phase2Distribution) = rand(DGP.dist)
+new_data!(DGP::Phase2Distribution) = rand(DGP.dist)
