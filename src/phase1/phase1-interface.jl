@@ -81,7 +81,7 @@ A method `rand(::T)` is required to generate new data from `dist`.
 struct Phase2Distribution{T} <: AbstractPhase1
     dist::T
 end
-export Phase2Distribution #FIXME: test
+export Phase2Distribution
 
 new_data(DGP::Phase2Distribution) = rand(DGP.dist)
 new_data!(DGP::Phase2Distribution) = rand(DGP.dist)
