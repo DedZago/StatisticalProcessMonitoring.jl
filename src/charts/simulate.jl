@@ -23,18 +23,18 @@ end
 export run_sim
 
 """
-    run_sim(CH::AbstractChart, DGP::AbstractPhase1)
+    run_sim(CH::AbstractChart, DGP::AbstractPhase2)
 
 Simulates a run length for the control chart `CH` by sampling new data from the provided data-generating process `DGP`.
 
 ### Inputs
 * `CH` - A control chart.
-* `DGP` - An AbstractPhase1 object.
+* `DGP` - An AbstractPhase2 object.
 
 ### Returns
 * An `Int`.
 """
-function run_sim(CH::AbstractChart, DGP::AbstractPhase1)
+function run_sim(CH::AbstractChart, DGP::AbstractPhase2)
     CH_ = shallow_copy_sim(CH)
     maxrl = get_maxrl(CH_)
     i = 0.0

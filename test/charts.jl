@@ -20,7 +20,7 @@ end
 @testset "Charts" begin
     x = randn(100)
     NM = ARL(200)
-    PH1 = Phase1Data(Bootstrap(), x)
+    PH1 = Phase2(Bootstrap(), x)
     LIM = TwoSidedFixedLimit(1.0)
     STAT = EWMA(λ = 0.2)
     @testset "constructor" begin
@@ -58,7 +58,7 @@ end
     @testset "run_sim" begin
         x = randn(100)
         NM = ARL(200)
-        PH1 = Phase1Data(Bootstrap(), x)
+        PH1 = Phase2(Bootstrap(), x)
         LIM = TwoSidedFixedLimit(1.0)
         STAT = EWMA(λ = 0.2)
         CH = ControlChart(STAT, LIM, NM, PH1)
@@ -77,7 +77,7 @@ end
         # --- Block bootstrap
         x = randn(100)
         NM = ARL(200)
-        PH1 = Phase1Data(BlockBootstrap(5, x), x)
+        PH1 = Phase2(BlockBootstrap(5, x), x)
         LIM = TwoSidedFixedLimit(1.0)
         STAT = EWMA(λ = 0.2)
         CH = ControlChart(STAT, LIM, NM, PH1)
@@ -96,7 +96,7 @@ end
 
     x = randn(100)
     NM = ARL(200)
-    PH1 = Phase1Data(Bootstrap(), x)
+    PH1 = Phase2(Bootstrap(), x)
     λ = 0.2
     STAT = EWMA(λ = λ)
     f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
@@ -138,7 +138,7 @@ end
 
     @testset "Multiple charts" begin
         NM = QRL(200, 0.2)
-        PH1 = Phase1Data(Bootstrap(), x)
+        PH1 = Phase2(Bootstrap(), x)
         h = 1.0
         LIM = OneSidedFixedLimit(h, true)
         λ1 = 0.2
@@ -186,7 +186,7 @@ end
     @testset "shallow copy" begin
         @testset "ControlChart" begin
             NM = ARL(200)
-            PH1 = Phase1Data(Bootstrap(), x)
+            PH1 = Phase2(Bootstrap(), x)
             h = 1.0
             LIM = TwoSidedFixedLimit(h)
             k = 0.5
@@ -215,7 +215,7 @@ end
 
         @testset "MultipleChart" begin
             NM = ARL(200)
-            PH1 = Phase1Data(Bootstrap(), x)
+            PH1 = Phase2(Bootstrap(), x)
             h = 1.0
             LIM = TwoSidedFixedLimit(h)
             k = 0.5

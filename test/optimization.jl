@@ -9,7 +9,7 @@ using LinearAlgebra
     Random.seed!(123)
     x = randn(100)
     NM = ARL(200)
-    PH1 = Phase1Data(Bootstrap(), x)
+    PH1 = Phase2(Bootstrap(), x)
     LIM = TwoSidedFixedLimit(1.0)
     λ0 = 0.2
     STAT = EWMA(λ = λ0)

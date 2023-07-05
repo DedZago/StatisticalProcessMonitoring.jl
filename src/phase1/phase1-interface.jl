@@ -14,55 +14,55 @@ new_data!(B::Bootstrap, data::AbstractVecOrMat) = new_data(B, data)
 include("tsboot.jl")
 
 
-abstract type AbstractPhase1 end
-# new_data(PH1::AbstractPhase1) = 
-new_data!(::AbstractPhase1) = error("Not implemented for abstract interface.")
+abstract type AbstractPhase2 end
+# new_data(PH2::AbstractPhase2) = 
+new_data!(::AbstractPhase2) = error("Not implemented for abstract interface.")
 
-function shallow_copy_sim(PH1::T) where T <: AbstractPhase1
-    return T(deepcopy(PH1.samp), PH1.data)
+function shallow_copy_sim(PH2::T) where T <: AbstractPhase2
+    return T(deepcopy(PH2.samp), PH2.data)
 end
 
 """
-`Phase1Data` is a struct that holds the reference sample data and a sampling method to generate new observations from the reference data. 
+`Phase2` is a struct that holds the reference sample data and a sampling method to generate new observations from the reference data. 
 
 # Arguments
-- `data`: The data obtained by phase 1.
 - `samp = Bootstrap()`: The sampling method to be used to generate new observations. Defaults to `Bootstrap()`.
+- `data`: The data obtained after phase 1.
 
 # Examples
 x = randn(500)
-PH1 = Phase1Data(data = x)
+PH2 = Phase2(data = x)
 """
-@with_kw struct Phase1Data{S <: AbstractSampling, T} <: AbstractPhase1
+@with_kw struct Phase2{S <: AbstractSampling, T} <: AbstractPhase2
     samp::S = Bootstrap()
     data::T
 end
-export Phase1Data
+export Phase2
 
-get_sampler(PH1::Phase1Data) = PH1.samp
+get_sampler(PH2::Phase2) = PH2.samp
 export get_sampler
-get_data(PH1::Phase1Data) = PH1.data
+get_data(PH2::Phase2) = PH2.data
 export get_data
 
 
 
 """
-    new_data(P1::Phase1Data{S,T})
-    new_data(P1::Phase1Data{S,AbstractVector})
-    new_data(P1::Phase1Data{S,AbstractMatrix})
+    new_data(PH2::Phase2{S,T})
+    new_data(PH2::Phase2{S,AbstractVector})
+    new_data(PH2::Phase2{S,AbstractMatrix})
 
 Generates a new observation based on the observed Phase I (in-control) data.
 If it is not overloaded, then it defaults to generating data using a nonparametric bootstrap.
 """
-new_data(P1::Phase1Data) = new_data(P1.samp, P1.data)
-new_data!(P1::Phase1Data) = new_data!(P1.samp, P1.data)
+new_data(PH2::Phase2) = new_data(PH2.samp, PH2.data)
+new_data!(PH2::Phase2) = new_data!(PH2.samp, PH2.data)
 export new_data!
 
 
 ################# TEST TRUE DGP #################
 
 """
-    Phase2Distribution{T} <: AbstractPhase1
+    Phase2Distribution{T} <: AbstractPhase2
 
 A struct representing Phase II observations, it is used to generate and monitor new data from the true data-generating process. It contains a field `dist` of type `T`, which represents the underlying data-generating process.
 
@@ -73,15 +73,15 @@ A method `rand(::T)` is required to generate new data from `dist`.
     DGP = Phase2Distribution(Normal(0,1))
     new_data(DGP)
 """
-struct Phase2Distribution{T} <: AbstractPhase1
+struct Phase2Distribution{T} <: AbstractPhase2
     dist::T
 end
 export Phase2Distribution
 
-new_data(DGP::Phase2Distribution) = rand(DGP.dist)
-new_data!(DGP::Phase2Distribution) = rand(DGP.dist)
+new_data(PH2::Phase2Distribution) = rand(PH2.dist)
+new_data!(PH2::Phase2Distribution) = rand(PH2.dist)
 
-#TODO: see if an abstraction is needed to avoid defining shallow_copy_sim for every type <: AbstractPhase1 that has to be defined.
-function shallow_copy_sim(PH1::Phase2Distribution) 
-    return Phase2Distribution(deepcopy(PH1.dist))
+#TODO: see if an abstraction is needed to avoid defining shallow_copy_sim for every type <: AbstractPhase2 that has to be defined.
+function shallow_copy_sim(PH2::Phase2Distribution) 
+    return Phase2Distribution(deepcopy(PH2.dist))
 end

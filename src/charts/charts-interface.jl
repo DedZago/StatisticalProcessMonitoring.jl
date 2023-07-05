@@ -13,10 +13,10 @@ mutable struct ControlChart{STAT, LIM, NOM, PH1} <: AbstractChart{STAT, LIM, NOM
     phase1::PH1
     t::Int
 
-    ControlChart(stat::S, limit::L, nominal::N, phase1::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = new{S,L,N,P}(stat, limit, nominal, phase1, t)
-    ControlChart(stat::S, limit::L, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = new{S,L,N,P}(stat, limit, nominal, phase1, 0)
-    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = new{Vector{S},Vector{L},N,P}(stat, limit, nominal, phase1, 0)
-    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase1::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase1} = new{Vector{S},Vector{L},N,P}(stat, limit, nominal, phase1, t)
+    ControlChart(stat::S, limit::L, nominal::N, phase1::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(stat, limit, nominal, phase1, t)
+    ControlChart(stat::S, limit::L, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(stat, limit, nominal, phase1, 0)
+    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{Vector{S},Vector{L},N,P}(stat, limit, nominal, phase1, 0)
+    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase1::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{Vector{S},Vector{L},N,P}(stat, limit, nominal, phase1, t)
 end
 export ControlChart
 
@@ -227,11 +227,11 @@ function set_limit!(CH::MultipleControlChart, h::Vector{Float64})
 end
 
 """
-    set_phase1!(CH::AbstractChart, phase1::AbstractPhase1)
+    set_phase1!(CH::AbstractChart, phase1::AbstractPhase2)
 
 Set the Phase 1 information of a control chart.
 """
-function set_phase1!(CH::C, phase1::PH1) where C <: AbstractChart where PH1 <: AbstractPhase1
+function set_phase1!(CH::C, phase1::PH1) where C <: AbstractChart where PH1 <: AbstractPhase2
     CH.phase1 = phase1
     return phase1
 end

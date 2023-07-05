@@ -3,7 +3,7 @@ using SPM
 using Test
 using Random
 
-@testset "Phase1Data" begin
+@testset "Phase2" begin
     Random.seed!(123)
     x = randn(1000)
     xmat = randn(15, 5)
@@ -88,18 +88,18 @@ using Random
     end
 
     @testset "Phase 1" begin
-        PH1 = Phase1Data(Bootstrap(), x)
+        PH1 = Phase2(Bootstrap(), x)
         y = new_data(PH1)
         @test y in x
-        PH1 = Phase1Data(Bootstrap(), xmat)
+        PH1 = Phase2(Bootstrap(), xmat)
         y = new_data(PH1)
         @test y in eachrow(xmat)
 
         blocksize = 10
-        PH1 = Phase1Data(BlockBootstrap(blocksize, x), x)
+        PH1 = Phase2(BlockBootstrap(blocksize, x), x)
         y = new_data!(PH1)
         @test y in x
-        PH1 = Phase1Data(BlockBootstrap(blocksize, xmat), xmat)
+        PH1 = Phase2(BlockBootstrap(blocksize, xmat), xmat)
         y = new_data!(PH1)
         @test y in eachrow(xmat)
     end
