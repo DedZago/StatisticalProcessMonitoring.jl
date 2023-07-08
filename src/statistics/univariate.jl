@@ -1,4 +1,5 @@
 abstract type UnivariateStatistic <: AbstractStatistic end
+export UnivariateStatistic
 
 """
     EWMA(λ, value)
