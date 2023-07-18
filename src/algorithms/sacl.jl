@@ -145,7 +145,7 @@ function saCL!(CH::ControlChart; settings::OptSettings = OptSettings())
     if verbose_sa println("Running optimization ...") end
     while i < maxiter_sa
         if verbose_sa && (i % floor(maxiter_sa / 50) == 0)
-            println("i: $(i)/$(Int(trunc(maxiter_sa)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))\tstop: $(criter)")
+            println("i: $(i)/$(Int(trunc(maxiter_sa)))\th: $(round.(h, digits=5))\thm: $(round.(hm, digits=5))\tstop: $(Int(trunc(criter)))")
         end
         i += 1
         set_limit!(CH, h)
