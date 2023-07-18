@@ -1,4 +1,5 @@
 abstract type ResidualStatistic <: AbstractStatistic end
+export ResidualStatistic
 
 residual(x, S::ResidualStatistic) = error("Not implemented for abstract class")
 
