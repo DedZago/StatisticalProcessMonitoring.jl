@@ -1,7 +1,8 @@
 abstract type ResidualStatistic <: AbstractStatistic end
 export ResidualStatistic
 
-residual(x, S::ResidualStatistic) = error("Not implemented for abstract class")
+residual!(x, S::ResidualStatistic) = error("Not implemented for abstract class")
+export residual!
 
 ################ Control charts based on residuals ################
 
@@ -11,8 +12,8 @@ get_value(S::ResidualStatistic) = get_value(get_statistic(S))
 get_design(S::ResidualStatistic) = get_design(get_statistic(S))
 set_design!(S::ResidualStatistic, par) = set_design!(get_statistic(S), par)
 get_maxrl(S::ResidualStatistic) = get_maxrl(get_statistic(S))
-update_statistic(S::ResidualStatistic, x) = update_statistic(get_statistic(S), residual(x, S))
-update_statistic!(S::ResidualStatistic, x) = update_statistic!(get_statistic(S), residual(x, S))
+update_statistic(S::ResidualStatistic, x) = update_statistic(get_statistic(S), residual!(x, S))
+update_statistic!(S::ResidualStatistic, x) = update_statistic!(get_statistic(S), residual!(x, S))
 
 """
     LocationScaleStatistic{S, M, P}
@@ -40,4 +41,4 @@ export LocationScaleStatistic
 #FIXME: test whether the location scale constructors and the residual function work on vector and matrix data
 LocationScaleStatistic(stat, x::AbstractVector) = LocationScaleStatistic(stat, mean(x), 1.0/std(x))
 LocationScaleStatistic(stat, x::AbstractMatrix) = LocationScaleStatistic(stat, mean.(eachcol(x)), inv(sqrt(cov(x))))
-residual(x, S::LocationScaleStatistic) = S.Ω * (x .- S.μ)
+residual!(x, S::LocationScaleStatistic) = S.Ω * (x .- S.μ)
