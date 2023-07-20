@@ -4,7 +4,7 @@ using Parameters
     # Global options
     trace::I = 0
     ic_solver::S = :SA
-    rlsim::F1 = ifelse(ic_solver == :Bisection, run_sim, run_sim_sa)
+    rlsim::F1 = ifelse(ic_solver == :Double, run_path_sim, ifelse(ic_solver == :Bisection, run_sim, run_sim_sa))
     method_opt::S = :LN_BOBYQA
 
     # saCL options
@@ -31,7 +31,11 @@ using Parameters
     x_tol_bi::F = 1e-06
     f_tol_bi::F = 1.0
     verbose_bi::B = trace > 1
+
+    # CombinedCL
     inflate_bi::F = 1.05
+    
+    # Double bootstrap bisection
 
     # Global parameter optimization options
     x_tol_opt::F = 1e-05
@@ -51,7 +55,7 @@ using Parameters
     gamma_spsa::F = 0.02
 
     @assert trace >= 0
-    @assert ic_solver in [:SA, :Bisection, :Combined]
+    @assert ic_solver in [:SA, :Bisection, :Combined, :Double]
     @assert hmin_sa > 0
     @assert Nfixed_sa > 0
     @assert Afixed_sa > 0

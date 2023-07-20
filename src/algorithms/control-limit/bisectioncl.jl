@@ -118,6 +118,7 @@ function measure(RLs, CH::ControlChart{S,L,N,P}; verbose=true) where {S,L,N<:QRL
     if verbose println("q$(get_nominal(CH).qtl)[RL] = $(ret)") end
     return ret
 end
+export measure
 
 
 """

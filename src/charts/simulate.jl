@@ -1,7 +1,7 @@
 """
     run_sim(CH::AbstractChart)
 
-Simulates a run length for the control chart `CH` by sampling new data from its Phase I object.
+Simulates a run length for the control chart `CH` by sampling new data from its Phase II object.
 
 ### Inputs
 * `CH` - A control chart.
@@ -49,7 +49,7 @@ end
 """
     run_sim_sa(CH::AbstractChart, maxiter::Real, delta::Real)
 
-Simulates a run length for the control chart `CH` by sampling new data from the Phase I object, to be used by the stochastic approximation algorithm implemented in the `saCL!` function.
+Simulates a run length for the control chart `CH` by sampling new data from the Phase II object, to be used by the stochastic approximation algorithm implemented in the `saCL!` function.
 
 ### Inputs
 * `CH` - A control chart.
@@ -159,7 +159,7 @@ export run_sim_sa
 """
     run_sim_oc(CH::AbstractChart; shift = 0.0)
 
-Simulates a run length under location shift for the control chart `CH` by sampling new data from its Phase I object.
+Simulates a run length under location shift for the control chart `CH` by sampling new data from its Phase II object.
 
 ### Inputs
 * `CH` - A control chart.
@@ -180,3 +180,29 @@ function run_sim_oc(CH::AbstractChart; shift = 0.0, maxiter::Real = Inf)
     return i
 end
 export run_sim_oc
+
+
+"""
+    run_path_sim(CH::AbstractChart)
+
+Simulates a run length path for the control chart `CH` by sampling new data from its Phase II object.
+
+### Inputs
+* `CH::AbstractChart` - A control chart.
+* `maxiter::Real` - The maximum value of the run length. Defaults to `min(maxrl(CH), 10*get_nominal_value(CH))`
+
+### Returns
+* A vector containing values of the control chart.
+"""
+function run_path_sim(CH::AbstractChart; maxiter::Real = min(get_maxrl(CH), 10*get_nominal_value(CH)))
+    CH_ = shallow_copy_sim(CH)
+    i = 0
+    out = zeros(Int(maxiter))
+    while i < maxiter
+        i = i + 1
+        update_chart!(CH_, new_data!(CH_))
+        out[i] = get_value(CH_)
+    end
+    return out
+end
+export run_path_sim
