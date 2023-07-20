@@ -1,4 +1,5 @@
 using Statistics
+# FIXME: test double bootstrap functions
 
 """
     doubleBootstrap!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
