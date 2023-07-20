@@ -25,7 +25,7 @@ using Parameters
     # Bisection options
     hmin_bi::F = sqrt(eps())
     hmax_bi::F = 50.0
-    maxiter_bi::I = 50
+    maxiter_bi::I = 30
     nsims_bi::I = 10_000
     trunc_bi::I = 10_000
     x_tol_bi::F = 1e-06

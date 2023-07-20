@@ -56,60 +56,60 @@ function doubleBootstrap!(CH::ControlChart; settings::OptSettings = OptSettings(
         rl_paths[i, :] = rlsim(CH, maxiter = maxrl)
     end
 
-    hmax_bi = maximum(rl_paths)
-    hmin_bi = 0.0
-    if verbose_bi println("Running bisection on simulated paths with endpoints [$(hmin_bi), $(hmax_bi)] ...") end
-
-    hold = hmax_bi + x_tol_bi + 1.0                 # Starting value to assess convergence
-    RLs = Vector{Float64}(undef, nsims_bi_i)        # Vector of simulated run lenghts
-    target = get_nominal_value(CH)                  # Target nominal ARL/QRL/...
-    E_RL = 0.0                                      # Estimated ARL/QRL/...
-    h = 0.0                                         # Initialize control limit value
-    conv = "Maximum number of iterations reached"
     i = 0
-    idx = Vector{Int}(undef, nsims_bi_i)
-    rows = 1:nsims_bi_i
-    while i < maxiter_bi
-        i = i+1
-        h = (hmin_bi + hmax_bi) / 2
-        if verbose_bi print("i: $(i)/$(maxiter_bi),\th: $(h)\t") end
+    conv = "Maximum number of iterations reached"
+    target = get_nominal_value(CH)                  # Target nominal ARL/QRL/...
+    last_E_RL_estimate = target - (f_tol_bi + 1.0)
+    h = 0.0
+    while abs(last_E_RL_estimate - target) > f_tol_bi
+        hmax_bi = maximum(rl_paths)
+        hmin_bi = 0.0
+        if verbose_bi println("Running bisection on simulated paths with endpoints [$(hmin_bi), $(hmax_bi)] ...") end
+        hold = hmax_bi + x_tol_bi + 1.0                 # Starting value to assess convergence
+        RLs = Vector{Float64}(undef, nsims_bi_i)        # Vector of simulated run lenghts
+        E_RL = 0.0                                      # Estimated ARL/QRL/...
+        h = 0.0                                         # Initialize control limit value
+        idx = Vector{Int}(undef, nsims_bi_i)
+        rows = 1:nsims_bi_i
+        i = 0
+        while i < maxiter_bi
+            i = i+1
+            h = (hmin_bi + hmax_bi) / 2
+            if verbose_bi print("i: $(i)/$(maxiter_bi),\th: $(h)\t") end
 
-        idx .= sample(rows, nsims_bi_i)
-        # Calculate run length on simulated paths
-        set_h!(get_limit(CH), h)
-        for j in 1:nsims_bi_i
-            for k in 1:maxrl
-                #FIXME: use set_h! and set_value! to make it more general to double-sided limits etc...
-                set_value!(CH, rl_paths[idx[j], k])
-                # @show get_value(CH), get_limit_value(CH)
-                if is_OC(CH)
-                    RLs[j] = k
-                    break
-                end 
-                if k == maxrl
-                    RLs[j] = maxrl
+            idx .= sample(rows, nsims_bi_i)
+            # Calculate run length on simulated paths
+            set_h!(get_limit(CH), h)
+            for j in 1:nsims_bi_i
+                for k in 1:maxrl
+                    #FIXME: use set_h! and set_value! to make it more general to double-sided limits etc...
+                    set_value!(CH, rl_paths[idx[j], k])
+                    # @show get_value(CH), get_limit_value(CH)
+                    if is_OC(CH)
+                        RLs[j] = k
+                        break
+                    end 
+                    if k == maxrl
+                        RLs[j] = maxrl
+                    end
                 end
             end
+            # Calculate nominal measure (ARL/QRL/...) 
+            E_RL = measure(RLs, CH, verbose=verbose_bi)
+            # Apply bisection algorithm
+            if E_RL > target
+                hmax_bi = h
+            else
+                hmin_bi = h
+            end
+            # Assess convergence in the run length value
+            if abs(E_RL - target) < f_tol_bi
+                conv = "Convergence (target)"
+                break
+            end
+            hold = h
         end
-        # Calculate nominal measure (ARL/QRL/...) 
-        E_RL = measure(RLs, CH, verbose=verbose_bi)
-        # Apply bisection algorithm
-        if E_RL > target
-            hmax_bi = h
-        else
-            hmin_bi = h
-        end
-        # Assess convergence in the run length value
-        if abs(E_RL - target) < f_tol_bi
-            conv = "Convergence (target)"
-            break
-        end
-        # Assess convergence in the control limit value
-        if abs(hold - h) < x_tol_bi
-            conv = "Convergence (limit)"
-            break
-        end
-        hold = h
+        last_E_RL_estimate = E_RL
     end
     set_value!(CH, old_value)
     set_h!(get_limit(CH), h)
