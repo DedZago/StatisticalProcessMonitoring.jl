@@ -1,5 +1,6 @@
 using Statistics
 # FIXME: test double bootstrap functions
+# FIXME: understand why double bootstrap does not work with curved limits 
 
 """
     doubleBootstrap!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
@@ -45,6 +46,8 @@ function doubleBootstrap!(CH::ControlChart; settings::OptSettings = OptSettings(
 
     if verbose_bi println("Generating $(nsims_bi) run length paths ...") end
 
+    old_value = get_value(CH)
+
     nsims_bi_i = Int(nsims_bi)                              # Number of simulated run lengts
     maxrl = Int(min(get_maxrl(CH), 10*get_nominal_value(CH)))
 
@@ -53,7 +56,8 @@ function doubleBootstrap!(CH::ControlChart; settings::OptSettings = OptSettings(
         rl_paths[i, :] = rlsim(CH, maxiter = maxrl)
     end
 
-    hmin_bi, hmax_bi = extrema(rl_paths)
+    hmax_bi = maximum(rl_paths)
+    hmin_bi = 0.0
     if verbose_bi println("Running bisection on simulated paths with endpoints [$(hmin_bi), $(hmax_bi)] ...") end
 
     hold = hmax_bi + x_tol_bi + 1.0                 # Starting value to assess convergence
@@ -72,10 +76,13 @@ function doubleBootstrap!(CH::ControlChart; settings::OptSettings = OptSettings(
 
         idx .= sample(rows, nsims_bi_i)
         # Calculate run length on simulated paths
+        set_h!(get_limit(CH), h)
         for j in 1:nsims_bi_i
             for k in 1:maxrl
                 #FIXME: use set_h! and set_value! to make it more general to double-sided limits etc...
-                if rl_paths[idx[j],k] > h
+                set_value!(CH, rl_paths[idx[j], k])
+                # @show get_value(CH), get_limit_value(CH)
+                if is_OC(CH)
                     RLs[j] = k
                     break
                 end 
@@ -104,6 +111,8 @@ function doubleBootstrap!(CH::ControlChart; settings::OptSettings = OptSettings(
         end
         hold = h
     end
+    set_value!(CH, old_value)
+    set_h!(get_limit(CH), h)
     return (h=h, iter=i, status = conv)
 end
 export doubleBootstrap!

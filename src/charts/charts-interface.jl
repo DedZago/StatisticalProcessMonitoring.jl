@@ -202,6 +202,17 @@ export set_statistic!
 
 
 """
+    function set_value!(CH::AbstractChart, value)
+
+Set the value of the statistic of a control chart.
+"""
+function set_value!(CH::C, value) where C <: AbstractChart
+    set_value!(get_statistic(CH), value)
+end
+export set_value!
+
+
+"""
     function set_limit!(CH::AbstractChart, limit::AbstractLimit)
 
 Set the control limit of a control chart.

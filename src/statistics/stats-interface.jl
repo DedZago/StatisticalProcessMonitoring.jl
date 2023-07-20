@@ -12,6 +12,17 @@ Get the current value of a statistic.
 """
 get_value(stat::AbstractStatistic) = stat.value
 export get_value
+
+"""
+    function set_value!(stat::AbstractStatistic, value)
+
+Set the value of a statistic.
+"""
+function set_value!(stat::AbstractStatistic, value)
+    stat.value = value
+end
+export set_value!
+
 """
     update_statistic!(stat::AbstractStatistic, x)
 
