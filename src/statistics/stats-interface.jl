@@ -37,4 +37,5 @@ get_maxrl(stat::Vector{T}) where T <: AbstractStatistic = minimum(get_maxrl.(sta
 export get_maxrl
 
 include("univariate.jl")
+include("multivariate.jl")
 include("residual.jl")

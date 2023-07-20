@@ -19,12 +19,9 @@ Lowry, C. A., Woodall, W. H., Champ, C. W., & Rigdon, S. E. (1992). A Multivaria
 @with_kw mutable struct MEWMA{L,V} <: UnivariateStatistic 
     Λ::Vector{L}
     value::V = 0.0
-    μ::Vector{L} = zeros(L, size(L)[1])
-    z::Vector{L} = deepcopy(μ)
-    Σ::Matrix{L} = diagm(ones(L, size(L)[1]))
-    inv_Σz::Matrix{L} = inv(diagm(Λ)*Σ*diagm(Λ))
+    z::Vector{L} = zeros(length(Λ))
+    inv_Σz::Matrix{L} = inv(diagm(Λ)*diagm(Λ))
     @assert !isinf(value)
-    @assert dim(Λ[1]) == dim(Λ[2])
 end
 export MEWMA
 
@@ -32,18 +29,16 @@ export MEWMA
 get_design(stat::MEWMA) = (Λ = stat.Λ,)
 
 function set_design!(stat::MEWMA, Λ::AbstractVector)
-    stat.inv_Σz = inv(diagm(Λ)*stat.Σ*diagm(Λ))
+    stat.inv_Σz = inv(diagm(Λ)*diagm(Λ))
     stat.Λ = Λ
 end
 
 function update_statistic!(stat::MEWMA, x::AbstractVector)
     for j in eachindex(x)
-        stat.z[j] = (1.0 - stat.Λ[j]) * stat.z[j] + stat.Λ[j] * (x[j] - stat.μ[j])
+        stat.z[j] = (1.0 - stat.Λ[j]) * stat.z[j] + stat.Λ[j] * x[j]
     end  
-    error("TODO")
+    stat.value = stat.z' * stat.inv_Σz * stat.z
 end
 
-function update_statistic(stat::MEWMA, x::AbstractVector)
-    error("Not implemented for the MEWMA control chart")
-end
+update_statistic(stat::MEWMA, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
 
