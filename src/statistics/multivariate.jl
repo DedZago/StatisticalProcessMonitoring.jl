@@ -1,6 +1,36 @@
 using LinearAlgebra
 
 """
+    MShewhart(μ, Σ, value)
+
+Multivariate Shewhart control chart for observations with mean `μ`, variance-covariance `Σ` and initial value `value`.
+
+The update mechanism based on a new observation `x` is given by
+
+``value = (x - μ) Σ^(-1) (x - μ)``.
+
+### References 
+* Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
+"""
+@with_kw mutable struct MShewhart{VF,VM,V} <: UnivariateStatistic 
+    μ::VF
+    Σ_m1::VM
+    value::V = 0.0
+    @assert length(μ) == size(Σ_m1, 1)
+    @assert size(Σ_m1, 1) == size(Σ_m1, 2)
+    @assert !isinf(value)
+end
+export MShewhart
+
+MShewhart(x::AbstractMatrix; value = 0.0) = MShewhart(mean.(eachcol(x)), inv(cov(x)), value)
+
+get_design(stat::MShewhart) = NamedTuple()
+set_design!(stat::MShewhart, ::Float64) = error("Cannot set a design for Shewhart chart.")
+
+update_statistic(stat::MShewhart, x::AbstractVector) = dot(x - stat.μ, stat.Σ_m1, x - stat.μ)
+update_statistic!(stat::MShewhart, x::AbstractVector) = stat.value = update_statistic(stat, x)
+
+"""
     MEWMA(Λ, value)
 
 Exponentially weighted moving average with smoothing matrix `Λ` and initial value `value`.

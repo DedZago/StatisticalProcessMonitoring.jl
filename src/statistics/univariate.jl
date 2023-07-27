@@ -1,6 +1,33 @@
 abstract type UnivariateStatistic <: AbstractStatistic end
 export UnivariateStatistic
 
+
+"""
+    Shewhart(value)
+
+Shewhart control chart with initial value `value`.
+
+The update mechanism based on a new observation `x` is given by
+
+``value = x``.
+
+### References 
+* Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
+"""
+@with_kw mutable struct Shewhart{V} <: UnivariateStatistic 
+    value::V = 0.0
+    @assert !isinf(value)
+end
+export Shewhart
+
+get_design(stat::Shewhart) = NamedTuple()
+set_design!(stat::Shewhart, ::Float64) = error("Cannot set a design for Shewhart chart.")
+
+update_statistic(stat::Shewhart, x::Real) = x
+update_statistic!(stat::Shewhart, x::Real) = stat.value = update_statistic(stat, x)
+
+
+
 """
     EWMA(λ, value)
 
