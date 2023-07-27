@@ -187,8 +187,8 @@ See the documentation of `combinedCL!` for more information about the algorithm 
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 * Capizzi, G., & Masarotto, G. (2016). Efficient control chart calibration by simulated stochastic approximation. IIE Transactions, 48(1), 57-65. https://doi.org/10.1080/0740817X.2015.1055392
 """
-function combinedCL(CH::ControlChart; rlsim::Function = run_sim, nsims::Int=10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, trunc::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false, inflate = 1.05, rlsim_sa::Function = run_sim_sa, Nfixed::Int = 200, Nmin::Int = 200, maxiter_sa = 200)
+function combinedCL(CH::ControlChart; kw...)
     CH_ = shallow_copy_sim(CH)
-    return combinedCL!(CH_, rlsim=rlsim, nsims=nsims, hmin=hmin, maxiter=maxiter, trunc=trunc, x_tol=x_tol, f_tol=f_tol, verbose=verbose, inflate=inflate, rlsim_sa=rlsim_sa, Nfixed=Nfixed, Nmin=Nmin, maxiter_sa=maxiter_sa)
+    return combinedCL!(CH_; kw...)
 end
 export combinedCL

@@ -83,9 +83,9 @@ See the documentation of `doubleBootstrap!` for more information about the algor
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function doubleBootstrap(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Int = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), B::Int = 1000, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0)
+function doubleBootstrap(CH::ControlChart; kw...)
     CH_ = shallow_copy_sim(CH)
-    return doubleBootstrap!(CH_, rlsim=rlsim, maxiter=maxiter, nsims=nsims, maxrl=maxrl, B=B, x_tol=x_tol, f_tol=f_tol)
+    return doubleBootstrap!(CH_; kw...)
 end
 export doubleBootstrap
 

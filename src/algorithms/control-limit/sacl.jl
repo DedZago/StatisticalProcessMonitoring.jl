@@ -177,8 +177,8 @@ See the documentation of `saCL!` for more information about the algorithm and th
 ### References
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
-function saCL(CH::ControlChart; rlsim::Function = run_sim_sa, hmin::Float64 = sqrt(eps()), Nfixed::Int = 500, Afixed::Float64 = 0.1, Amin::Float64 = 0.1, Amax::Float64 = 100.0, delta_sa::Float64 = 0.1, q::Float64 = 0.55, gamma::Float64 = 0.02, Nmin::Int = 1000, z::Float64 = 3.0, Cmrl::Float64 = 10.0, maxiter::Int = 50_000, verbose::Bool = false)
+function saCL(CH::ControlChart; kw...)
     CH_ = shallow_copy_sim(CH)
-    return saCL!(CH_, rlsim=rlsim, hmin=hmin, Nfixed=Nfixed, Afixed=Afixed, Amin=Amin, Amax=Amax, delta_sa=delta_sa, q=q, gamma=gamma, Nmin=Nmin, z=z, Cmrl=Cmrl, maxiter=maxiter, verbose=verbose)
+    return saCL!(CH_; kw...)
 end
 export saCL

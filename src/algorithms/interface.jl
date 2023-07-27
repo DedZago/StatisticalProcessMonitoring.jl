@@ -16,14 +16,13 @@ Optimizes the control limit of a ControlChart object.
 ### Example
     optimize_limit!(my_chart, settings=OptSettings(ic_solver=:SA))
 """
-function optimize_limit!(CH::ControlChart; settings::OptSettings = OptSettings())
-    @unpack ic_solver, rlsim = settings
-    if ic_solver == :SA
-        return saCL!(CH, settings = settings)
-    elseif ic_solver == :Bisection
-        return bisectionCL!(CH, settings = settings)
-    elseif ic_solver == :Combined
-        combinedCL!(CH, settings = settings)
+function optimize_limit!(CH::ControlChart, solver::Symbol=:SA; kw...)
+    if solver == :SA
+        return saCL!(CH; kw...)
+    elseif solver == :Bisection
+        return bisectionCL!(CH; kw...)
+    elseif solver == :Combined
+        combinedCL!(CH; kw...)
     else
         error("Unknown optimization method.")
     end
@@ -48,9 +47,9 @@ Optimizes the control limit of a ControlChart object, without modifying the orig
 ### Example
     optimize_limit(my_chart, settings=OptSettings(ic_solver=:SA))
 """
-function optimize_limit(CH::ControlChart; settings::OptSettings = OptSettings())
+function optimize_limit(CH::ControlChart, solver::Symbol = :SA; kw...)
     CH_ = deepcopy(CH)
-    optimize_limit!(CH_, settings=settings)
+    optimize_limit!(CH_, solver=solver, kw...)
 end
 export optimize_limit
 
