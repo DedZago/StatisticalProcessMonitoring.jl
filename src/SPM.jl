@@ -1,6 +1,7 @@
 module SPM
 
 using Parameters
+using LinearAlgebra
 
 include("phase1/phase1-interface.jl")
 include("nominal/nominal-interface.jl")
