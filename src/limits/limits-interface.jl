@@ -1,8 +1,8 @@
 abstract type AbstractLimit{T} end
 get_h(L::AbstractLimit) = L.h
 
-function get_h(L::Vector{AbstractLimit{T}}) where T
-    ret = Vector{T}(undef, length(L))
+function get_h(L::Vector{T}) where T <: AbstractLimit
+    ret = Vector{Float64}(undef, length(L))
     for i in 1:length(L)
         ret[i] = get_h(L[i])
     end
@@ -27,7 +27,13 @@ export is_IC
 is_OC(L::AbstractLimit, stat::AbstractStatistic) = !is_IC(L, stat)
 export is_OC
 
-is_IC_vec(L::Vector{LIM}, stat::Vector{STAT}) where {LIM <: AbstractLimit, STAT <: AbstractStatistic} = is_IC.(L, stat)
+function is_IC_vec(L::Vector{LIM}, stat::Vector{STAT}) where {LIM <: AbstractLimit, STAT <: AbstractStatistic} 
+    output = Vector{Bool}(undef, length(L))
+    for i in eachindex(output)
+        output[i] = is_IC(L[i], stat[i])
+    end
+    return output
+end
 export is_IC_vec
 
 export get_curved_value
