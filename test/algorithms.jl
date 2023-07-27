@@ -18,9 +18,9 @@ end
     LIM = TwoSidedCurvedLimit(2.0, f)
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
-        saCL(CH, settings=OptSettings(Nmin_sa=1, maxiter_sa=1, Nfixed_sa=1))
-        bisectionCL(CH, settings=OptSettings(hmax_bi=1.0, maxiter_bi=1, nsims_bi = 10))
-        combinedCL(CH, settings=OptSettings(maxiter_bi=1, maxiter_sa=1, nsims_bi=1))
+        saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
+        bisectionCL(CH, 1.0, maxiter=1, nsims = 10)
+        combinedCL(CH, maxiter=1, maxiter_sa=1, nsims=1)
     end
 
     x = randn(500)
@@ -31,9 +31,9 @@ end
     LIM = OneSidedFixedLimit(2.0, true)
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
-        saCL(CH, settings=OptSettings(Nmin_sa=1, maxiter_sa=1, Nfixed_sa=1))
-        bisectionCL(CH, settings=OptSettings(hmax_bi=1.0, maxiter_bi=1, nsims_bi = 10))
-        combinedCL(CH, settings=OptSettings(maxiter_bi=1, maxiter_sa=1, nsims_bi=1))
+        saCL(CH, Nmin = 1, maxiter = 1, Nfixed = 1)
+        bisectionCL(CH, 1.0, maxiter=1, nsims = 10)
+        combinedCL(CH, maxiter=1, maxiter_sa=1, nsims=1)
     end
 
     x = randn(500)
@@ -44,9 +44,9 @@ end
     LIM = OneSidedFixedLimit(2.0, true)
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
-        saCL(CH, settings=OptSettings(Nmin_sa=1, maxiter_sa=1, Nfixed_sa=1))
-        bisectionCL(CH, settings=OptSettings(hmax_bi=1.0, maxiter_bi=1, nsims_bi = 10))
-        combinedCL(CH, settings=OptSettings(maxiter_bi=1, maxiter_sa=1, nsims_bi=1))
+        saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
+        bisectionCL(CH, 1.0, maxiter=1, nsims = 10)
+        combinedCL(CH, maxiter=1, maxiter_sa=1, nsims=1)
     end
 
     x = randn(500)
@@ -58,7 +58,7 @@ end
     PH1 = Phase2(Bootstrap(), x)
     CH = ControlChart([STAT1, STAT2], [LIM1, LIM2], NM, PH1)
     @testset "call" begin
-        saCL(CH, settings=OptSettings(Nmin_sa=1, maxiter_sa=1, Nfixed_sa=1))
+        saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
     end
 end
 end#module

@@ -87,7 +87,7 @@ using Random
         @test get_block(BB) != initblock
     end
 
-    @testset "Phase 1" begin
+    @testset "Phase 2" begin
         PH1 = Phase2(Bootstrap(), x)
         y = new_data(PH1)
         @test y in x

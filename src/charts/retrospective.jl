@@ -1,5 +1,3 @@
-#FIXME: construct retrospective interface for plotting and diagnosing.
-
 struct ProcessControl{D<:AbstractVecOrMat, S, A, L}
     x::D                # Observed data
     stat::S             # Value of the statistic
@@ -19,13 +17,13 @@ Base.show(io::IO, P::ProcessControl) = print(io, "ProcessControl of length $(len
 Apply a control chart to a data vector or data matrix `x`.
 """
 function apply_chart!(CH::AbstractChart, x::AbstractVector)
-    y = [deepcopy(get_value(CH)) for _ in eachindex(x)]
-    lim = [deepcopy(get_limit_value(CH)) for _ in eachindex(x)]
+    y = Vector{typeof(get_value(CH))}(undef, length(x))
+    lim = Vector{typeof(get_limit(CH))}(undef, length(x))
     alarm = [false for _ in eachindex(x)]
     for i in eachindex(x)
         update_chart!(CH, x[i])
-        y[i] = get_value(CH)
-        lim[i] = get_limit_value(CH)
+        y[i] = deepcopy(get_value(CH))
+        lim[i] = deepcopy(get_limit(CH))
         if is_OC(CH)
             alarm[i] = true
         end
@@ -36,13 +34,13 @@ end
 
 function apply_chart!(CH::AbstractChart, x::AbstractMatrix)
     n, _ = size(x)
-    y = [deepcopy(get_value(CH)) for _ in 1:n]
-    lim = [deepcopy(get_limit_value(CH)) for _ in 1:n]
+    y = Vector{typeof(get_value(CH))}(undef, n)
+    lim = Vector{typeof(get_limit(CH))}(undef, n)
     alarm = [false for _ in eachindex(x)]
     for i in 1:n
         update_chart!(CH, view(x, i, :))
-        y[i] = get_value(CH)
-        lim[i] = get_limit_value(CH)
+        y[i] = deepcopy(get_value(CH))
+        lim[i] = deepcopy(get_limit_value(CH))
         if is_OC(CH)
             alarm[i] = true
         end
@@ -57,3 +55,15 @@ function apply_chart(CH::AbstractChart, x::AbstractVecOrMat)
     return apply_chart!(CH_, x)
 end
 export apply_chart
+
+#FIXME: construct interface for plotting and diagnosing.
+
+# function plot_series(PCTL::ProcessControl)
+#     plt = plot(PCTL.stat)
+#     limits = hcat(get_value.(PCTL.lim)...)
+#     for i in axes(limits, 1)
+#         plot!(plt, limits[i,:], label = "", linestyle=:dashed)
+#     end
+#     plt
+# end
+# export plot_series
