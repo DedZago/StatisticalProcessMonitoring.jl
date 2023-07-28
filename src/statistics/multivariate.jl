@@ -50,7 +50,7 @@ Lowry, C. A., Woodall, W. H., Champ, C. W., & Rigdon, S. E. (1992). A Multivaria
     Λ::Vector{L}
     value::V = 0.0
     z::Vector{L} = zeros(length(Λ))
-    inv_Σz::Matrix{L} = inv(diagm(Λ)*diagm(Λ))
+    inv_Σz::Matrix{L} = inv(diagm([Λ[k]^2/(2*Λ[k]-Λ[k]^2) for k in 1:length(Λ)]))
     @assert !isinf(value)
 end
 export MEWMA
