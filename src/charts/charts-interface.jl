@@ -30,7 +30,7 @@ export MultipleControlChart
     shallow_copy_sim(CH::AbstractChart)
 
 Create a shallow copy of a control chart, so that only the statistic and the control limit are copied.
-This is done to prevent copying the Phase 1 data multiple times and thus reduce computational effort.
+This is done to prevent copying eventual Phase 2 data multiple times and thus reduce computational effort when optimizing the control limit and the chart tuning parameters.
 """
 shallow_copy_sim(CH::ControlChart) = ControlChart(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), deepcopy(get_nominal(CH)), shallow_copy_sim(get_phase1(CH)), deepcopy(get_t(CH)))
 export shallow_copy_sim
