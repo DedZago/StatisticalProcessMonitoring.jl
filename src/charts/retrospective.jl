@@ -28,7 +28,7 @@ function apply_chart!(CH::AbstractChart, x::AbstractVector)
             alarm[i] = true
         end
     end
-    return ProcessControl(x, y, alarm, lim)
+    return ProcessControl(deepcopy(x), y, alarm, lim)
 end
 
 
@@ -40,12 +40,12 @@ function apply_chart!(CH::AbstractChart, x::AbstractMatrix)
     for i in 1:n
         update_chart!(CH, view(x, i, :))
         y[i] = deepcopy(get_value(CH))
-        lim[i] = deepcopy(get_limit_value(CH))
+        lim[i] = deepcopy(get_limit(CH))
         if is_OC(CH)
             alarm[i] = true
         end
     end
-    return ProcessControl(x, y, alarm, lim)
+    return ProcessControl(deepcopy(x), y, alarm, lim)
 end
 export apply_chart!
 
