@@ -49,9 +49,9 @@ end
 export EWMA
 
 
-get_design(stat::EWMA) = (λ = stat.λ,)
+get_design(stat::EWMA) = [stat.λ]
 set_design!(stat::EWMA, λ::Float64) = stat.λ = λ
-set_design!(stat::EWMA, λ) = stat.λ = λ[1]
+set_design!(stat::EWMA, λ::AbstractVector) = stat.λ = first(λ)
 
 
 update_statistic(stat::EWMA, x::Real) = (1.0 - stat.λ) * stat.value + stat.λ * x
@@ -80,9 +80,9 @@ end
 export CUSUM
 
 
-get_design(stat::CUSUM) = (k = stat.k,)
+get_design(stat::CUSUM) = [stat.k]
 set_design!(stat::CUSUM, k::Float64) = stat.k = k
-set_design!(stat::CUSUM, k) = stat.k = k[1]
+set_design!(stat::CUSUM, k::AbstractVector) = stat.k = first(k)
 
 
 function update_statistic(stat::CUSUM, x::Real)
@@ -123,9 +123,9 @@ export AEWMA
 #TODO: test
 
 
-get_design(stat::AEWMA) = (λ = stat.λ, k = stat.k)
+get_design(stat::AEWMA) = [stat.λ, stat.k]
 
-function set_design!(stat::AEWMA, par)
+function set_design!(stat::AEWMA, par::AbstractVector)
     @assert length(par) == 2
     stat.λ = par[1]
     stat.k = par[2]   
