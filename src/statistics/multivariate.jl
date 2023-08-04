@@ -157,7 +157,6 @@ export AMCUSUM
 
 #TODO: Test AMCUSUM control chart 
 #TODO: Write AMCUSUM constructors
-get_design(stat::AMCUSUM) = deepcopy(stat.λ)
 get_value(stat::AMCUSUM) = get_value(stat.stat)
 set_value!(stat::AMCUSUM) = set_value!(stat.stat)
 
@@ -177,7 +176,7 @@ function update_statistic!(stat::AMCUSUM, x::AbstractVector)
     return update_statistic!(stat.stat, x)
 end
 
-update_statistic(stat::MCUSUM, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
+update_statistic(stat::AMCUSUM, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
 
 
 
