@@ -121,7 +121,7 @@ Optimizes the design of a control chart using a specified optimization algorithm
 # Returns
 The optimized design of the control chart.
 """
-function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SA, trace::Int, kw...)
+function optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SA, trace::Int, kw...)
     CH_ = deepcopy(CH)
     optimize_design!(CH_, rlsim_oc, settings; optimizer=optimizer, solver=solver, trace=trace, kw...)
 end
