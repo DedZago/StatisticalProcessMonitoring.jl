@@ -1,11 +1,12 @@
 """
-    optimize_limit!(CH::ControlChart[; settings = OptSettings()])
+    optimize_limit(CH::ControlChart, solver::Symbol = :SA; kw...)
 
 Optimizes the control limit of a ControlChart object.
 
 ### Args
-* CH (ControlChart): The ControlChart object to optimize.
-* settings (OptSettings, optional): Optimization settings. Defaults to OptSettings().
+- `CH::ControlChart`: The ControlChart object to optimize.
+- `solver::Symbol`: The solver algorithm to use. Defaults to `:SA`.
+- `kw...`: Additional keyword arguments to pass to the algorithm.
 
 ### Returns
     The optimized control limit value.
@@ -17,6 +18,7 @@ Optimizes the control limit of a ControlChart object.
     optimize_limit!(my_chart, settings=OptSettings(ic_solver=:SA))
 """
 function optimize_limit!(CH::ControlChart, solver::Symbol=:SA; kw...)
+    #FIXME: better assertion for solver
     if solver == :SA
         return saCL!(CH; kw...)
     elseif solver == :Bisection
@@ -30,13 +32,14 @@ end
 export optimize_limit!
 
 """
-    optimize_limit(CH::ControlChart[; settings = OptSettings()])
+    optimize_limit(CH::ControlChart, solver::Symbol = :SA; kw...)
 
 Optimizes the control limit of a ControlChart object, without modifying the original ControlChart object.
 
 ### Args
-* CH (ControlChart): The ControlChart object to optimize.
-* settings (OptSettings, optional): Optimization settings. Defaults to OptSettings().
+- `CH::ControlChart`: The ControlChart object to optimize.
+- `solver::Symbol`: The solver algorithm to use. Defaults to `:SA`.
+- `kw...`: Additional keyword arguments to pass to the algorithm.
 
 ### Returns
     The optimized control limit value.
@@ -55,35 +58,42 @@ export optimize_limit
 
 
 """
-    optimize_design!(CH, rlsim_oc[; settings = OptSettings()])
+    optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SACL, nsims_opt::Int = 1000, trace::Int, kw...)
 
-Optimizes the parameter of a simulation `CH` with respect to a given objective function `rlsim_oc`. 
+Optimizes the design of a control chart using a specified optimization algorithm.
 
-### Arguments
-- `CH` : The simulation to optimize.
-- `rlsim_oc` : The objective function.
-- `settings` (optional, default=OptSettings()) : Optimization settings.
+# Arguments
+- `CH::ControlChart`: The control chart object to optimize.
+- `rlsim_oc::Function`: A function that simulates the out-of-control state of the control chart.
+- `settings::OptSettings`: The optimization settings to use. Defaults to `OptSettings(CH)`.
+- `optimizer::Symbol`: The optimization algorithm to use. Defaults to `:LN_BOBYQA`.
+- `solver::Symbol`: The solver algorithm to use. Defaults to `:SACL`.
+- `trace::Int`: The trace level for printing optimization progress. Set to `0` to disable printing.
+- `kw...`: Additional keyword arguments to pass to the solver algorithm.
 
-### Returns
-- `get_design(CH)` : The optimized parameter.
+# Returns
+The optimized design of the control chart.
 """
-function optimize_design!(CH, rlsim_oc; settings::OptSettings = OptSettings())
-    CH_ = shallow_copy_sim(CH)
-    @unpack nsims_opt, trace, method_opt = settings
+function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SA, trace::Int, kw...)
+    CH_ = deepcopy(CH)
+
+    @unpack nsims = settings
+
+    #FIXME: assertions for optimizer and solver
 
     function rlconstr(par::Vector, grad::Vector)::Float64
         set_design!(CH_, par)
-        optimize_limit!(CH_, settings=settings)
+        optimize_limit!(CH_, solver, kw...)
         if trace > 0
             print("$(round.(par, digits=6))\t")
         end
-        ret = SPM.measure([rlsim_oc(CH_) for _ in 1:nsims_opt], CH_, verbose=trace > 0)
+        ret = SPM.measure([rlsim_oc(CH_) for _ in 1:nsims], CH_, verbose=trace > 0)
         return ret
     end
 
-    if method_opt == :Grid
+    if optimizer == :Grid
         set_design!(CH, optimize_grid(CH, rlconstr, settings))
-    elseif method_opt == :SPSA
+    elseif optimizer == :SPSA
         #TODO: implement SPSA
         set_design!(CH, optimize_SPSA(CH, rlconstr, settings))
     else
@@ -95,20 +105,24 @@ end
 export optimize_design!
 
 """
-    optimize_design(CH, rlsim_oc[; settings = OptSettings()])
+    optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SACL, nsims_opt::Int = 1000, trace::Int, kw...)
 
-Optimize a parameter using the specified CH and rlsim_oc.
+Optimizes the design of a control chart using a specified optimization algorithm.
 
-### Args
-    `CH`: the CH parameter.
-    `rlsim_oc`: the rlsim_oc parameter.
-    `settings`: the optimization settings.
+# Arguments
+- `CH::ControlChart`: The control chart object to optimize.
+- `rlsim_oc::Function`: A function that simulates the out-of-control state of the control chart.
+- `settings::OptSettings`: The optimization settings to use. Defaults to `OptSettings(CH)`.
+- `optimizer::Symbol`: The optimization algorithm to use. Defaults to `:LN_BOBYQA`.
+- `solver::Symbol`: The solver algorithm to use. Defaults to `:SACL`.
+- `trace::Int`: The trace level for printing optimization progress. Set to `0` to disable printing.
+- `kw...`: Additional keyword arguments to pass to the solver algorithm.
 
-### Returns
-    The optimized parameter values.
+# Returns
+The optimized design of the control chart.
 """
-function optimize_design(CH, rlsim_oc; settings::OptSettings = OptSettings())
+function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SA, trace::Int, kw...)
     CH_ = deepcopy(CH)
-    optimize_design!(CH_, rlsim_oc, settings=settings)
+    optimize_design!(CH_, rlsim_oc, settings; optimizer=optimizer, solver=solver, trace=trace, kw...)
 end
 export optimize_design
