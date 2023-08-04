@@ -1,6 +1,6 @@
 abstract type AbstractStatistic end
 
-get_design(::AbstractStatistic) = @NamedTuple{}
+get_design(::AbstractStatistic) = Vector{Float64}()
 export get_design
 set_design!(::AbstractStatistic) = error("Not implemented for abstract class.") 
 export set_design!

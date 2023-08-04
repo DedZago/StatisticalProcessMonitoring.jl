@@ -18,15 +18,18 @@ Optimizes the control limit of a ControlChart object.
     optimize_limit!(my_chart, settings=OptSettings(ic_solver=:SA))
 """
 function optimize_limit!(CH::ControlChart, solver::Symbol=:SA; kw...)
+    valid_solvers = [:SA, :Bisection, :Combined, :Bootstrap]
+    @assert solver in valid_solvers "Unknown control limit solver. Valid solvers are $(valid_solvers)"
+
     #FIXME: better assertion for solver
     if solver == :SA
         return saCL!(CH; kw...)
     elseif solver == :Bisection
         return bisectionCL!(CH; kw...)
     elseif solver == :Combined
-        combinedCL!(CH; kw...)
-    else
-        error("Unknown optimization method.")
+        return combinedCL!(CH; kw...)
+    elseif solver == :Bootstrap
+        error("To be implemented yet.")
     end
 end
 export optimize_limit!
@@ -52,7 +55,7 @@ Optimizes the control limit of a ControlChart object, without modifying the orig
 """
 function optimize_limit(CH::ControlChart, solver::Symbol = :SA; kw...)
     CH_ = deepcopy(CH)
-    optimize_limit!(CH_, solver=solver, kw...)
+    optimize_limit!(CH_, solver; kw...)
 end
 export optimize_limit
 
@@ -79,6 +82,8 @@ function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSet
 
     @unpack nsims = settings
 
+    valid_optimizers = [:Grid, :SPSA, :LN_BOBYQA, :LN_COBYLA, :LN_SBPLX, :LN_NELDERMEAD, :LN_PRAXIS, :LN_NEWOA]
+    @assert optimizer in valid_optimizers "Unknown tuning parameter optimizer. Valid optimizers are $(valid_optimizers)"
     #FIXME: assertions for optimizer and solver
 
     function rlconstr(par::Vector, grad::Vector)::Float64
