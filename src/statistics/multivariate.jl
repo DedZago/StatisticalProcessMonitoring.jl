@@ -22,6 +22,7 @@ The update mechanism based on a new observation `x` is given by
 end
 export MShewhart
 
+#TODO: test MShewhart control chart
 MShewhart(x::AbstractMatrix; value = 0.0) = MShewhart(mean.(eachcol(x)), inv(cov(x)), value)
 
 get_design(stat::MShewhart) = Vector{Float64}()
@@ -71,4 +72,112 @@ function update_statistic!(stat::DiagMEWMA, x::AbstractVector)
 end
 
 update_statistic(stat::DiagMEWMA, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
+
+
+
+"""
+    MCUSUM{L,V}(k::L, value::V = 0.0, St::Vector{L})
+
+A mutable struct representing a Multivariate Cumulative Sum (MCUSUM) statistic.
+
+# Arguments
+- `k::L`: The value of the allowance parameter.
+- `value::V`: The initial value of the statistic. Default is 0.0.
+- `St::Vector{L}`: A vector representing the multivariate cumulative sum at the current time `t`.
+
+# Examples
+    stat = MCUSUM(0.25, 0.0, [0.0, 0.0])
+
+# References
+- Crosier, R. B. (1988). Multivariate Generalizations of Cumulative Sum Quality-Control Schemes. Technometrics, 30(3), 291-303. https://doi.org/10.2307/1270083
+"""
+@with_kw mutable struct MCUSUM{L,V} <: UnivariateStatistic 
+    k::L
+    p::Int
+    value::V = 0.0
+    St::Vector{L} = zeros(p)
+    @assert !isinf(value)
+    @assert p > 0
+    @assert k > 0
+end
+export MCUSUM
+
+#TODO: Test MCUSUM control chart 
+get_design(stat::MCUSUM) = deepcopy(stat.k)
+
+set_design!(stat::MCUSUM, k::Real) = stat.k = k
+set_design!(stat::MCUSUM, k::AbstractVector) = stat.k = first(k)
+
+function update_statistic!(stat::MCUSUM, x::AbstractVector)
+    Ct = sqrt(dot(stat.St + x, stat.St + x))
+    if Ct <= stat.k
+        stat.St .= 0.0
+    else
+        stat.St = (1.0 - stat.k/Ct) * (St + x)
+    end
+    stat.value = sqrt(dot(stat.St, stat.St))
+    return stat.value
+end
+
+update_statistic(stat::MCUSUM, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
+
+
+"""
+    AMCUSUM{C,L,V}(λ::L, p::Int; minshift::L = 0.1, shift::L = 0.0, Et::Vector{V}, t::Int = 0, stat::C = MCUSUM(k=0.1, p=p))
+
+Constructs an instance of the AMCUSUM struct.
+
+# Arguments
+- `λ::L`: The value of λ, where 0.0 <= λ <= 1.0.
+- `p::Int`: The number of quality variables to monitor.
+- `minshift::L`: The minimum shift value to be detected. Default is 0.1.
+- `shift::L`: The current shift value. Default is 0.0.
+- `Et::Vector{V}`: The vector Et of smoothed deviations from the zero mean. Has to be exactly equal to `zeros(p)`
+- `t::Int`: The current value of time. Has to be exactly 0.
+- `stat::C`: The underlying classical MCUSUM statistic. Default is MCUSUM(k=0.1, p=p).
+
+# References
+- Dai, Y., Luo, Y., Li, Z., & Wang, Z. (2011). A new adaptive CUSUM control chart for detecting the multivariate process mean. Quality and Reliability Engineering International, 27(7), 877-884. https://doi.org/10.1002/qre.1177
+"""
+@with_kw mutable struct AMCUSUM{C,L,V} <: UnivariateStatistic 
+    λ::L
+    p::Int
+    minshift::L = 0.1
+    shift::L = 0.0
+    Et::Vector{V} = zeros(p)
+    t::Int = 0
+    stat::C = MCUSUM(k=0.1, p=p)
+
+    @assert 0.0 <= λ <= 1.0
+    @assert minshift > 0.0
+    @assert t == 0
+    @assert Et == zeros(p)
+end
+export AMCUSUM
+
+#TODO: Test AMCUSUM control chart 
+#TODO: Write AMCUSUM constructors
+get_design(stat::AMCUSUM) = deepcopy(stat.λ)
+get_value(stat::AMCUSUM) = get_value(stat.stat)
+set_value!(stat::AMCUSUM) = set_value!(stat.stat)
+
+set_design!(stat::AMCUSUM, λ::Real) = stat.λ = λ
+set_design!(stat::AMCUSUM, λ::AbstractVector) = stat.λ = first(λ)
+get_design(stat::AMCUSUM) = [stat.λ]
+
+function update_statistic!(stat::AMCUSUM, x::AbstractVector)
+    stat.t += 1
+    λ = stat.λ
+    stat.Et = (1 - λ) * stat.Et + λ * x
+    Ct = sqrt(dot(stat.St + x, stat.St + x))
+    squared_shift_est = 1/(1 - (1 - λ)^stat.t)^2 * (stat.Et'stat.Et - (1-(1-λ)^(2*stat.t))*(λ*length(stat.Et)/(2-λ)))
+    squared_shift = max(stat.minshift, (1-λ)*(stat.shift)^2 + λ*squared_shift_est)
+    stat.shift = sqrt(squared_shift)
+    set_design!(stat.stat, stat.shift/2)
+    return update_statistic!(stat.stat, x)
+end
+
+update_statistic(stat::MCUSUM, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
+
+
 
