@@ -63,7 +63,7 @@ function update_block!(B::BlockBootstrap, data::AbstractMatrix)
         bb = sample(1:length(data))
         for i in 1:get_blocksize(B)
             # wrap around the circle
-            get_block(B)[i, :] = data[(bb + i - 1) % size(data)[2] + 1, :]
+            get_block(B)[i, :] = data[(bb + i - 1) % size(data)[1] + 1, :]
         end
     end
 end
