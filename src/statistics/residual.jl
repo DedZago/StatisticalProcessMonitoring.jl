@@ -12,6 +12,8 @@ get_value(S::ResidualStatistic) = get_value(get_statistic(S))
 get_design(S::ResidualStatistic) = get_design(get_statistic(S))
 set_design!(S::ResidualStatistic, par) = set_design!(get_statistic(S), par)
 get_maxrl(S::ResidualStatistic) = get_maxrl(get_statistic(S))
+
+#FIXME: residual! in update_statistic may result in unwanted bugs
 update_statistic(S::ResidualStatistic, x) = update_statistic(get_statistic(S), residual!(x, S))
 update_statistic!(S::ResidualStatistic, x) = update_statistic!(get_statistic(S), residual!(x, S))
 
