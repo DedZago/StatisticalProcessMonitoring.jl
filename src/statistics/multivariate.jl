@@ -24,7 +24,7 @@ export MShewhart
 
 MShewhart(x::AbstractMatrix; value = 0.0) = MShewhart(mean.(eachcol(x)), inv(cov(x)), value)
 
-get_design(stat::MShewhart) = NamedTuple()
+get_design(stat::MShewhart) = Vector{Float64}()
 set_design!(stat::MShewhart, ::Float64) = error("Cannot set a design for Shewhart chart.")
 
 update_statistic(stat::MShewhart, x::AbstractVector) = dot(x - stat.μ, stat.Σ_m1, x - stat.μ)
@@ -46,29 +46,29 @@ and the chart value is defined as
 ### References 
 Lowry, C. A., Woodall, W. H., Champ, C. W., & Rigdon, S. E. (1992). A Multivariate Exponentially Weighted Moving Average Control Chart. Technometrics, 34(1), 46-53. https://doi.org/10.1080/00401706.1992.10485232
 """
-@with_kw mutable struct MEWMA{L,V} <: UnivariateStatistic 
+@with_kw mutable struct DiagMEWMA{L,V} <: UnivariateStatistic 
     Λ::Vector{L}
     value::V = 0.0
     z::Vector{L} = zeros(length(Λ))
     inv_Σz::Matrix{L} = inv(diagm([Λ[k]^2/(2*Λ[k]-Λ[k]^2) for k in 1:length(Λ)]))
     @assert !isinf(value)
 end
-export MEWMA
+export DiagMEWMA
 
 
-get_design(stat::MEWMA) = (Λ = stat.Λ,)
+get_design(stat::DiagMEWMA) = deepcopy(stat.Λ)
 
-function set_design!(stat::MEWMA, Λ::AbstractVector)
+function set_design!(stat::DiagMEWMA, Λ::AbstractVector)
     stat.inv_Σz = inv(diagm(Λ)*diagm(Λ))
     stat.Λ = Λ
 end
 
-function update_statistic!(stat::MEWMA, x::AbstractVector)
+function update_statistic!(stat::DiagMEWMA, x::AbstractVector)
     for j in eachindex(x)
         stat.z[j] = (1.0 - stat.Λ[j]) * stat.z[j] + stat.Λ[j] * x[j]
     end  
     stat.value = stat.z' * stat.inv_Σz * stat.z
 end
 
-update_statistic(stat::MEWMA, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
+update_statistic(stat::DiagMEWMA, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
 
