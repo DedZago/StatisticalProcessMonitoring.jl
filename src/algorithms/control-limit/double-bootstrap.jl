@@ -3,7 +3,7 @@ using Statistics
 # FIXME: understand why double bootstrap does not work with curved limits 
 
 """
-    doubleBootstrap!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
+    approximateBisectionCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm on bootstrapped paths (see for instance Qiu, 2013).
 
@@ -28,7 +28,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function doubleBootstrap!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Int = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), B::Int = 1000, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false)
+function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Int = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), B::Int = 1000, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false)
 
     @assert maxiter > 0 "maxiter must be positive"
     @assert nsims > 0 "nsims must be positive"
@@ -59,22 +59,22 @@ function doubleBootstrap!(CH::ControlChart; rlsim::Function = run_path_sim, maxi
     #FIXME: add parameters to control bootstrap-corrected control limit estimate
     h_boot = zeros(B)
     h = bisection_paths(deepcopy(CH), rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, verbose)
-    for b in 1:B
-        h_boot[b] = bisection_paths(CH, rl_paths[sample(1:nsims_i, nsims_i), :], target, maxrl, nsims_i, x_tol, f_tol, maxiter, false)
-    end
-    h = 2*h - mean(h_boot)
+    # for b in 1:B
+    #     h_boot[b] = bisection_paths(CH, rl_paths[sample(1:nsims_i, nsims_i), :], target, maxrl, nsims_i, x_tol, f_tol, maxiter, false)
+    # end
+    # h = 2*h - mean(h_boot)
     # while abs(last_E_RL_estimate - target) > f_tol
     set_value!(CH, old_value)
     set_h!(get_limit(CH), h)
     return (h=h, iter=i, status = conv)
 end
-export doubleBootstrap!
+export approximateBisectionCL!
 
 """
-    doubleBootstrap(CH::ControlChart; kw...)
+    approximateBisectionCL(CH::ControlChart; kw...)
 
 Applies the bisection algorithm on simulated run length paths to find the control limit of a control chart without modifying the control chart object `CH`.
-See the documentation of `doubleBootstrap!` for more information about the algorithm and keyword arguments.
+See the documentation of `approximateBisectionCL!` for more information about the algorithm and keyword arguments.
 
 ### Returns
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
@@ -83,11 +83,11 @@ See the documentation of `doubleBootstrap!` for more information about the algor
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function doubleBootstrap(CH::ControlChart; kw...)
+function approximateBisectionCL(CH::ControlChart; kw...)
     CH_ = shallow_copy_sim(CH)
-    return doubleBootstrap!(CH_; kw...)
+    return approximateBisectionCL!(CH_; kw...)
 end
-export doubleBootstrap
+export approximateBisectionCL
 
 
 function bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, verbose)
