@@ -71,9 +71,6 @@ function update_statistic!(stat::DiagMEWMA, x::AbstractVector)
     stat.value = stat.z' * stat.inv_Σz * stat.z
 end
 
-update_statistic(stat::DiagMEWMA, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
-
-
 
 """
     MCUSUM{L,V}(k::L, value::V = 0.0, St::Vector{L})
@@ -99,8 +96,11 @@ A mutable struct representing a Multivariate Cumulative Sum (MCUSUM) statistic.
     @assert !isinf(value)
     @assert p > 0
     @assert k > 0
+    @assert p == length(St)
 end
 export MCUSUM
+
+MCUSUM(x::AbstractMatrix, k::Real) = MCUSUM(k=k, p=size(x,2))
 
 #TODO: Test MCUSUM control chart 
 get_design(stat::MCUSUM) = deepcopy(stat.k)
@@ -113,13 +113,11 @@ function update_statistic!(stat::MCUSUM, x::AbstractVector)
     if Ct <= stat.k
         stat.St .= 0.0
     else
-        stat.St = (1.0 - stat.k/Ct) * (St + x)
+        stat.St = (1.0 - stat.k/Ct) * (stat.St + x)
     end
     stat.value = sqrt(dot(stat.St, stat.St))
     return stat.value
 end
-
-update_statistic(stat::MCUSUM, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
 
 
 """
@@ -155,8 +153,8 @@ Constructs an instance of the AMCUSUM struct.
 end
 export AMCUSUM
 
-#TODO: Test AMCUSUM control chart 
-#TODO: Write AMCUSUM constructors
+AMCUSUM(x::AbstractMatrix, λ::Real; minshift=0.1) = AMCUSUM(λ=λ, p=size(x,2))
+
 get_value(stat::AMCUSUM) = get_value(stat.stat)
 set_value!(stat::AMCUSUM) = set_value!(stat.stat)
 
@@ -165,18 +163,13 @@ set_design!(stat::AMCUSUM, λ::AbstractVector) = stat.λ = first(λ)
 get_design(stat::AMCUSUM) = [stat.λ]
 
 function update_statistic!(stat::AMCUSUM, x::AbstractVector)
+    update_statistic!(stat.stat, x)
     stat.t += 1
     λ = stat.λ
     stat.Et = (1 - λ) * stat.Et + λ * x
-    Ct = sqrt(dot(stat.St + x, stat.St + x))
     squared_shift_est = 1/(1 - (1 - λ)^stat.t)^2 * (stat.Et'stat.Et - (1-(1-λ)^(2*stat.t))*(λ*length(stat.Et)/(2-λ)))
     squared_shift = max(stat.minshift, (1-λ)*(stat.shift)^2 + λ*squared_shift_est)
     stat.shift = sqrt(squared_shift)
     set_design!(stat.stat, stat.shift/2)
-    return update_statistic!(stat.stat, x)
+    return get_value(stat)
 end
-
-update_statistic(stat::AMCUSUM, x::AbstractVector) = update_statistic!(deepcopy(stat), x)
-
-
-
