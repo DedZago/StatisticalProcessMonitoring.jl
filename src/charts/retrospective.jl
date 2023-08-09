@@ -36,7 +36,7 @@ function apply_chart!(CH::AbstractChart, x::AbstractMatrix)
     n, _ = size(x)
     y = Vector{typeof(get_value(CH))}(undef, n)
     lim = Vector{typeof(get_limit(CH))}(undef, n)
-    alarm = [false for _ in eachindex(x)]
+    alarm = [false for _ in 1:n]
     for i in 1:n
         update_chart!(CH, view(x, i, :))
         y[i] = deepcopy(get_value(CH))
