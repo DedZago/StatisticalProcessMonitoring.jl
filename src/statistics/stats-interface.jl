@@ -28,10 +28,10 @@ export set_value!
 
 Update a statistic with a new observation x
 """
-update_statistic(stat::AbstractStatistic, x) = error("Not implemented for abstract class.")
-export update_statistic
 update_statistic!(stat::AbstractStatistic, x) = error("Not implemented for abstract class.")
 export update_statistic!
+update_statistic(stat::AbstractStatistic, x) = update_statistic!(deepcopy(stat), x)
+export update_statistic
 get_maxrl(::AbstractStatistic) = Inf
 get_maxrl(stat::Vector{T}) where T <: AbstractStatistic = minimum(get_maxrl.(stat))
 export get_maxrl
