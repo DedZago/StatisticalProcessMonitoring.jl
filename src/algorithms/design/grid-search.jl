@@ -11,9 +11,9 @@ Optimizes a control chart by finding the best set of parameters using a grid sea
 - par_current (Vector{Float64}): the optimal set of parameters found by the optimization algorithm.
 """
 function optimize_grid(CH::ControlChart, rlconstr::Function, settings::OptSettings)
-    @unpack minpar_opt, maxpar_opt, maxiter_opt, nsims_opt, m_grid, x_tol_opt = settings
+    @unpack minpar, maxpar, maxiter, nsims, m_grid, x_tol = settings
 
-    p = length(minpar_opt)
+    p = length(minpar)
     grid_vec = Vector{Vector{Float64}}(undef, p)
     step = Vector{Float64}(undef, p)
     par_current = zeros(p)
@@ -23,9 +23,9 @@ function optimize_grid(CH::ControlChart, rlconstr::Function, settings::OptSettin
     cnt = 0
     best_RL = 0.0
     RL = 0.0
-    min_par = deepcopy(minpar_opt)
-    max_par = deepcopy(maxpar_opt)
-    while i < maxiter_opt
+    min_par = deepcopy(minpar)
+    max_par = deepcopy(maxpar)
+    while i < maxiter
         i = i+1
         par_old = deepcopy(par_current)
         step = [max_par[w] - min_par[w] for w in 1:p]
@@ -43,7 +43,7 @@ function optimize_grid(CH::ControlChart, rlconstr::Function, settings::OptSettin
                 par_current = par
             end
         end
-        if sum(abs.(par_current - par_old)) < x_tol_opt
+        if sum(abs.(par_current - par_old)) < x_tol
             @show par_current, par_old
             break
         end

@@ -60,8 +60,14 @@ export DiagMEWMA
 get_design(stat::DiagMEWMA) = deepcopy(stat.Λ)
 
 function set_design!(stat::DiagMEWMA, Λ::AbstractVector)
-    stat.inv_Σz = inv(diagm(Λ)*diagm(Λ))
-    stat.Λ = Λ
+    Λ_v = zeros(length(stat.z))
+    if length(Λ) == 1 && length(stat.z) > 1
+        Λ_v = fill(first(Λ), length(stat.z))
+    else
+        Λ_v[:] = Λ[:]
+    end
+    stat.inv_Σz = inv(diagm(Λ_v)*diagm(Λ_v))
+    stat.Λ = Λ_v
 end
 
 function update_statistic!(stat::DiagMEWMA, x::AbstractVector)
@@ -156,7 +162,7 @@ export AMCUSUM
 AMCUSUM(x::AbstractMatrix, λ::Real; minshift=0.1) = AMCUSUM(λ=λ, p=size(x,2))
 
 get_value(stat::AMCUSUM) = get_value(stat.stat)
-set_value!(stat::AMCUSUM) = set_value!(stat.stat)
+set_value!(stat::AMCUSUM, x) = set_value!(stat.stat, x)
 
 set_design!(stat::AMCUSUM, λ::Real) = stat.λ = λ
 set_design!(stat::AMCUSUM, λ::AbstractVector) = stat.λ = first(λ)

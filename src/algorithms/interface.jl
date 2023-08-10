@@ -101,7 +101,7 @@ function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSet
         #TODO: implement SPSA
         set_design!(CH, optimize_SPSA(CH, rlconstr, settings))
     else
-        set_design!(CH, optimize_nlopt(CH, rlconstr, settings))
+        set_design!(CH, optimize_nlopt(CH, rlconstr, settings, optimizer=optimizer))
     end
     set_h!(get_limit(CH), get_h(get_limit(CH_)))
     return get_design(CH)
