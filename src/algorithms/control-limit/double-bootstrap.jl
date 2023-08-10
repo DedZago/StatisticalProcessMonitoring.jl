@@ -28,12 +28,11 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Int = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), B::Int = 1000, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false)
+function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Int = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false)
 
     @assert maxiter > 0 "maxiter must be positive"
     @assert nsims > 0 "nsims must be positive"
     @assert maxrl > 0 "maxrl must be positive"
-    @assert B > 0 "B must be positive"
     @assert x_tol > 0 "x_tol must be positive"
     @assert f_tol > 0 "f_tol must be positive"
 
@@ -57,8 +56,7 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
 
     #! Important
     #FIXME: add parameters to control bootstrap-corrected control limit estimate
-    h_boot = zeros(B)
-    h = bisection_paths(deepcopy(CH), rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, verbose)
+    h = _bisection_paths(deepcopy(CH), rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, verbose)
     # for b in 1:B
     #     h_boot[b] = bisection_paths(CH, rl_paths[sample(1:nsims_i, nsims_i), :], target, maxrl, nsims_i, x_tol, f_tol, maxiter, false)
     # end
@@ -90,7 +88,7 @@ end
 export approximateBisectionCL
 
 
-function bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, verbose)
+function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, verbose)
     hmax = maximum(rl_paths)
     hmin = 0.0
     if verbose println("Running bisection on simulated paths with endpoints [$(hmin), $(hmax)] ...") end
@@ -138,3 +136,4 @@ function bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_t
     end
     return h    
 end
+export _bisection_paths
