@@ -7,19 +7,22 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 
 ### Inputs
 * `CH` - A control chart.
-* `rlsim` - A function that generates a run length for the control chart with signature `rlsim(CH; maxiter)`. If left unspecified, defaults to `run_sim`. See the help for `run_sim` for more information about the signature of the function.
-* `settings` - An `OptSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see for instance Qiu (2013).
+* `hmax` - The maximum value for the control limit.
 
 ### Accepted settings:
-* `hmin` - The minimum value of the control limit, defaults to `sqrt(eps())`.
-* `hmax` - The maximum value for the control limit.
-* `maxiter` - The maximum number of bisection iterations.
-* `nsims` - The number of run lengths used to estimate the target nominal property.
-* `trunc` - The maximum run length after which it is truncated, to avoid excessive computations.
-* `x_tol` - Absolute tolerance for the algorithm, which is ended if
+* `rlsim` - A function that generates a run length for the control chart with signature `rlsim(CH; maxiter)`. If left unspecified, defaults to `run_sim`. See the help for `run_sim` for more information about the signature of the function.
+* `nsims` - The number of run lengths used to estimate the target nominal property (default: 10000).
+* `hmin` - The minimum value of the control limit, (default: `sqrt(eps())`).
+* `maxiter` - The maximum number of bisection iterations (default: 30).
+* `trunc` - The value at which to truncate the run length, to avoid excessive computations (default: Inf, i.e. no truncation).
+* `x_tol` - Absolute tolerance for the algorithm, which is terminated if
     ``h^{(k+1)} - h^{(k)} < x_{\\text{tol}}``
-* `f_tol` - Absolute tolerance for the algorithm, which is ended if
+    (default: 1e-06)
+* `f_tol` - Absolute tolerance for the algorithm, which is terminated if
     ``\\text{target}(h^{(k+1)}) - \\text{target}(h^{(k)}) < f_{\\text{tol}}``
+    (default: 1.0)
+* `verbose` - Whether to print information to the user about the state of the optimization (default: false).
+* `parallel::Bool` - Whether the algorithm should be run in parallel, using available threads (default: false)
 
 ### Returns
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
@@ -28,9 +31,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function bisectionCL!(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::Int = 10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, trunc::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false)
-
-    #TODO: consider trunc of the control chart run lengths when calculating the control limit?
+function bisectionCL!(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::Int = 10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, trunc::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false, parallel::Bool = false)
 
     @assert hmin > 0 "hmin must be positive"
     @assert hmax > 0 "hmax must be positive"
@@ -58,8 +59,14 @@ function bisectionCL!(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::
         # Set control limit value
         set_limit!(CH, h)
         # Simulate run lengths 
-        for j in 1:nsims_i
-            RLs[j] = first(rlsim(CH, maxiter=trunc))
+        if parallel
+            Threads.@threads for j in 1:nsims_i
+                RLs[j] = first(rlsim(CH, maxiter=trunc))
+            end
+        else
+            for j in 1:nsims_i
+                RLs[j] = first(rlsim(CH, maxiter=trunc))
+            end
         end
         # Calculate nominal measure (ARL/QRL/...) 
         E_RL = measure(RLs, CH, verbose=verbose)
@@ -126,34 +133,36 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 
 ### Inputs
 * `CH` - A control chart.
-* `rlsim` - A function that generates a run length for the control chart with signature `rlsim(CH; maxiter)`. If left unspecified, defaults to `run_sim`. See the help for `run_sim` for more information about the signature of the function.
-* `settings` - An `OptSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see for instance Qiu (2013).
 
 ### Accepted settings
+* `inflate::Real` - An inflation constant for the starting control limit value so that, on average, the first iteration will move the control limit to lower values. This usually saves computational time (default: 1.05).
+* `parallel::Bool` - Whether the algorithm should be run in parallel, using available threads (default: false)
+
 #### Bisection algorithm
-* `rlsim` - A function that generates new data with signature `rlsim(CH; maxiter)`. If left unspecified, defaults to `run_sim`.
-* `hmin` - The minimum value of the control limit, defaults to `sqrt(eps())`.
-* `hmax` - The maximum value for the control limit.
-* `maxiter` - The maximum number of bisection iterations.
-* `nsims` - The number of run lengths used to estimate the target nominal property.
-* `trunc` - The maximum run length after which it is truncated, to avoid excessive computations.
-* `x_tol` - Absolute tolerance for the algorithm, which is ended if
+* `rlsim` - A function that generates a run length for the control chart with signature `rlsim(CH; maxiter)`. If left unspecified, defaults to `run_sim`. See the help for `run_sim` for more information about the signature of the function.
+* `nsims` - The number of run lengths used to estimate the target nominal property (default: 10000).
+* `hmin` - The minimum value of the control limit, (default: `sqrt(eps())`).
+* `maxiter` - The maximum number of bisection iterations (default: 30).
+* `trunc` - The value at which to truncate the run length, to avoid excessive computations (default: Inf, i.e. no truncation).
+* `x_tol` - Absolute tolerance for the algorithm, which is terminated if
     ``h^{(k+1)} - h^{(k)} < x_{\\text{tol}}``
-* `f_tol` - Absolute tolerance for the algorithm, which is ended if
+    (default: 1e-06)
+* `f_tol` - Absolute tolerance for the algorithm, which is terminated if
     ``\\text{target}(h^{(k+1)}) - \\text{target}(h^{(k)}) < f_{\\text{tol}}``
+    (default: 1.0)
 #### SA algorithm
-* `Nfixed_sa` - The number of iterations for the gain estimation stage.
-* `Afixed_sa` - The fixed gain during the gain estimation stage.
-* `Amin_sa` - The minimum allowed value of gain.
-* `Amax_sa` - The maximum allowed value of gain.
-* `deltaSA_sa` - The shift in control limit used during the gain estimation stage.
-* `q_sa` - The power that controls the denominator in the Robbins-Monro algorithm.
-* `gamma_sa` - The precision parameter for the stopping criterion of the algorithm.
-* `Nmin_sa` - The minimum number of iterations required for the algorithm to end.
-* `z_sa` - The quantile of the `Normal(0,1)` that controls the probability of the stopping criterion being satisfied.
-* `Cmrl_sa` - The inflation factor for the maximum number of iterations the run length may run for.
-* `maxiter_sa` - Maximum number of iterations before the algorithm is forcibly ended.
-* `verbose_sa` - Whether to print information to the user about the state of the optimization.
+* `Nfixed` - The number of iterations for the gain estimation stage (default: 200).
+* `Afixed` - The fixed gain during the gain estimation stage (default: 0.1).
+* `Amin` - The minimum allowed value of gain (default: 0.1).
+* `Amax` - The maximum allowed value of gain (default: 100).
+* `deltaSA` - The shift in control limit used during the gain estimation stage (default: 0.1).
+* `q` - The power that controls the denominator in the Robbins-Monro algorithm (default: 0.55).
+* `gamma` - The precision parameter for the stopping criterion of the algorithm (default: 0.05).
+* `Nmin` - The minimum number of iterations required for the algorithm to end (default: 200).
+* `z` - The quantile of the `Normal(0,1)` that controls the probability of the stopping criterion being satisfied (default: 3.0).
+* `Cmrl` - The inflation factor for the maximum number of iterations the run length may run for (default: 10.0).
+* `maxiter_sa` - Maximum number of iterations before the algorithm is forcibly ended (default: 200).
+* `verbose` - Whether to print information to the user about the state of the optimization (default: false).
 
 ### Returns
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
@@ -163,10 +172,10 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Capizzi, G., & Masarotto, G. (2016). Efficient control chart calibration by simulated stochastic approximation. IIE Transactions, 48(1), 57-65. https://doi.org/10.1080/0740817X.2015.1055392
 
 """
-function combinedCL!(CH::ControlChart; rlsim::Function = run_sim, nsims::Int = 10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, trunc::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false, inflate = 1.05, rlsim_sa::Function = run_sim_sa, Nfixed::Int = 200, Nmin::Int = 200, maxiter_sa = 200)
-    h, _, _ = saCL(CH, rlsim = rlsim_sa, Nfixed=Nfixed, Nmin=Nmin, maxiter=maxiter_sa, verbose=verbose)
+function combinedCL!(CH::ControlChart; rlsim::Function = run_sim, nsims::Int = 10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, trunc::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false, inflate = 1.05, rlsim_sa::Function = run_sim_sa, Nfixed::Int = 200, Nmin::Int = 200, maxiter_sa::Int = 200, parallel::Bool = false)
+    h, _, _ = saCL(CH, rlsim = rlsim_sa, Nfixed=Nfixed, Nmin=Nmin, maxiter=maxiter_sa, verbose=verbose, parallel=parallel)
     hmax = 2.0 * inflate * h
-    bisectionCL!(CH, hmax, rlsim=rlsim, nsims=nsims, hmin=hmin, maxiter=maxiter, trunc=trunc, x_tol=x_tol, f_tol=f_tol, verbose=verbose)
+    bisectionCL!(CH, hmax, rlsim=rlsim, nsims=nsims, hmin=hmin, maxiter=maxiter, trunc=trunc, x_tol=x_tol, f_tol=f_tol, verbose=verbose, parallel=parallel)
 end
 export combinedCL!
 
