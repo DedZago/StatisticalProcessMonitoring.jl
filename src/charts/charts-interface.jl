@@ -10,17 +10,17 @@ mutable struct ControlChart{STAT, LIM, NOM, PH1} <: AbstractChart{STAT, LIM, NOM
     stat::STAT
     limit::LIM
     nominal::NOM
-    phase1::PH1
+    phase2::PH1
     t::Int
 
-    ControlChart(stat::S, limit::L, nominal::N, phase1::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(stat, limit, nominal, phase1, t)
-    ControlChart(stat::S, limit::L, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(stat, limit, nominal, phase1, 0)
-    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase1::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{Vector{S},Vector{L},N,P}(stat, limit, nominal, phase1, 0)
-    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase1::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{Vector{S},Vector{L},N,P}(stat, limit, nominal, phase1, t)
+    ControlChart(stat::S, limit::L, nominal::N, phase2::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), t)
+    ControlChart(stat::S, limit::L, nominal::N, phase2::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), 0)
+    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase2::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{Vector{S},Vector{L},N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), 0)
+    ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase2::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{Vector{S},Vector{L},N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), t)
 end
 export ControlChart
 
-Base.show(io::IO, CH::ControlChart) = print(io, "stat: $(get_statistic(CH))\nlimit: $(get_limit(CH))\nnominal: $(get_nominal(CH))\nphase1: $(typeof(get_phase1(CH)))\n\nt: $(get_t(CH))")
+Base.show(io::IO, CH::ControlChart) = print(io, "stat: $(get_statistic(CH))\nlimit: $(get_limit(CH))\nnominal: $(get_nominal(CH))\nphase2: $(typeof(get_phase2(CH)))\n\nt: $(get_t(CH))")
 
 const MultipleControlChart{S,L,N,P} = ControlChart{Vector{S}, Vector{L},N,P} where {S,L,N,P}
 export MultipleControlChart
@@ -32,7 +32,7 @@ export MultipleControlChart
 Create a shallow copy of a control chart, so that only the statistic and the control limit are copied.
 This is done to prevent copying eventual Phase 2 data multiple times and thus reduce computational effort when optimizing the control limit and the chart tuning parameters.
 """
-shallow_copy_sim(CH::ControlChart) = ControlChart(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), deepcopy(get_nominal(CH)), shallow_copy_sim(get_phase1(CH)), deepcopy(get_t(CH)))
+shallow_copy_sim(CH::ControlChart) = ControlChart(deepcopy(get_statistic(CH)), deepcopy(get_limit(CH)), deepcopy(get_nominal(CH)), shallow_copy_sim(get_phase2(CH)), deepcopy(get_t(CH)))
 export shallow_copy_sim
 
 
@@ -101,12 +101,12 @@ export get_nominal_value
 
 
 """
-    get_phase1(CH::AbstractChart)
+    get_phase2(CH::AbstractChart)
 
-Get the Phase 1 information of a control chart.
+Get the phase 2 information of a control chart.
 """
-get_phase1(CH::AbstractChart) = CH.phase1
-export get_phase1
+get_phase2(CH::AbstractChart) = CH.phase2
+export get_phase2
 
 """
     get_t(CH::AbstractChart)
@@ -182,7 +182,7 @@ export is_OC
 Check whether each individual control chart that makes up a multiple control chart is in control or out of control.
 
 ### Returns
-A vector of Bool, whose length is the number of individual statstics.
+A vector of Bool, whose length is the number of individual statistics.
 """
 is_IC_vec(CH::MultipleControlChart) = is_IC_vec(get_limit(CH), get_statistic(CH))
 is_OC_vec(CH::MultipleControlChart) = .!(is_IC_vec(get_limit(CH), get_statistic(CH)))
@@ -193,6 +193,9 @@ export is_OC_vec
     function set_statistic!(CH::AbstractChart, statistic::AbstractStatistic)
 
 Set the statistic of a control chart.
+
+### Returns
+The statistic that has been set.
 """
 function set_statistic!(CH::C, statistic::STAT) where C <: AbstractChart where STAT <: AbstractStatistic
     CH.stat = statistic
@@ -205,6 +208,9 @@ export set_statistic!
     function set_value!(CH::AbstractChart, value)
 
 Set the value of the statistic of a control chart.
+
+### Returns
+The value of the statistic that has been set.
 """
 function set_value!(CH::C, value) where C <: AbstractChart
     set_value!(get_statistic(CH), value)
@@ -216,6 +222,9 @@ export set_value!
     function set_limit!(CH::AbstractChart, limit::AbstractLimit)
 
 Set the control limit of a control chart.
+
+### Returns
+The control limit that has been set.
 """
 function set_limit!(CH::AbstractChart, limit::AbstractLimit)
     CH.limit = limit
@@ -238,31 +247,31 @@ function set_limit!(CH::MultipleControlChart, h::Vector{Float64})
 end
 
 """
-    set_phase1!(CH::AbstractChart, phase1::AbstractPhase2)
+    set_phase2!(CH::AbstractChart, phase2::AbstractPhase2)
 
-Set the Phase 1 information of a control chart.
+Set the Phase 2 information of a control chart to simulate run lenghts.
 """
-function set_phase1!(CH::C, phase1::PH1) where C <: AbstractChart where PH1 <: AbstractPhase2
-    CH.phase1 = phase1
-    return phase1
+function set_phase2!(CH::C, phase2::PH2) where C <: AbstractChart where PH2 <: AbstractPhase2
+    CH.phase2 = phase2
+    return phase2
 end
-export set_phase1!
+export set_phase2!
 
 
 """
     new_data(CH::AbstractChart)
 
-Simulate a new observation for the control chart from the Phase 1 data.
+Simulate a new observation for the control chart from the phase 2 data.
 """
-new_data(CH::AbstractChart) = new_data(get_phase1(CH))
+new_data(CH::AbstractChart) = new_data(get_phase2(CH))
 export new_data
 
 """
     new_data(CH::AbstractChart)
 
-Simulate a new observation for the control chart from the Phase 1 data, eventually modifying the underlying phase 1 object.
+Simulate a new observation for the control chart from the phase 2 data, eventually modifying the underlying phase 2 object.
 """
-new_data!(CH::AbstractChart) = new_data!(get_phase1(CH))
+new_data!(CH::AbstractChart) = new_data!(get_phase2(CH))
 export new_data
     
 
