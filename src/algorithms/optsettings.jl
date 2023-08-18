@@ -42,7 +42,7 @@ function OptSettings(CH::ControlChart; kw...)
     if haskey(kw_dict, :maxpar)
         @assert length(minpar) == d
     else
-        kw_dict[:maxpar] = [-Inf for _ in 1:d]
+        kw_dict[:maxpar] = [Inf for _ in 1:d]
     end
     return OptSettings(; kw_dict...)
 end
