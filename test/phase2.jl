@@ -1,4 +1,4 @@
-module TestPhase1
+module Testphase2
 using SPM
 using Test
 using Random

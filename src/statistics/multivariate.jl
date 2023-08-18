@@ -34,15 +34,15 @@ update_statistic!(stat::MShewhart, x::AbstractVector) = stat.value = update_stat
 """
     MEWMA(Λ, value)
 
-Exponentially weighted moving average with smoothing matrix `Λ` and initial value `value`.
+Exponentially weighted moving average with diagonal smoothing matrix `Λ` and initial value `value`.
 
 The update mechanism based on a new observation `x` is given by
 
-``Z = (I-Λ)*Z + Λ * x``,
+``Z_t = (I-Λ)*Z_{t-1} + Λ * x_t``,
 
 and the chart value is defined as
 
-``value = Z' Λ^(-1) Z``.
+``value_t = Z_t' Λ^(-1) Z_t``.
 
 ### References 
 Lowry, C. A., Woodall, W. H., Champ, C. W., & Rigdon, S. E. (1992). A Multivariate Exponentially Weighted Moving Average Control Chart. Technometrics, 34(1), 46-53. https://doi.org/10.1080/00401706.1992.10485232
@@ -108,9 +108,7 @@ export MCUSUM
 
 MCUSUM(x::AbstractMatrix, k::Real) = MCUSUM(k=k, p=size(x,2))
 
-#TODO: Test MCUSUM control chart 
 get_design(stat::MCUSUM) = deepcopy(stat.k)
-
 set_design!(stat::MCUSUM, k::Real) = stat.k = k
 set_design!(stat::MCUSUM, k::AbstractVector) = stat.k = first(k)
 
@@ -127,9 +125,9 @@ end
 
 
 """
-    AMCUSUM{C,L,V}(λ::L, p::Int; minshift::L = 0.1, shift::L = 0.0, Et::Vector{V}, t::Int = 0, stat::C = MCUSUM(k=0.1, p=p))
+    AMCUSUM(λ, p; minshift = 0.1, shift = 0.0, Et = zeros(p), t = 0, stat = MCUSUM(k=0.1, p=p))
 
-Constructs an instance of the AMCUSUM struct.
+A mutable struct representing an Adaptive Multivariate Cumulative Sum (MCUSUM) statistic.
 
 # Arguments
 - `λ::L`: The value of λ, where 0.0 <= λ <= 1.0.
@@ -159,7 +157,7 @@ Constructs an instance of the AMCUSUM struct.
 end
 export AMCUSUM
 
-AMCUSUM(x::AbstractMatrix, λ::Real; minshift=0.1) = AMCUSUM(λ=λ, p=size(x,2))
+AMCUSUM(x::AbstractMatrix, λ::Real; minshift=0.1) = AMCUSUM(λ=λ, p=size(x,2), minshift=minshift)
 
 get_value(stat::AMCUSUM) = get_value(stat.stat)
 set_value!(stat::AMCUSUM, x) = set_value!(stat.stat, x)

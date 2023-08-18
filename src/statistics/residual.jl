@@ -6,15 +6,13 @@ export residual!
 
 ################ Control charts based on residuals ################
 
-#FIXME: test general interface for residual statistic
 get_statistic(S::ResidualStatistic) = S.stat
 get_value(S::ResidualStatistic) = get_value(get_statistic(S))
 get_design(S::ResidualStatistic) = get_design(get_statistic(S))
 set_design!(S::ResidualStatistic, par) = set_design!(get_statistic(S), par)
 get_maxrl(S::ResidualStatistic) = get_maxrl(get_statistic(S))
 
-#FIXME: residual! in update_statistic may result in unwanted bugs
-update_statistic(S::ResidualStatistic, x) = update_statistic(get_statistic(S), residual!(x, S))
+update_statistic(S::ResidualStatistic, x) = update_statistic(get_statistic(S), residual!(x, deepcopy(S)))
 update_statistic!(S::ResidualStatistic, x) = update_statistic!(get_statistic(S), residual!(x, S))
 
 """
@@ -36,8 +34,6 @@ A mutable struct representing a statistic applied to a location-scale family.
     μ::M = 0.0
     Ω::P = 0.0
 end
-
-
 export LocationScaleStatistic
 
 #FIXME: test whether the location scale constructors and the residual function work on vector and matrix data

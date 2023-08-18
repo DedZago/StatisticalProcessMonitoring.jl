@@ -15,7 +15,7 @@ using StatsBase
         @test_throws AssertionError EWMA(λ=0.1, value=-Inf)
         params = get_design(STAT)
         @test length(params) == 1
-        @test params[:λ] == λ
+        @test params[1] == λ
     end
     @testset "update" begin
         x = 1.0
@@ -41,7 +41,7 @@ end
         @test_throws AssertionError CUSUM(value=-Inf)
         params = get_design(STAT)
         @test length(params) == 1
-        @test params[:k] == k
+        @test params[1] == k
     end
     @testset "update" begin
         x = 1.0
