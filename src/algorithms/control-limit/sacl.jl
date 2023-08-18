@@ -64,18 +64,19 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 
 ### Settings
 The following settings control the behaviour of the algorithm: 
-* `Nfixed` - The number of iterations for the gain estimation stage.
-* `Afixed` - The fixed gain during the gain estimation stage.
-* `Amin` - The minimum allowed value of gain.
-* `Amax` - The maximum allowed value of gain.
-* `delta_sa` - The shift in control limit used during the gain estimation stage.
-* `q` - The power that controls the denominator in the Robbins-Monro algorithm.
-* `gamma` - The precision parameter for the stopping criterion of the algorithm.
-* `Nmin` - The minimum number of iterations to avoid early terminations.
-* `z` - The quantile of the `Normal(0,1)` that controls the probability of the stopping criterion being satisfied.
-* `Cmrl` - The inflation factor for the maximum number of iterations the run length may run for.
-* `maxiter` - Maximum number of iterations before the algorithm is forcibly ended.
-* `verbose` - Whether to print information to the user about the state of the optimization.
+* `Nfixed` - The number of iterations for the gain estimation stage (default: 500).
+* `Afixed` - The fixed gain during the gain estimation stage (default: 0.1).
+* `Amin` - The minimum allowed value of gain (default: 0.1).
+* `Amax` - The maximum allowed value of gain (default: 100.0).
+* `delta_sa` - The shift in control limit used during the gain estimation stage (default: 0.1).
+* `q` - The power that controls the denominator in the Robbins-Monro algorithm (default: 0.55).
+* `gamma` - The precision parameter for the stopping criterion of the algorithm (default: 0.02).
+* `Nmin` - The minimum number of iterations to avoid early terminations (default: 1000).
+* `z` - The quantile of the `Normal(0,1)` that controls the probability of the stopping criterion being satisfied (default: 3.0).
+* `Cmrl` - The inflation factor for the maximum number of iterations the run length may run for (default: 10.0).
+* `maxiter` - Maximum number of iterations before the algorithm is forcibly ended (default: 50000).
+* `verbose` - Whether to print information to the user about the state of the optimization (default: false).
+* `parallel::Bool` - Whether the algorithm should be run in parallel, using available threads (default: false). Parallelization is achieved by averaging `Threads.nthreads` independent replications of the algorithm, each with precision parameter `gamma*sqrt(Threads.nthreads)`. See [Capizzi, 2016] for further discussion on parallelizing the SA algorithm.
 
 ### Returns
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
@@ -83,7 +84,23 @@ The following settings control the behaviour of the algorithm:
 ### References
 * Capizzi, G., & Masarotto, G. (2016). "Efficient Control Chart Calibration by Simulated Stochastic Approximation". IIE Transactions 48 (1). https://doi.org/10.1080/0740817X.2015.1055392.
 """
-function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, hmin::Float64 = sqrt(eps()), Nfixed::Int = 500, Afixed::Float64 = 0.1, Amin::Float64 = 0.1, Amax::Float64 = 100.0, delta_sa::Float64 = 0.1, q::Float64 = 0.55, gamma::Float64 = 0.02, Nmin::Int = 1000, z::Float64 = 3.0, Cmrl::Float64 = 10.0, maxiter::Int = 50_000, verbose::Bool = false)
+function saCL!(CH::ControlChart; rlsim::Function = run_sim_sa, hmin::Float64 = sqrt(eps()), Nfixed::Int = 500, Afixed::Float64 = 0.1, Amin::Float64 = 0.1, Amax::Float64 = 100.0, delta_sa::Float64 = 0.1, q::Float64 = 0.55, gamma::Float64 = 0.02, Nmin::Int = 1000, z::Float64 = 3.0, Cmrl::Float64 = 10.0, maxiter::Int = 50_000, verbose::Bool = false, parallel::Bool = false)
+    if parallel
+        nthr = Threads.nthreads()
+        output_list = [[deepcopy(get_h(get_limit(CH))), 0.0, "Convergence"] for _ in 1:nthr]
+        Threads.@threads for i in 1:nthr
+            output_list[i] = collect(saCL_internal!(CH, rlsim = rlsim, hmin = hmin, Nfixed = Nfixed, Afixed = Afixed, Amin = Amin, Amax = Amax, delta_sa = delta_sa, q = q, gamma = gamma*sqrt(nthr), Nmin = Nmin, z = z, Cmrl = Cmrl, maxiter = maxiter, verbose = verbose))
+        end
+        status = ifelse(all([x[3] for x in output_list] .== "Convergence"), "Convergence", "Maximum number of iterations reached")
+        return (h = mean(x[1] for x in output_list), iter = Int(trunc(mean(x[2] for x in output_list))), status = status)
+    else
+        return saCL_internal!(CH, rlsim = rlsim, hmin = hmin, Nfixed = Nfixed, Afixed = Afixed, Amin = Amin, Amax = Amax, delta_sa = delta_sa, q = q, gamma = gamma, Nmin = Nmin, z = z, Cmrl = Cmrl, maxiter = maxiter, verbose = verbose)
+    end
+end
+export saCL
+
+
+function saCL_internal!(CH::ControlChart; rlsim::Function = run_sim_sa, hmin::Float64 = sqrt(eps()), Nfixed::Int = 500, Afixed::Float64 = 0.1, Amin::Float64 = 0.1, Amax::Float64 = 100.0, delta_sa::Float64 = 0.1, q::Float64 = 0.55, gamma::Float64 = 0.02, Nmin::Int = 1000, z::Float64 = 3.0, Cmrl::Float64 = 10.0, maxiter::Int = 50_000, verbose::Bool = false)
 
     tmp = rlsim(CH; maxiter=1, delta=0.0)
     @assert haskey(tmp, :rl) "rlsim function must have key :rl"
