@@ -61,7 +61,7 @@ export optimize_limit
 
 
 """
-    optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SACL, nsims_opt::Int = 1000, trace::Int, kw...)
+    optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SACL, nsims_opt::Int = 1000, kw...)
 
 Optimizes the design of a control chart using a specified optimization algorithm.
 
@@ -71,13 +71,12 @@ Optimizes the design of a control chart using a specified optimization algorithm
 - `settings::OptSettings`: The optimization settings to use. Defaults to `OptSettings(CH)`.
 - `optimizer::Symbol`: The optimization algorithm to use. Defaults to `:LN_BOBYQA`.
 - `solver::Symbol`: The solver algorithm to use. Defaults to `:SACL`.
-- `trace::Int`: The trace level for printing optimization progress. Set to `0` to disable printing.
 - `kw...`: Additional keyword arguments to pass to the solver algorithm.
 
 # Returns
 The optimized design of the control chart.
 """
-function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SA, trace::Int, kw...)
+function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SA, kw...)
     CH_ = deepcopy(CH)
 
     @unpack nsims = settings
@@ -87,11 +86,11 @@ function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSet
 
     function rlconstr(par::Vector, grad::Vector)::Float64
         set_design!(CH_, par)
-        optimize_limit!(CH_, solver, kw...)
-        if trace > 0
+        optimize_limit!(CH_, solver; kw...)
+        if settings.verbose
             print("$(round.(par, digits=6))\t")
         end
-        ret = SPM.measure([rlsim_oc(CH_) for _ in 1:nsims], CH_, verbose=trace > 0)
+        ret = SPM.measure([rlsim_oc(CH_) for _ in 1:nsims], CH_, verbose=settings.verbose)
         return ret
     end
 
@@ -109,7 +108,7 @@ end
 export optimize_design!
 
 """
-    optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SACL, nsims_opt::Int = 1000, trace::Int, kw...)
+    optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SACL, nsims_opt::Int = 1000, kw...)
 
 Optimizes the design of a control chart using a specified optimization algorithm.
 
@@ -119,14 +118,13 @@ Optimizes the design of a control chart using a specified optimization algorithm
 - `settings::OptSettings`: The optimization settings to use. Defaults to `OptSettings(CH)`.
 - `optimizer::Symbol`: The optimization algorithm to use. Defaults to `:LN_BOBYQA`.
 - `solver::Symbol`: The solver algorithm to use. Defaults to `:SACL`.
-- `trace::Int`: The trace level for printing optimization progress. Set to `0` to disable printing.
 - `kw...`: Additional keyword arguments to pass to the solver algorithm.
 
 # Returns
 The optimized design of the control chart.
 """
-function optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SA, trace::Int, kw...)
+function optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :SA, kw...)
     CH_ = deepcopy(CH)
-    optimize_design!(CH_, rlsim_oc, settings; optimizer=optimizer, solver=solver, trace=trace, kw...)
+    optimize_design!(CH_, rlsim_oc, settings; optimizer=optimizer, solver=solver, kw...)
 end
 export optimize_design

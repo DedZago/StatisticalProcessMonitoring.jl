@@ -2,7 +2,7 @@ using Parameters
 
 @with_kw mutable struct OptSettings{F, I, B} 
     # Global parameter optimization options
-    x_tol::F = 1e-05
+    x_tol::F = 1e-03
     nsims::I = 1000
     maxiter::I = 1000
     verbose::B = true
