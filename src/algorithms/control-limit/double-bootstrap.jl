@@ -62,7 +62,7 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
     target = get_nominal_value(CH)                  # Target nominal ARL/QRL/...
 
     #! Important
-    #FIXME: add parameters to control bootstrap-corrected control limit estimate
+    #TODO: think about potential bootstrap-corrected control limit estimate
     h = _bisection_paths(deepcopy(CH), rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
     # for b in 1:B
     #     h_boot[b] = bisection_paths(CH, rl_paths[sample(1:nsims_i, nsims_i), :], target, maxrl, nsims_i, x_tol, f_tol, maxiter, false)
