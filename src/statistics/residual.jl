@@ -7,6 +7,7 @@ export residual!
 ################ Control charts based on residuals ################
 
 get_statistic(S::ResidualStatistic) = S.stat
+set_value!(S::ResidualStatistic, x) = set_value!(get_statistic(S), x)
 get_value(S::ResidualStatistic) = get_value(get_statistic(S))
 get_design(S::ResidualStatistic) = get_design(get_statistic(S))
 set_design!(S::ResidualStatistic, par) = set_design!(get_statistic(S), par)
