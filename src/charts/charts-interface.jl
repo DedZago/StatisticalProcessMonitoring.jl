@@ -205,6 +205,20 @@ export set_statistic!
 
 
 """
+    function set_t!(CH::AbstractChart, t)
+
+Set the current time point of a control chart.
+
+### Returns
+The time point of the statistic that has been set.
+"""
+function set_t!(CH::C, t::Int) where C <: AbstractChart
+    CH.t = t
+end
+export set_t!
+
+
+"""
     function set_value!(CH::AbstractChart, value)
 
 Set the value of the statistic of a control chart.
