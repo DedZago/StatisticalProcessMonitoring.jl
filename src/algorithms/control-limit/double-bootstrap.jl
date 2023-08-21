@@ -43,8 +43,6 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
 
     if verbose println("Generating $(nsims) run length paths ...") end
 
-    old_value = get_value(CH)
-
     nsims_i = Int(nsims)                              # Number of simulated run lengts
     rl_paths = Matrix{Float64}(undef, nsims_i, maxrl)    # Generated run length paths
     if parallel
@@ -95,6 +93,7 @@ export approximateBisectionCL
 
 
 function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
+    #TODO: multiply the maximum value by the asymptotic inflating factor for curved control limits
     hmax = maximum(rl_paths)
     hmin = 0.0
     if verbose println("Running bisection on simulated paths with endpoints [$(hmin), $(hmax)] ...") end
@@ -114,9 +113,11 @@ function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_
         # Calculate run length on simulated paths
         set_h!(get_limit(CH), h)
         for j in 1:B
+            set_t!(CH, 0)
             for k in 1:maxrl
                 set_value!(CH, rl_paths[idx[j], k])
-                # @show get_value(CH), get_limit_value(CH)
+                set_t!(CH, get_t(CH) + 1)
+                # @show get_value(CH), get_limit_value(CH), is_OC(CH)
                 if is_OC(CH)
                     RLs[j] = k
                     break
@@ -136,6 +137,9 @@ function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_
         end
         # Assess convergence in the run length value
         if abs(E_RL - target) < f_tol
+            break
+        end
+        if abs(h - hold) < x_tol
             break
         end
         hold = h
