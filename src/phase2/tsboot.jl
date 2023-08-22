@@ -22,7 +22,7 @@ mutable struct BlockBootstrap{T} <: AbstractSampling
     # Initialized with t=0 so that update_block! updates the block the first time it is called
     function BlockBootstrap(blocksize::Int, data::Vector{T}) where T
         @assert blocksize > 0
-        out = new{Vector{T}}(zeros(T, blocksize), blocksize, 0)
+        out = new{Vector{T}}(similar(data)[1:blocksize], blocksize, 0)
         return out
     end
 
