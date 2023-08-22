@@ -106,7 +106,7 @@ A mutable struct representing a Multivariate Cumulative Sum (MCUSUM) statistic.
 end
 export MCUSUM
 
-MCUSUM(x::AbstractMatrix, k::Real) = MCUSUM(k=k, p=size(x,2))
+MCUSUM(k::Real, x::AbstractMatrix) = MCUSUM(k=k, p=size(x,2))
 
 get_design(stat::MCUSUM) = deepcopy(stat.k)
 set_design!(stat::MCUSUM, k::Real) = stat.k = k
@@ -157,7 +157,7 @@ A mutable struct representing an Adaptive Multivariate Cumulative Sum (MCUSUM) s
 end
 export AMCUSUM
 
-AMCUSUM(x::AbstractMatrix, λ::Real; minshift=0.1) = AMCUSUM(λ=λ, p=size(x,2), minshift=minshift)
+AMCUSUM(λ::Real, x::AbstractMatrix; minshift=0.1) = AMCUSUM(λ=λ, p=size(x,2), minshift=minshift)
 
 get_value(stat::AMCUSUM) = get_value(stat.stat)
 set_value!(stat::AMCUSUM, x) = set_value!(stat.stat, x)
