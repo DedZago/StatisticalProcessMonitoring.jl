@@ -14,7 +14,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * `nsims` - The number of run lengths used to estimate the target nominal property (default: 10000).
 * `hmin` - The minimum value of the control limit, (default: `sqrt(eps())`).
 * `maxiter` - The maximum number of bisection iterations (default: 30).
-* `trunc` - The value at which to truncate the run length, to avoid excessive computations (default: Inf, i.e. no truncation).
+* `maxrl` - The value at which to maxrlate the run length, to avoid excessive computations (default: Inf, i.e. no maxrlation).
 * `x_tol` - Absolute tolerance for the algorithm, which is terminated if
     ``h^{(k+1)} - h^{(k)} < x_{\\text{tol}}``
     (default: 1e-06)
@@ -31,12 +31,12 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function bisectionCL!(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::Int = 10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, trunc::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false, parallel::Bool = false)
+function bisectionCL!(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::Int = 10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, maxrl::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false, parallel::Bool = false)
 
     @assert hmin > 0 "hmin must be positive"
     @assert hmax > 0 "hmax must be positive"
     @assert maxiter > 0 "maxiter must be positive"
-    @assert trunc > 0 "trunc must be positive"
+    @assert maxrl > 0 "maxrl must be positive"
     @assert x_tol > 0 "x_tol must be positive"
     @assert f_tol > 0 "f_tol must be positive"
     @assert nsims > 0 "nsims must be positive"
@@ -61,11 +61,11 @@ function bisectionCL!(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::
         # Simulate run lengths 
         if parallel
             Threads.@threads for j in 1:nsims_i
-                RLs[j] = first(rlsim(CH, maxiter=trunc))
+                RLs[j] = first(rlsim(CH, maxiter=maxrl))
             end
         else
             for j in 1:nsims_i
-                RLs[j] = first(rlsim(CH, maxiter=trunc))
+                RLs[j] = first(rlsim(CH, maxiter=maxrl))
             end
         end
         # Calculate nominal measure (ARL/QRL/...) 
@@ -105,9 +105,9 @@ See the documentation of `bisectionCL!` for more information about the algorithm
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function bisectionCL(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::Int=1000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, trunc::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false)
+function bisectionCL(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::Int=1000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, maxrl::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false)
     CH_ = shallow_copy_sim(CH)
-    return bisectionCL!(CH_, hmax, rlsim=rlsim, nsims=nsims, hmin=hmin, maxiter=maxiter, trunc=trunc, x_tol=x_tol, f_tol=f_tol, verbose=verbose)
+    return bisectionCL!(CH_, hmax, rlsim=rlsim, nsims=nsims, hmin=hmin, maxiter=maxiter, maxrl=maxrl, x_tol=x_tol, f_tol=f_tol, verbose=verbose)
 end
 export bisectionCL
 
@@ -143,7 +143,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * `nsims` - The number of run lengths used to estimate the target nominal property (default: 10000).
 * `hmin` - The minimum value of the control limit, (default: `sqrt(eps())`).
 * `maxiter` - The maximum number of bisection iterations (default: 30).
-* `trunc` - The value at which to truncate the run length, to avoid excessive computations (default: Inf, i.e. no truncation).
+* `maxrl` - The value at which to maxrlate the run length, to avoid excessive computations (default: Inf, i.e. no maxrlation).
 * `x_tol` - Absolute tolerance for the algorithm, which is terminated if
     ``h^{(k+1)} - h^{(k)} < x_{\\text{tol}}``
     (default: 1e-06)
@@ -172,10 +172,10 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Capizzi, G., & Masarotto, G. (2016). Efficient control chart calibration by simulated stochastic approximation. IIE Transactions, 48(1), 57-65. https://doi.org/10.1080/0740817X.2015.1055392
 
 """
-function combinedCL!(CH::ControlChart; rlsim::Function = run_sim, nsims::Int = 10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, trunc::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false, inflate = 1.05, rlsim_sa::Function = run_sim_sa, Nfixed::Int = 200, Nmin::Int = 200, maxiter_sa::Int = 200, parallel::Bool = false)
+function combinedCL!(CH::ControlChart; rlsim::Function = run_sim, nsims::Int = 10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, maxrl::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false, inflate = 1.05, rlsim_sa::Function = run_sim_sa, Nfixed::Int = 200, Nmin::Int = 200, maxiter_sa::Int = 200, parallel::Bool = false)
     h, _, _ = saCL(CH, rlsim = rlsim_sa, Nfixed=Nfixed, Nmin=Nmin, maxiter=maxiter_sa, verbose=verbose, parallel=parallel)
     hmax = 2.0 * inflate * h
-    bisectionCL!(CH, hmax, rlsim=rlsim, nsims=nsims, hmin=hmin, maxiter=maxiter, trunc=trunc, x_tol=x_tol, f_tol=f_tol, verbose=verbose, parallel=parallel)
+    bisectionCL!(CH, hmax, rlsim=rlsim, nsims=nsims, hmin=hmin, maxiter=maxiter, maxrl=maxrl, x_tol=x_tol, f_tol=f_tol, verbose=verbose, parallel=parallel)
 end
 export combinedCL!
 

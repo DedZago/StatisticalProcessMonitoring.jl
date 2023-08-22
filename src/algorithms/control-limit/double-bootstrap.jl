@@ -28,7 +28,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Int = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, B::Int = nsims, verbose::Bool = false, parallel::Bool = false)
+function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Real = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, B::Int = nsims, verbose::Bool = false, parallel::Bool = false)
 
     @assert maxiter > 0 "maxiter must be positive"
     @assert nsims > 0 "nsims must be positive"
@@ -42,9 +42,9 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
     @assert length(tmp_rlpath) == 2 "rlsim must be of length maxiter"
 
     if verbose println("Generating $(nsims) run length paths ...") end
-
+    maxrl_i = Int(trunc(maxrl))
     nsims_i = Int(nsims)                              # Number of simulated run lengts
-    rl_paths = Matrix{Float64}(undef, nsims_i, maxrl)    # Generated run length paths
+    rl_paths = Matrix{Float64}(undef, nsims_i, maxrl_i)    # Generated run length paths
     if parallel
         Threads.@threads for i in 1:nsims_i
             rl_paths[i, :] = rlsim(CH, maxiter = maxrl)
@@ -61,7 +61,7 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
 
     #! Important
     #TODO: think about potential bootstrap-corrected control limit estimate
-    h = _bisection_paths(deepcopy(CH), rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
+    h = _bisection_paths(deepcopy(CH), rl_paths, target, maxrl_i, nsims_i, x_tol, f_tol, maxiter, B, verbose)
     # for b in 1:B
     #     h_boot[b] = bisection_paths(CH, rl_paths[sample(1:nsims_i, nsims_i), :], target, maxrl, nsims_i, x_tol, f_tol, maxiter, false)
     # end
