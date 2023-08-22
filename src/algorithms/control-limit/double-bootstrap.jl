@@ -101,7 +101,7 @@ function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_
     RLs = Vector{Float64}(undef, B)        # Vector of simulated run lenghts
     E_RL = 0.0                                      # Estimated ARL/QRL/...
     h = 0.0                                         # Initialize control limit value
-    idx = Vector{Int}(undef, nsims_i)
+    idx = Vector{Int}(undef, B)
     rows = 1:nsims_i
     i = 0
     while i < maxiter
@@ -109,7 +109,7 @@ function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_
         h = (hmin + hmax) / 2
         if verbose print("i: $(i)/$(maxiter),\th: $(h)\t") end
 
-        idx .= sample(rows, nsims_i)
+        idx .= sample(rows, B)
         # Calculate run length on simulated paths
         set_h!(get_limit(CH), h)
         for j in 1:B
