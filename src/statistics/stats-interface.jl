@@ -39,3 +39,7 @@ export get_maxrl
 include("univariate.jl")
 include("multivariate.jl")
 include("residual.jl")
+include("categorization/categorization.jl")
+include("categorization/LLCUSUM.jl")
+include("categorization/LI2012.jl")
+include("categorization/WANG2017.jl")
