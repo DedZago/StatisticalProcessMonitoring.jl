@@ -55,20 +55,15 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
         end
     end
 
-    i = 0
-    conv = "Maximum number of iterations reached"
     target = get_nominal_value(CH)                  # Target nominal ARL/QRL/...
-
-    #! Important
-    #TODO: think about potential bootstrap-corrected control limit estimate
-    h = _bisection_paths(deepcopy(CH), rl_paths, target, maxrl_i, nsims_i, x_tol, f_tol, maxiter, B, verbose)
+    h, iter, conv = _bisection_paths(deepcopy(CH), rl_paths, target, maxrl_i, nsims_i, x_tol, f_tol, maxiter, B, verbose)
     # for b in 1:B
     #     h_boot[b] = bisection_paths(CH, rl_paths[sample(1:nsims_i, nsims_i), :], target, maxrl, nsims_i, x_tol, f_tol, maxiter, false)
     # end
     # h = 2*h - mean(h_boot)
     # while abs(last_E_RL_estimate - target) > f_tol
     set_h!(get_limit(CH), h)
-    return (h=h, iter=i, status = conv)
+    return (h=h, iter=iter, status = conv)
 end
 export approximateBisectionCL!
 
@@ -104,6 +99,7 @@ function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_
     idx = Vector{Int}(undef, B)
     rows = 1:nsims_i
     i = 0
+    conv = "Maximum number of iterations reached"
     while i < maxiter
         i = i+1
         h = (hmin + hmax) / 2
@@ -137,13 +133,11 @@ function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_
         end
         # Assess convergence in the run length value
         if abs(E_RL - target) < f_tol
-            break
-        end
-        if abs(h - hold) < x_tol
+            conv = "Convergence"
             break
         end
         hold = h
     end
-    return h    
+    return (h, i, conv)
 end
 export _bisection_paths
