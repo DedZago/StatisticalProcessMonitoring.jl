@@ -163,6 +163,10 @@ function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_
             conv = "Convergence"
             break
         end
+        if abs(hold - h) < x_tol
+            conv = "Convergence"
+            break
+        end
         hold = h
     end
     return (h, i, conv)
@@ -268,6 +272,10 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
             conv = "Convergence"
             break
         end
+        if abs(hold - h) < x_tol
+            conv = "Convergence"
+            break
+        end
         hold = h
     end
     return (get_limit_value(CH), i, conv)
@@ -314,6 +322,10 @@ function _bisection_paths_multiple_j(CH::MultipleControlChart, l, rl_paths, targ
         end
         # Assess convergence in the run length value
         if abs(E_RL - target) < f_tol
+            conv = "Convergence"
+            break
+        end
+        if abs(hold - h) < x_tol
             conv = "Convergence"
             break
         end
