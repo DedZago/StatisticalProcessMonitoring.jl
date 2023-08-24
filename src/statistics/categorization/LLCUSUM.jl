@@ -32,9 +32,9 @@ Qiu, P. (2008). Distribution-free multivariate process control based on log-line
 end
 export LLCUSUM
 
-SPM.get_design(stat::LLCUSUM) = [stat.k]
-SPM.set_design!(stat::LLCUSUM, k::AbstractVector) = stat.k = first(k)
-SPM.set_design!(stat::LLCUSUM, k::Float64) = stat.k = k
+get_design(stat::LLCUSUM) = [stat.k]
+set_design!(stat::LLCUSUM, k::AbstractVector) = stat.k = first(k)
+set_design!(stat::LLCUSUM, k::Float64) = stat.k = k
 
 
 function LLCUSUM(k::Float64, x::AbstractMatrix; ncuts::Vector{Int} = [2 for _ in eachcol(x)])
@@ -117,7 +117,7 @@ function categorical_to_index(g::AbstractVector, table::AbstractMatrix)
 end
 export categorical_to_index
 
-function SPM.update_statistic!(STAT::LLCUSUM, x::AbstractVector)
+function update_statistic!(STAT::LLCUSUM, x::AbstractVector)
     ncells = length(STAT.f0)
     g_n = zeros(ncells)
     gObs = categorize_data(x, STAT.qtls)
@@ -145,4 +145,4 @@ function SPM.update_statistic!(STAT::LLCUSUM, x::AbstractVector)
     return STAT.value
 end
 
-SPM.update_statistic(STAT::LLCUSUM, x::AbstractVector) = update_statistic!(deepcopy(STAT), x)
+update_statistic(STAT::LLCUSUM, x::AbstractVector) = update_statistic!(deepcopy(STAT), x)

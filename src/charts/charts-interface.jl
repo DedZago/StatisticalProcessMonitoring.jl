@@ -329,7 +329,9 @@ end
 
 function update_chart!(CH::MultipleControlChart, x)
     CH.t += 1
-    update_statistic!.(get_statistic(CH), x)
+    for i in eachindex(get_statistic(CH))
+        update_statistic!(get_statistic(CH)[i], x)
+    end
 end
 
 function update_chart!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, LIM <: DynamicLimit, NOM, PH1}
