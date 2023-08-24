@@ -229,6 +229,12 @@ The value of the statistic that has been set.
 function set_value!(CH::C, value) where C <: AbstractChart
     set_value!(get_statistic(CH), value)
 end
+function set_value!(CH::MultipleControlChart, value::AbstractVector)
+    set_value!.(get_statistic(CH), value)
+end
+function set_value!(CH::MultipleControlChart, value::Real, j::Int)
+    set_value!(get_statistic(CH)[j], value)
+end
 export set_value!
 
 
@@ -252,6 +258,7 @@ end
 export set_limit! 
 
 set_limit!(CH::MultipleControlChart, h::Float64) = set_h!.(get_limit(CH), h)
+set_limit!(CH::MultipleControlChart, h::Float64, j::Int) = set_h!(get_limit(CH)[j], h)
 
 function set_limit!(CH::MultipleControlChart, h::Vector{Float64})
     @assert length(get_limit(CH)) == length(h)

@@ -183,7 +183,8 @@ export run_sim_oc
 
 
 """
-    run_path_sim(CH::AbstractChart)
+    run_path_sim(CH::AbstractChart; maxiter)
+    run_path_sim(CH::MultipleControlChart; maxiter)
 
 Simulates a run length path for the control chart `CH` by sampling new data from its Phase II object.
 
@@ -202,6 +203,18 @@ function run_path_sim(CH::AbstractChart; maxiter::Real = min(get_maxrl(CH), 10*g
         i = i + 1
         update_chart!(CH_, new_data!(CH_))
         out[i] = get_value(CH_)
+    end
+    return out
+end
+
+function run_path_sim(CH::MultipleControlChart; maxiter::Real = min(get_maxrl(CH), 10*get_nominal_value(CH)))
+    CH_ = shallow_copy_sim(CH)
+    i = 0
+    out = zeros(Int(maxiter), length(get_statistic(CH)))
+    while i < maxiter
+        i = i + 1
+        update_chart!(CH_, new_data!(CH_))
+        out[i, :] = get_value(CH_)
     end
     return out
 end
