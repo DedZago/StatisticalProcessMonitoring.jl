@@ -223,7 +223,7 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
         set_value!(CH, starting_chart_value[1], 1)
         # Calculate nominal measure (ARL/QRL/...) 
         E_RL1 = measure(RLs, CH, verbose=verbose)
-        @show E_RL1
+        # @show E_RL1
 
         #TODO: Use E_RL as target for the remaining control charts
         for l in 2:L
@@ -231,7 +231,7 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
             set_t!(CH, 0)
             set_value!(CH, starting_chart_value[l], l)
             set_limit!(CH, h_l_current[l], l)
-            @show h_l_current
+            # @show h_l_current
         end
 
         #TODO: Calculate run length of joint control chart
@@ -253,7 +253,7 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
         set_t!(CH, 0)
         set_value!(CH, starting_chart_value)
         E_RL = mean(RLs)
-        @show E_RL
+        # @show E_RL
 
         # Apply bisection algorithm
         if E_RL > target
