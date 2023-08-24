@@ -289,18 +289,21 @@ function _bisection_paths_multiple_j(CH::MultipleControlChart, l, rl_paths, targ
     E_RL = 0.0                                      # Estimated ARL/QRL/...
     h = 0.0                                         # Initialize control limit value
     i = 0
+    idx = Vector{Int}(undef, B)
+    rows = 1:nsims_i
     conv = "Maximum number of iterations reached"
     while i < maxiter
         i = i+1
         h = (hmin + hmax) / 2
         if verbose print("i: $(i)/$(maxiter),\th: $(h)\t") end
 
+        idx .= sample(rows, B)
         # Calculate run length on simulated paths
         set_limit!(CH, h, l)
         for j in 1:B
             set_t!(CH, 0)
             for k in 1:maxrl
-                set_value!(CH, rl_paths[j, k], l)
+                set_value!(CH, rl_paths[idx[j], k], l)
                 set_t!(CH, get_t(CH) + 1)
                 # @show get_value(CH), get_limit_value(CH), is_OC(CH)
                 if is_OC(CH)
