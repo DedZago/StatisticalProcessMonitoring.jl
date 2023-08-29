@@ -68,11 +68,11 @@ function _calculate_rl_paths(CH::AbstractChart, rlsim::Function, nsims_i, maxrl_
     rl_paths = Matrix{Float64}(undef, nsims_i, maxrl_i)    # Generated run length paths
     if parallel
         Threads.@threads for i in 1:nsims_i
-            rl_paths[i, :] = rlsim(CH, maxiter = maxrl)
+            rl_paths[i, :] = rlsim(CH, maxiter = maxrl_i)
         end
     else
         for i in 1:nsims_i
-            rl_paths[i, :] = rlsim(CH, maxiter = maxrl)
+            rl_paths[i, :] = rlsim(CH, maxiter = maxrl_i)
         end
     end
     return rl_paths
