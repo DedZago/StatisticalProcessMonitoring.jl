@@ -278,7 +278,7 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
         end
         hold = h
     end
-    return (get_limit_value(CH), i, conv)
+    return (get_h(get_limit(CH)), i, conv)
 end
 
 
