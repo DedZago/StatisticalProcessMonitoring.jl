@@ -6,7 +6,7 @@ using Test
     # Test default construction
     @testset "Default Construction" begin
         opt_settings = OptSettings{Float64, Int, Bool}()
-        @test opt_settings.x_tol == 1e-05
+        @test opt_settings.x_tol == 1e-03
         @test opt_settings.nsims == 1000
         @test opt_settings.maxiter == 1000
         @test opt_settings.verbose == true
