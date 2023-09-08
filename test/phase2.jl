@@ -85,6 +85,11 @@ using Random
         @test length(get_block(BB)) != length(initblock)
         @test !(y in initblock)
         @test get_block(BB) != initblock
+
+        Random.seed!(123)
+        expected_blocksize = 10
+        BB = StationaryBootstrap(expected_blocksize, xmat)
+        y = new_data!(BB, xmat)
     end
 
     @testset "Phase 2" begin

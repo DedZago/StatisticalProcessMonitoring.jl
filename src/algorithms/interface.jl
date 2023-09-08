@@ -18,7 +18,7 @@ Optimizes the control limit of a ControlChart object.
 ### Example
     optimize_limit!(my_chart, settings=OptSettings(ic_solver=:SA))
 """
-function optimize_limit!(CH::ControlChart, solver::Symbol=:Bootstrap; hmax::Float64 = 20.0, kw...)::NamedTuple{(:h, :iter, :status), Tuple{Float64, Int64, String}}
+function optimize_limit!(CH::ControlChart, solver::Symbol=:Bootstrap; hmax::Float64 = 20.0, kw...)
     valid_solvers = [:SA, :Bisection, :Combined, :Bootstrap]
     @assert solver in valid_solvers "Unknown control limit solver. Valid solvers are $(valid_solvers)"
 

@@ -1,7 +1,6 @@
 abstract type NominalProperties end
 
 get_value(NM::NominalProperties) = NM.value
-set_value(NM::NominalProperties, x::Real) = NM.value = x
 
 """
     ARL(value)

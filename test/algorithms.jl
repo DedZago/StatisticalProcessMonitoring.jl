@@ -2,6 +2,7 @@
 module TestAlgorithms
 using SPM
 using Test
+using Distributions
 
 @testset "settings" begin
     @testset "constructor" begin
@@ -21,6 +22,11 @@ end
         saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
         bisectionCL(CH, 1.0, maxiter=1, nsims = 10)
         combinedCL(CH, maxiter=1, maxiter_sa=1, nsims=1)
+        approximateBisectionCL(CH, nsims=1, maxiter=1)
+        optimize_limit(CH, :SA, Nmin=1, maxiter=1, Nfixed=1)
+        optimize_limit(CH, :Bisection, hmax=1.0, maxiter=1, nsims = 10)
+        optimize_limit(CH, :Combined, maxiter=1, maxiter_sa=1, nsims=1)
+        optimize_limit(CH, :Bootstrap, nsims=1, maxiter=1)
     end
 
     x = randn(500)
@@ -59,6 +65,35 @@ end
     CH = ControlChart([STAT1, STAT2], [LIM1, LIM2], NM, PH1)
     @testset "call" begin
         saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
+    end
+end
+
+
+@testset "multiple charts" begin
+    x = randn(500)
+    NM = ARL(200)
+    PH1 = Phase2Distribution(Normal(0,1))
+    STAT1 = EWMA(λ = 0.2)
+    STAT2 = Shewhart()
+    LIM1 = TwoSidedFixedLimit(2.0)
+    LIM2 = TwoSidedFixedLimit(2.0)
+    CH = ControlChart([STAT1, STAT2], [LIM1, LIM2], NM, PH1)
+    @testset "call" begin
+        saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
+        approximateBisectionCL(CH, nsims=1, maxiter=1)
+        optimize_limit(CH, :SA, Nmin=1, maxiter=1, Nfixed=1)
+        optimize_limit(CH, :Bootstrap, nsims=1, maxiter=1)
+    end
+
+    x = randn(1000)
+    NM = QRL(200, 0.5)
+    PH1 = Phase2(BlockBootstrap(10, x), x)
+    CH = ControlChart([STAT1, STAT2], [LIM1, LIM2], NM, PH1)
+    @testset "call" begin
+        saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
+        approximateBisectionCL(CH, nsims=1, maxiter=1)
+        optimize_limit(CH, :SA, Nmin=1, maxiter=1, Nfixed=1)
+        optimize_limit(CH, :Bootstrap, nsims=1, maxiter=1)
     end
 end
 end#module
