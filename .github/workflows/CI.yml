@@ -58,3 +58,10 @@ jobs:
             using SPM
             DocMeta.setdocmeta!(SPM, :DocTestSetup, :(using SPM); recursive=true)
             doctest(SPM)'
+  codecov:
+    name: Upload coverage reports to Codecov
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: codecov/codecov-action@v3
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
