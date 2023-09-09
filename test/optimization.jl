@@ -1,6 +1,7 @@
 module TestOptimization
 using Test
 using LinearAlgebra
+using Random
 
 # Unit test
 
