@@ -26,7 +26,7 @@ export MShewhart
 MShewhart(x::AbstractMatrix; value = 0.0) = MShewhart(mean.(eachcol(x)), inv(cov(x)), value)
 
 get_design(stat::MShewhart) = Vector{Float64}()
-set_design!(stat::MShewhart, ::Float64) = error("Cannot set a design for Shewhart chart.")
+set_design!(stat::MShewhart, p::Float64) = error("Cannot set a design for Shewhart chart.")
 
 update_statistic(stat::MShewhart, x::AbstractVector) = dot(x - stat.μ, stat.Σ_m1, x - stat.μ)
 update_statistic!(stat::MShewhart, x::AbstractVector) = stat.value = update_statistic(stat, x)
@@ -108,7 +108,7 @@ export MCUSUM
 
 MCUSUM(k::Real, x::AbstractMatrix) = MCUSUM(k=k, p=size(x,2))
 
-get_design(stat::MCUSUM) = deepcopy(stat.k)
+get_design(stat::MCUSUM) = [stat.k]
 set_design!(stat::MCUSUM, k::Real) = stat.k = k
 set_design!(stat::MCUSUM, k::AbstractVector) = stat.k = first(k)
 

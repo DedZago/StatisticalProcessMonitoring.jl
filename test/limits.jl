@@ -101,6 +101,8 @@ using StatsBase
         @test get_value(L) == quantile(x, 1.0 - 1.0/get_value(NM))
         resample_sims!(L)
         @test all([L.sim[b] in x for b in 1:B])
+        L = OneSidedBootstrapLimit(STAT, false, B)
+        is_IC(L, STAT)
 
         L = OneSidedBootstrapLimit(STAT, false, B)
         NM = ARL(100)
@@ -122,6 +124,7 @@ using StatsBase
         alpha = 1.0/get_value(NM)
         @test get_value(L) == quantile(x, [alpha/2, 1.0 - alpha/2])
         @test all([L.sim[b] in x for b in 1:B])
+        is_IC(L, STAT)
     end
 end
 end

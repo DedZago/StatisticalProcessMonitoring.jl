@@ -20,8 +20,8 @@ The update mechanism based on a new observation `x` is given by
 end
 export Shewhart
 
-get_design(stat::Shewhart) = NamedTuple()
-set_design!(stat::Shewhart, ::Float64) = error("Cannot set a design for Shewhart chart.")
+get_design(stat::Shewhart) = Vector{Float64}()
+set_design!(stat::Shewhart, x) = error("Cannot set a design for Shewhart chart.")
 
 update_statistic(stat::Shewhart, x::Real) = x
 update_statistic!(stat::Shewhart, x::Real) = stat.value = update_statistic(stat, x)
