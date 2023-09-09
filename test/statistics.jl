@@ -168,7 +168,7 @@ end
         end
 
         @testset "data categorization" begin
-           x = randn(100,3)
+           x = randn(1000,2)
            STAT = LLCUSUM(0.1, x) 
            PH2 = MultinomialBootstrap(STAT)
            update_statistic(STAT, new_data!(PH2, x))

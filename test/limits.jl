@@ -2,6 +2,7 @@ module TestLimits
 using SPM
 using Test
 using StatsBase
+using Distributions
 
 @testset "Fixed" begin
     h = 1.0; upw = true
@@ -125,6 +126,10 @@ using StatsBase
         @test get_value(L) == quantile(x, [alpha/2, 1.0 - alpha/2])
         @test all([L.sim[b] in x for b in 1:B])
         is_IC(L, STAT)
+
+        PH2 = Phase2Distribution(Normal(0,1))
+        CH = ControlChart(STAT, L, NM, PH2)
+        update_chart!(CH, rand(Normal(0,1)))
     end
 end
 end
