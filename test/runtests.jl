@@ -11,6 +11,8 @@ ti = time()
     include("charts.jl")
     include("settings.jl")
     include("algorithms.jl")
+    include("optimization.jl")
+    include("retrospective.jl")
 end
 
 ti = time() - ti
