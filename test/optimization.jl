@@ -2,6 +2,7 @@ module TestOptimization
 using Test
 using LinearAlgebra
 using Random
+using SPM
 
 # Unit test
 
@@ -17,7 +18,7 @@ using Random
     CH = ControlChart(STAT, LIM, NM, PH1)
 
     # Test happy path
-    settings = OptSettings(verbose=true, minpar = [0.001], maxpar = [0.99], maxiter=1, m_grid=2, nsims=3)
+    settings = OptSettings(verbose=false, minpar = [0.001], maxpar = [0.99], maxiter=1, m_grid=2, nsims=3)
     rlsim_oc = x -> run_sim_oc(x, shift = 0.5)
     @testset "optimize_design" begin
         optimize_design(CH, rlsim_oc, settings, verbose=false)
