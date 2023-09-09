@@ -152,7 +152,7 @@ end
             update_statistic!(STAT, randn(3))            
             update_statistic(STAT, randn(3))            
             @test get_design(STAT) == Vector{Float64}()
-            @test_throws ErrorException set_design(STAT, 3.0)
+            @test_throws ErrorException set_design!(STAT, 3.0)
 
             STAT = DiagMEWMA(Λ = [0.2,0.2])
             set_design!(STAT, [0.1,0.1])
