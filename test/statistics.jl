@@ -181,6 +181,19 @@ end
            PH2 = MultinomialBootstrap(STAT)
            update_statistic(STAT, new_data!(PH2, x))
         end
+
+        @testset "partially observed" begin
+            NM = ARL(200)
+            p = 5
+            q = 2
+            x = randn(1,p)
+            STAT = RSADA(0.3, 1.0, q, x)
+            LIM = OneSidedFixedLimit(1.0, true)
+            DIST = MvNormal(zeros(p), ones(p))
+            PH2 = Phase2Distribution(DIST)
+            CH = ControlChart(STAT, LIM, NM, PH2)
+            update_chart!(CH, rand(DIST))
+        end
     end
 end
 
