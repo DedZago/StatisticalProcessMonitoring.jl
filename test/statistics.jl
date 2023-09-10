@@ -3,6 +3,7 @@ using SPM
 using Test
 using Random
 using StatsBase
+using Distributions
 
 @testset "EWMA" begin
     λ = 0.1; value = 0.0
