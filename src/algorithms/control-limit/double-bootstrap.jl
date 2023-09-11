@@ -53,7 +53,7 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
     rl_paths = _calculate_rl_paths(CH, rlsim, nsims_i, maxrl_i, parallel)
 
     target = get_nominal_value(CH)                  # Target nominal ARL/QRL/...
-    h, iter, conv = _bisection_paths(deepcopy(CH), rl_paths, target, maxrl_i, nsims_i, x_tol, f_tol, maxiter, B, verbose)
+    h, iter, conv = _bisection_paths(deepcopy(CH), rl_paths, target, maxrl_i, nsims_i, x_tol, f_tol, maxiter, B, verbose, parallel = parallel)
     # for b in 1:B
     #     h_boot[b] = bisection_paths(CH, rl_paths[sample(1:nsims_i, nsims_i), :], target, maxrl, nsims_i, x_tol, f_tol, maxiter, false)
     # end
@@ -114,7 +114,7 @@ end
 export approximateBisectionCL
 
 
-function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
+function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose; parallel::Bool = false)
     #TODO: multiply the maximum value by the asymptotic inflating factor for curved control limits
     hmax = maximum(rl_paths)
     hmin = 0.0
@@ -175,7 +175,7 @@ export _bisection_paths
 
 
 
-function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
+function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose; parallel::Bool = false)
     #TODO: multiply the maximum value by the asymptotic inflating factor for curved control limits
     #TODO: From here
     @assert length(size(rl_paths)) == 3 "rl_paths must be a 3-dimensional array <currently is <$(length(size(rl_paths)))>"
@@ -229,16 +229,26 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
         E_RL1 = measure(RLs, CH, verbose=verbose)
         # @show E_RL1
 
-        #TODO: Use E_RL as target for the remaining control charts
-        for l in 2:L
-            h_l_current[l] = _bisection_paths_multiple_j(CH::MultipleControlChart, l, view(rl_paths,:,:,l), E_RL1, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose, hmin=hmin_l[l], hmax=hmax_l[l])
-            set_t!(CH, 0)
-            set_value!(CH, starting_chart_value[l], l)
-            set_limit!(CH, h_l_current[l], l)
-            # @show h_l_current
+        # Use E_RL as target for the remaining control charts
+        if parallel
+            Threads.@threads for l in 2:L
+                h_l_current[l] = _bisection_paths_multiple_j(CH::MultipleControlChart, l, view(rl_paths,:,:,l), E_RL1, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose, hmin=hmin_l[l], hmax=hmax_l[l])
+                set_t!(CH, 0)
+                set_value!(CH, starting_chart_value[l], l)
+                set_limit!(CH, h_l_current[l], l)
+                # @show h_l_current
+            end
+        else
+            for l in 2:L
+                h_l_current[l] = _bisection_paths_multiple_j(CH::MultipleControlChart, l, view(rl_paths,:,:,l), E_RL1, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose, hmin=hmin_l[l], hmax=hmax_l[l])
+                set_t!(CH, 0)
+                set_value!(CH, starting_chart_value[l], l)
+                set_limit!(CH, h_l_current[l], l)
+                # @show h_l_current
+            end
         end
 
-        #TODO: Calculate run length of joint control chart
+        # Calculate run length of joint control chart
         for j in 1:B
             set_t!(CH, 0)
             for k in 1:maxrl
