@@ -6,7 +6,7 @@ using Test
     # Test default construction
     @testset "Default Construction" begin
         opt_settings = OptSettings{Float64, Int, Bool}()
-        @test opt_settings.x_tol == 1e-05
+        @test opt_settings.x_tol == 1e-03
         @test opt_settings.nsims == 1000
         @test opt_settings.maxiter == 1000
         @test opt_settings.verbose == true
@@ -56,7 +56,7 @@ using Test
         x = randn(200, 3)
         ph2 = Phase2(Bootstrap(), x)
         ch = ControlChart(stat, lim, nom, ph2)
-        opt_settings = OptSettings(ch, x_tol = 1e-04, nsims = 500)
+        opt_settings = OptSettings(ch, x_tol = 1e-04, nsims = 500, minpar=fill(-Inf,p), maxpar=fill(Inf,p))
         @test opt_settings.x_tol == 1e-04
         @test opt_settings.nsims == 500
         @test opt_settings.maxiter == 1000  # Default value

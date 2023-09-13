@@ -66,6 +66,8 @@ end
         CH_ = deepcopy(CH)
         run_sim(CH)
         @test run_sim(CH, maxiter = 1) == 1
+        run_sim(CH, Phase2(Bootstrap(), x))
+        run_sim_oc(CH, shift = 1.0)
         @test structEqual(get_statistic(CH), get_statistic(CH_))
         @test structEqual(get_limit(CH), get_limit(CH_))
         @test structEqual(get_nominal(CH), get_nominal(CH_))
