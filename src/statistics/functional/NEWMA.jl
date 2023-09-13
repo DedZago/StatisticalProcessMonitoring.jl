@@ -1,25 +1,32 @@
+using Distributions
+using LinearAlgebra
 using Parameters
 using StatsBase
 
 """
-    NEWMA{F}(λ::Float64, σ::Float64, g::F) where {F <: AbstractRegressionFunction}
+    NEWMA
 
-Construct a NEWMA (Nonparametric Exponentially Weighted Moving Average) object.
+Nonparametric Exponentially Weighted Moving Average object for monitoring nonparametric regression estimates.
 
 # Fields
 - `λ::Float64`: The EWMA smoothing constant. Must be between 0 and 1.
 - `value::Float64`: The current value of the NEWMA statistic.
 - `σ::Float64`: The standard deviation of the error term.
+- `cdf_σ::E`: A function that computes the (estimated) cdf of the error term `σ` with signature `cdf_σ(x::Real)`.
 - `g::F`: The estimated regression function object. Must have a method of signature `predict(g::F, x::AbstractVector)`.
-- `Uj::Vector{Float64}`: The current smoothed observations.
+- `Ej::Vector{Float64}`: The current smoothed observations.
+
+# References
+Zou, C., Tsung, F., & Wang, Z. (2008). Monitoring Profiles Based on Nonparametric Regression Methods. Technometrics, 50(4), 512-526. https://doi.org/10.1198/004017008000000433
 """
-@with_kw mutable struct NEWMA{F} <: UnivariateStatistic
+@with_kw mutable struct NEWMA{E,F} <: UnivariateStatistic
     λ::Float64              # EWMA smoothing constant
     value::Float64 = 0.0
     σ::Float64              # Standard deviation of the error term
+    cdf_σ::E                # Cumulative distribution function of σ
     g::F                    # Estimated regression function object, must have a method
                             # of signature `predict(g::F, x::AbstractVector)`
-    Uj::Vector{Float64}     # Current smoothed observations
+    Ej::Vector{Float64}     # Current smoothed observations
     @assert 0 < λ <= 1
 end
 export NEWMA
@@ -29,8 +36,8 @@ set_design!(stat::NEWMA, λ::AbstractVector) = stat.λ = first(k)
 set_design!(stat::NEWMA, λ::Float64) = stat.λ = λ
 
 
-function NEWMA(λ::Float64, g::F, σ::Float64, n::Int)
-    return NEWMA(λ=λ, value=0.0, g = g, σ = σ, Uj = zeros(n))
+function NEWMA(λ::Float64, g::F, σ::Float64, cdf_σ::E, n::Int)
+    return NEWMA(λ=λ, value=0.0, g = g, σ = σ, cdf_σ = cdf_σ, Ej = zeros(n))
 end
 
 #FIXME: test
@@ -43,7 +50,7 @@ Construct a NEWMA control chart by calculating the standard errors for a functio
 - `λ::Float64`: The EWMA smoothing constant. Must be between 0 and 1.
 - `g::F`: The estimated regression function object. Must have a method of signature `predict(g::F, x::AbstractVector)`.
 - `dat::FunctionalData`: A `FunctionalData` object containing observations of the regression curves.
-- `Uj::Vector{Float64}`: The current smoothed observations.
+- `Ej::Vector{Float64}`: The current smoothed observations.
 
 # Returns
 The constructed NEWMA control chart.
@@ -57,10 +64,16 @@ The constructed NEWMA control chart.
     NEWMA(0.2, g, dat)
 """
 function NEWMA(λ::Float64, g::F, dat::FunctionalData)
-    res = [d.y .- predict(g, d.x) for d in dat]     # Calculate residuals from estimated regression function
-    n = first(dat).x
-    σ = std(hcat(res...))                           # Assume random errors are the same across functions
-    return NEWMA(λ, g, σ, n)
+    error("Must specify matrix Sigma")
+    σjs = zeros(length(dat))
+    res = zeros(length(first(dat).x))
+    for i in 1:length(dat)
+       res[:] = dat[i].y - predict(g, dat[i].x) 
+       σjs[i] = std(res)
+    end
+    n = length(first(dat).x)
+    ecdf_σ = ecdf(σjs)
+    return NEWMA(λ, g, σ, ecdf_σ, n + 1)
 end
 
 update_statistic(STAT::NEWMA, x::FunctionalObservation) = update_statistic!(deepcopy(STAT), x)
@@ -69,5 +82,8 @@ update_statistic(STAT::NEWMA, x::FunctionalObservation) = update_statistic!(deep
 function update_statistic!(STAT::NEWMA, x::FunctionalObservation)
     yhat = predict(STAT.g, x.x)
     zj = (x.y .- yhat) ./ STAT.σ
-    error("Not implemented yet.")
+    new_σ = quantile(Normal(0,1), STAT.cdf_σ(std(zj)))
+    STAT.Ej[1:(end-1)] = (1 - STAT.λ) * STAT.Ej[1:(end-1)] + STAT.λ * zj
+    STAT.Ej[end] = (1 - STAT.λ) * STAT.Ej[end] + STAT.λ * new_σ
+    STAT.value = dot(STAT.Ej, STAT.Sigma, STAT.Ej)
 end
