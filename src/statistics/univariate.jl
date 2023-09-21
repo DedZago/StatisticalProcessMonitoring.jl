@@ -57,6 +57,41 @@ set_design!(stat::EWMA, λ::AbstractVector) = stat.λ = first(λ)
 update_statistic(stat::EWMA, x::Real) = (1.0 - stat.λ) * stat.value + stat.λ * x
 update_statistic!(stat::EWMA, x::Real) = stat.value = update_statistic(stat, x)
 
+"""
+    OneSidedEWMA(λ, value, upw::Bool)
+
+OneSidedEWMA statistic with design parameter `λ` and initial value `value`.
+
+The update mechanism based on a new observation `x` is given by:
+* if `upw == true`, then ``value = \\max\\{0, (1-λ)\\cdot value + λ\\cdot x\\}``;
+* if `upw == true`, then ``value = \\min\\{0, (1-λ)\\cdot value + λ\\cdot x\\}``;
+
+"""
+@with_kw mutable struct OneSidedEWMA{L,V} <: UnivariateStatistic 
+    λ::L = 0.1
+    value::V = 0.0
+    upw::Bool = true
+    @assert !isinf(value)
+    @assert 0.0 < λ <= 1.0
+end
+export OneSidedEWMA
+
+
+get_design(stat::OneSidedEWMA) = [stat.λ]
+set_design!(stat::OneSidedEWMA, λ::Float64) = stat.λ = λ
+set_design!(stat::OneSidedEWMA, λ::AbstractVector) = stat.λ = first(λ)
+
+function update_statistic(stat::OneSidedEWMA, x::Real)
+    if stat.upw
+        return max(0.0, (1.0 - stat.λ) * stat.value + stat.λ*x)
+    else
+        return min(0.0, (1.0 - stat.λ) * stat.value + stat.λ*x)
+    end
+end
+
+update_statistic!(stat::OneSidedEWMA, x::Real) = stat.value = update_statistic(stat, x)
+
+
 
 """
     CUSUM(k, value, upw::Bool)
