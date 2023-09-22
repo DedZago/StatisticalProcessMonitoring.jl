@@ -136,21 +136,26 @@ end
 export kronecker_matrix
 
 
-function compose(lhs::Symbol, rhs::AbstractVector{Symbol})
-    Formula(lhs, Expr(:call, :+, [1;rhs]...))
+function compose(lhs::Symbol, rhs::AbstractVector)
+    @show rhs
+    ts = term.(rhs)
+    if length(rhs) == 0
+        return term(lhs) ~ ConstantTerm(1)
+    else
+        return term(lhs) ~ foldl(+, ts)
+    end
 end
 
-function stepwise_loglinear(df, lhs::Symbol, rhs::AbstractVector{Symbol},
-              forward::Bool, use_aic::Bool)
-    options = forward ? setdiff(names(df), [lhs; rhs]) : rhs
+function step(df, lhs::Symbol, rhs::AbstractVector, forward::Bool, use_aic::Bool)
+    options = forward ? setdiff(Symbol.(names(df)), [lhs; rhs]) : rhs
     fun = use_aic ? aic : bic
     isempty(options) && return (rhs, false)
-    best_fun = fun(lm(compose(lhs, rhs), df))
+    best_fun = fun(glm(compose(lhs, rhs), df, Poisson()))
     improved = false
     best_rhs = rhs
     for opt in options
         this_rhs = forward ? [rhs; opt] : setdiff(rhs, [opt])
-        this_fun = fun(lm(compose(lhs, this_rhs), df))
+        this_fun = fun(glm(compose(lhs, this_rhs), df, Poisson()))
         if this_fun < best_fun
             best_fun = this_fun
             best_rhs = this_rhs
@@ -159,15 +164,15 @@ function stepwise_loglinear(df, lhs::Symbol, rhs::AbstractVector{Symbol},
     end
     (best_rhs, improved)
 end
-export stepwise_loglinear
 
-function stepwise(df, lhs::Symbol, forward::Bool, use_aic::Bool)
-    rhs = forward ? Symbol[] : setdiff(names(df), [lhs])
+function stepwise_loglinear(df, lhs::Symbol, forward::Bool, use_aic::Bool)
+    rhs = forward ? Symbol[] : setdiff(Symbol.(names(df)), [lhs])
     while true
         rhs, improved = step(df, lhs, rhs, forward, use_aic)
-        improved || return lm(compose(lhs, sort(rhs)), df)
+        improved || return glm(compose(lhs, sort(rhs)), df, Poisson())
     end
 end
+export stepwise_loglinear
 
 
 
