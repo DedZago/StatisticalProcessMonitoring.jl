@@ -1,3 +1,6 @@
+using DataFrames
+using StatsBase
+using GLM
 using Distributions
 
 function create_table(x::AbstractMatrix, q::AbstractVector)
@@ -131,6 +134,43 @@ function kronecker_matrix(qtls::AbstractVector)
     return Matrix(tmp)
 end
 export kronecker_matrix
+
+
+function compose(lhs::Symbol, rhs::AbstractVector{Symbol})
+    Formula(lhs, Expr(:call, :+, [1;rhs]...))
+end
+
+function stepwise_loglinear(df, lhs::Symbol, rhs::AbstractVector{Symbol},
+              forward::Bool, use_aic::Bool)
+    options = forward ? setdiff(names(df), [lhs; rhs]) : rhs
+    fun = use_aic ? aic : bic
+    isempty(options) && return (rhs, false)
+    best_fun = fun(lm(compose(lhs, rhs), df))
+    improved = false
+    best_rhs = rhs
+    for opt in options
+        this_rhs = forward ? [rhs; opt] : setdiff(rhs, [opt])
+        this_fun = fun(lm(compose(lhs, this_rhs), df))
+        if this_fun < best_fun
+            best_fun = this_fun
+            best_rhs = this_rhs
+            improved = true
+        end
+    end
+    (best_rhs, improved)
+end
+export stepwise_loglinear
+
+function stepwise(df, lhs::Symbol, forward::Bool, use_aic::Bool)
+    rhs = forward ? Symbol[] : setdiff(names(df), [lhs])
+    while true
+        rhs, improved = step(df, lhs, rhs, forward, use_aic)
+        improved || return lm(compose(lhs, sort(rhs)), df)
+    end
+end
+
+
+
 
 
 
