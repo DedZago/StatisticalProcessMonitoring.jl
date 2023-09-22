@@ -135,27 +135,75 @@ function kronecker_matrix(qtls::AbstractVector)
 end
 export kronecker_matrix
 
+"""
+    compose(lhs::Symbol, rhs::Tuple)
+    compose(lhs::Symbol, rhs::Term)
+    compose(lhs::Symbol, rhs::ConstantTerm)
 
-function compose(lhs::Symbol, rhs::AbstractVector)
-    @show rhs
-    ts = term.(rhs)
+Compose a response variable `lhs` with a tuple or vector of predictors `rhs` terms.
+
+# Arguments
+- `lhs::Symbol`: The left-hand side of the equation.
+- `rhs::Tuple`: The right-hand side of the equation.
+
+# Returns
+- The composed equation.
+
+If `rhs` is empty, the function returns `lhs` composed with an intercept.
+Otherwise, the function returns `lhs` composed with the terms in `rhs`.
+"""
+function compose(lhs::Symbol, rhs::Tuple)
     if length(rhs) == 0
         return term(lhs) ~ ConstantTerm(1)
     else
-        return term(lhs) ~ foldl(+, ts)
+        return term(lhs) ~ rhs
     end
 end
 
-function step(df, lhs::Symbol, rhs::AbstractVector, forward::Bool, use_aic::Bool)
-    options = forward ? setdiff(Symbol.(names(df)), [lhs; rhs]) : rhs
+function compose(lhs::Symbol, rhs::Term)
+    return term(lhs) ~ rhs
+end
+
+function compose(lhs::Symbol, rhs::ConstantTerm)
+    return term(lhs) ~ rhs
+end
+export compose
+
+"""
+    get_removable_terms(rhs)
+
+Given an iterable collection of terms `rhs`, this function returns the indices of the terms in `rhs` that can be removed in a backward elimination step.
+
+# Arguments
+- `rhs`: An iterable collection of terms in the equation.
+
+# Returns
+- An array of indices of the terms in `rhs` that have the maximum order.
+"""
+function get_removable_terms(rhs)
+    terms_order = collect(length.(terms.(rhs)))     # Get the order of the terms in `rhs`
+    max_order = maximum(terms_order)                # Maximum order can be removed
+    return (1:length(rhs))[terms_order .== max_order]
+end
+export get_removable_terms
+
+
+function step_backward(df, lhs::Symbol, rhs, use_aic::Bool)
+    options = rhs
     fun = use_aic ? aic : bic
+    isa(rhs, ConstantTerm) && return(rhs, false)
     isempty(options) && return (rhs, false)
     best_fun = fun(glm(compose(lhs, rhs), df, Poisson()))
     improved = false
     best_rhs = rhs
-    for opt in options
-        this_rhs = forward ? [rhs; opt] : setdiff(rhs, [opt])
-        this_fun = fun(glm(compose(lhs, this_rhs), df, Poisson()))
+    removable = get_removable_terms(rhs)
+    for i in removable
+        opt = options[i]
+        this_rhs = foldl(+, setdiff(rhs, [opt]))
+        formula_current = compose(lhs, this_rhs)
+        @show formula_current
+        @show this_rhs
+        this_fun = fun(glm(formula_current, df, Poisson()))
         if this_fun < best_fun
             best_fun = this_fun
             best_rhs = this_rhs
@@ -165,14 +213,30 @@ function step(df, lhs::Symbol, rhs::AbstractVector, forward::Bool, use_aic::Bool
     (best_rhs, improved)
 end
 
-function stepwise_loglinear(df, lhs::Symbol, forward::Bool, use_aic::Bool)
-    rhs = forward ? Symbol[] : setdiff(Symbol.(names(df)), [lhs])
+function step_backward(df, lhs::Symbol, rhs::Term, use_aic::Bool)
+    fun = use_aic ? aic : bic
+    best_fun = fun(glm(compose(lhs, rhs), df, Poisson()))
+    best_rhs = rhs
+    improved = false
+    this_rhs = ConstantTerm(1)
+    this_fun = fun(glm(term(lhs) ~ this_rhs, df, Poisson()))
+    if this_fun < best_fun
+        best_rhs = this_rhs
+        improved = true
+    end
+    (best_rhs, improved)
+end
+
+function backward_loglinear(df, lhs::Symbol; use_aic::Bool = false)
+    rhs_symbol = setdiff(Symbol.(names(df)), [lhs])
+    rhs = foldl(*, term.(rhs_symbol))
+    @show rhs
     while true
-        rhs, improved = step(df, lhs, rhs, forward, use_aic)
-        improved || return glm(compose(lhs, sort(rhs)), df, Poisson())
+        rhs, improved = step_backward(df, lhs, rhs, use_aic)
+        improved || return glm(compose(lhs, rhs), df, Poisson())
     end
 end
-export stepwise_loglinear
+export backward_loglinear
 
 
 

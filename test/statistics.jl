@@ -129,6 +129,13 @@ end
             @test update_statistic(STAT, xnew) == update_statistic(E, znew)
         end
 
+        @testset "Univariate" begin
+            STAT = OneSidedEWMA(λ = 0.2)   
+            update_statistic!(STAT, randn())
+            STAT = OneSidedEWMA(λ = 0.2, upw=false)   
+            update_statistic!(STAT, randn())
+        end
+
         @testset "Multivariate" begin
             Random.seed!(123)
             x = randn(100, 3)
@@ -169,18 +176,25 @@ end
         end
 
         @testset "data categorization" begin
-           x = randn(1000,2)
-           STAT = LLCUSUM(0.1, x) 
-           PH2 = MultinomialBootstrap(STAT)
-           update_statistic(STAT, new_data!(PH2, x))
+            @testset "backward selection" begin
+                Random.seed!(123)
+                n = 50
+                df = DataFrame(y = rand(Poisson(3.0), n), x1 = randn(n), x2 = randn(n))
+                blmodel = backward_loglinear(df, :y)
+                @test size(blmodel.mm) == (n, 1)
+            end
+            x = randn(1000,2)
+            STAT = LLCUSUM(0.1, x) 
+            PH2 = MultinomialBootstrap(STAT)
+            update_statistic(STAT, new_data!(PH2, x))
 
-           STAT = WANG2017(0.1, x) 
-           PH2 = MultinomialBootstrap(STAT)
-           update_statistic(STAT, new_data!(PH2, x))
+            STAT = WANG2017(0.1, x) 
+            PH2 = MultinomialBootstrap(STAT)
+            update_statistic(STAT, new_data!(PH2, x))
 
-           STAT = LI2012(0.1, x) 
-           PH2 = MultinomialBootstrap(STAT)
-           update_statistic(STAT, new_data!(PH2, x))
+            STAT = LI2012(0.1, x) 
+            PH2 = MultinomialBootstrap(STAT)
+            update_statistic(STAT, new_data!(PH2, x))
         end
 
         @testset "partially observed" begin
