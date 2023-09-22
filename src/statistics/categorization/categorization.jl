@@ -169,6 +169,15 @@ function compose(lhs::Symbol, rhs::ConstantTerm)
 end
 export compose
 
+
+function get_term_vector(term::InteractionTerm)
+    return term.terms
+end
+
+function get_term_vector(term::Term)
+    return [term]
+end
+
 """
     get_removable_terms(rhs)
 
@@ -183,7 +192,26 @@ Given an iterable collection of terms `rhs`, this function returns the indices o
 function get_removable_terms(rhs)
     terms_order = collect(length.(terms.(rhs)))     # Get the order of the terms in `rhs`
     max_order = maximum(terms_order)                # Maximum order can be removed
-    return (1:length(rhs))[terms_order .== max_order]
+    removable_terms = (1:length(rhs))[terms_order .== max_order]        # Get maximum order elements
+    max_order == 1 && return removable_terms
+    # Get terms that do not appear in higher-order terms
+    for j in reverse(1:(max_order-1))
+        for k in (1:length(rhs))[terms_order .== j]
+            candidate_removable = rhs[k]
+            remv = true
+            for h in (j+1):max_order
+                for tt in rhs[terms_order .== h]
+                    if issubset(Set(get_term_vector(candidate_removable)), Set(tt.terms))
+                        remv = false
+                    end
+                end
+            end
+            if remv
+                push!(removable_terms, k)
+            end
+        end
+    end
+    return removable_terms
 end
 export get_removable_terms
 
@@ -196,12 +224,12 @@ function step_backward(df, lhs::Symbol, rhs, use_aic::Bool)
     best_fun = fun(glm(compose(lhs, rhs), df, Poisson()))
     improved = false
     best_rhs = rhs
+    @show best_rhs
     removable = get_removable_terms(rhs)
     for i in removable
         opt = options[i]
         this_rhs = foldl(+, setdiff(rhs, [opt]))
         formula_current = compose(lhs, this_rhs)
-        @show formula_current
         @show this_rhs
         this_fun = fun(glm(formula_current, df, Poisson()))
         if this_fun < best_fun
