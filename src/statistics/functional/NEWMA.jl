@@ -19,11 +19,12 @@ Nonparametric Exponentially Weighted Moving Average object for monitoring nonpar
 # References
 Zou, C., Tsung, F., & Wang, Z. (2008). Monitoring Profiles Based on Nonparametric Regression Methods. Technometrics, 50(4), 512-526. https://doi.org/10.1198/004017008000000433
 """
-@with_kw mutable struct NEWMA{E,F} <: UnivariateStatistic
+@with_kw mutable struct NEWMA{E,F,M} <: UnivariateStatistic
     λ::Float64              # EWMA smoothing constant
     value::Float64 = 0.0
     σ::Float64              # Standard deviation of the error term
     cdf_σ::E                # Cumulative distribution function of σ
+    V::M                    # Covariance matrix of the nonparametric regression
     g::F                    # Estimated regression function object, must have a method
                             # of signature `predict(g::F, x::AbstractVector)`
     Ej::Vector{Float64}     # Current smoothed observations
@@ -66,13 +67,14 @@ The constructed NEWMA control chart.
 function NEWMA(λ::Float64, g::F, dat::FunctionalData)
     error("Must specify matrix Sigma")
     σjs = zeros(length(dat))
-    res = zeros(length(first(dat).x))
+    res = zeros(length(get_covariates(first(dat))))
     for i in 1:length(dat)
-       res[:] = dat[i].y - predict(g, dat[i].x) 
+       res[:] = dat[i].y - predict(g, get_covariates(dat[i])) 
        σjs[i] = std(res)
     end
-    n = length(first(dat).x)
+    n = length(get_covariates(first(dat)))
     ecdf_σ = ecdf(σjs)
+    error("Add regression covariance matrix")
     return NEWMA(λ, g, σ, ecdf_σ, n + 1)
 end
 
@@ -80,10 +82,11 @@ update_statistic(STAT::NEWMA, x::FunctionalObservation) = update_statistic!(deep
 
 #FIXME: test
 function update_statistic!(STAT::NEWMA, x::FunctionalObservation)
-    yhat = predict(STAT.g, x.x)
+    yhat = predict(STAT.g, get_covariates(x))
     zj = (x.y .- yhat) ./ STAT.σ
     new_σ = quantile(Normal(0,1), STAT.cdf_σ(std(zj)))
     STAT.Ej[1:(end-1)] = (1 - STAT.λ) * STAT.Ej[1:(end-1)] + STAT.λ * zj
     STAT.Ej[end] = (1 - STAT.λ) * STAT.Ej[end] + STAT.λ * new_σ
+    error("Add regression covariance matrix")
     STAT.value = dot(STAT.Ej, STAT.Sigma, STAT.Ej)
 end
