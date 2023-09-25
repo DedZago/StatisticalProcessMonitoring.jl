@@ -1,7 +1,6 @@
 using Parameters
 using StatsBase
 using LinearAlgebra
-using RCall
 
 """
     LLCUSUM(x::AbstractMatrix, k::Real; ncuts::AbstractVector = [2 for _ in eachcol(x)])
@@ -38,7 +37,9 @@ set_design!(stat::LLCUSUM, k::Float64) = stat.k = k
 
 
 function LLCUSUM(k::Float64, x::AbstractMatrix; ncuts::Vector{Int} = [2 for _ in eachcol(x)])
-    df, table, qtls = create_table(x, ncuts)
+    df_mat, table, qtls = create_table(x, ncuts)
+    df = DataFrame(df_mat, :auto)
+    rename!(df, Dict(Symbol("x"*string(size(df,2))) => :y))
     f0 = estimate_loglinear_model_probabilities(df, table)
     if !isapprox(sum(f0), 1.0)
         error("Sum of probabilities is different from 1 (value is $(sum(f0)))")
@@ -59,29 +60,8 @@ Estimates the probabilities of an ordinal loglinear model based on the observed 
 - `prob::Vector{Float64}`: A vector of estimated probabilities.
 """
 function estimate_loglinear_model_probabilities(df, table)
-    @rput df
-    @rput table
-    R"df = data.frame(df)
-        q = NCOL(df)-1
-        for(j in 1:q){
-            df[, j] = as.factor(df[, j])
-        }
-        names(df)[NCOL(df)] = \"y\"
-        f = as.formula(paste0(\"y ~ .^\", 2))
-        mod0 = glm(f, data=df, family=poisson)
-        # mod0 = glm(y ~ 1, data=df, family=poisson)
-        selected_model = step(mod0, trace=0, direction=\"backward\", k=3.841459) 
-        # selected_model = step(mod0, scope = list(upper=f), trace=0, direction=\"forward\", k=3.841459) 
-        table = data.frame(table)
-        for(j in 1:(NCOL(table))){
-            table[, j] = as.factor(table[, j])
-        }
-        # print(backw)
-        prob = predict(selected_model, table, type=\"response\")
-        prob = prob / sum(df$y)
-        "
-    @rget prob
-    return prob
+    mod = backward_loglinear(df, :y)
+    return predict(mod) / sum(df.y)
 end
 export estimate_loglinear_model_probabilities
 

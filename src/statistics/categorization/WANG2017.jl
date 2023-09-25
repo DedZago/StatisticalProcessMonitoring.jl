@@ -1,4 +1,3 @@
-using RCall
 using Parameters
 using LinearAlgebra
 import LinearAlgebra: kron
@@ -40,7 +39,9 @@ SPM.set_design!(stat::WANG2017, l::Float64) = stat.l = l
 
 function WANG2017(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
     @assert length(ncuts) == size(x,2) "Must provide a number of classes for each variable ($(size(x,2)) total, $(length(ncuts)) provided)"
-    df, table, qtls = create_table(x, ncuts)
+    df_mat, table, qtls = create_table(x, ncuts)
+    df = DataFrame(df_mat, :auto)
+    rename!(df, Dict(Symbol("x"*string(size(df,2))) => :y))
     f0 = estimate_ordinal_model_probabilities(df, table)
     @assert isapprox(sum(f0), 1.0) "Sum of probabilities is different from 1 (value is $(sum(f0)))"
     #----- Create GLRT vcov matrix -----#
@@ -61,20 +62,13 @@ Estimates the probabilities of an ordinal loglinear model based on the observed 
 # Returns
 - `prob::Vector{Float64}`: A vector of estimated probabilities.
 """
-function estimate_ordinal_model_probabilities(df, table)
-    @rput df
-    @rput table
-    R"
-        df = data.frame(df)
-        names(df)[NCOL(df)] = 'y'
-        f = as.formula(paste0('y ~ .^', 2))
-        modFull = glm(f, data=df, family=poisson)
-        table = data.frame(table)
-        prob = predict(modFull, table, type='response')
-        prob = prob / sum(prob)
-        "
-    @rget prob
-    return prob
+function estimate_ordinal_model_probabilities(df, table; order=2)
+    rhs_symbol = setdiff(Symbol.(names(df)), [:y])
+    rhs = foldl(*, term.(rhs_symbol))
+    terms_order = collect(length.(terms.(rhs)))     # Get the order of the terms in `rhs`
+    rhs = rhs[terms_order .<= order]
+    mod = glm(term(:y) ~ rhs, df, Poisson())
+    return predict(mod) / sum(df.y)
 end
 export estimate_ordinal_model_probabilities
 

@@ -1,4 +1,3 @@
-using RCall
 using Parameters
 using LinearAlgebra
 

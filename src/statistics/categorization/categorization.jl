@@ -224,13 +224,13 @@ function step_backward(df, lhs::Symbol, rhs, use_aic::Bool)
     best_fun = fun(glm(compose(lhs, rhs), df, Poisson()))
     improved = false
     best_rhs = rhs
-    @show best_rhs
+    # @show best_rhs
     removable = get_removable_terms(rhs)
     for i in removable
         opt = options[i]
         this_rhs = foldl(+, setdiff(rhs, [opt]))
         formula_current = compose(lhs, this_rhs)
-        @show this_rhs
+        # @show this_rhs
         this_fun = fun(glm(formula_current, df, Poisson()))
         if this_fun < best_fun
             best_fun = this_fun
@@ -258,7 +258,6 @@ end
 function backward_loglinear(df, lhs::Symbol; use_aic::Bool = false)
     rhs_symbol = setdiff(Symbol.(names(df)), [lhs])
     rhs = foldl(*, term.(rhs_symbol))
-    @show rhs
     while true
         rhs, improved = step_backward(df, lhs, rhs, use_aic)
         improved || return glm(compose(lhs, rhs), df, Poisson())
