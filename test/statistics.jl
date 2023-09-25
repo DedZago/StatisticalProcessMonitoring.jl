@@ -209,6 +209,17 @@ end
             CH = ControlChart(STAT, LIM, NM, PH2)
             update_chart!(CH, rand(DIST))
         end
+
+        @testset "covariance matrix" begin
+            NM = ARL(200)
+            p = 3
+            STAT = MEWMC(λ=0.1, p = p)
+            LIM = OneSidedFixedLimit(1.0, true)
+            DIST = MvNormal(zeros(p), ones(p))
+            PH2 = Phase2Distribution(DIST)
+            CH = ControlChart(STAT, LIM, NM, PH2)
+            update_chart(CH, rand(DIST))
+        end
     end
 end
 

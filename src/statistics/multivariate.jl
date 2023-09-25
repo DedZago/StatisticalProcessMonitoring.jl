@@ -32,7 +32,7 @@ update_statistic(stat::MShewhart, x::AbstractVector) = dot(x - stat.μ, stat.Σ_
 update_statistic!(stat::MShewhart, x::AbstractVector) = stat.value = update_statistic(stat, x)
 
 """
-    MEWMA(Λ, value)
+    DiagMEWMA(Λ, value)
 
 Exponentially weighted moving average with diagonal smoothing matrix `Λ` and initial value `value`.
 
@@ -177,3 +177,46 @@ function update_statistic!(stat::AMCUSUM, x::AbstractVector)
     set_design!(stat.stat, stat.shift/2)
     return get_value(stat)
 end
+
+
+
+"""
+    MEWMC(λ, value)
+
+Exponentially weighted moving covariance matrix control chart with smoothing constant `λ` and initial value `value`.
+
+The update mechanism based on a new observation `x \\in \\mathbb{R}^p` is given by
+
+``Z_t = (1 - λ)*Z_{t-1} + λ \\cdot xx'``,
+
+and the chart value is defined as
+
+``value_t = \\text{tr}(Z_t) - \\log|Z_t| - p``.
+
+### References 
+Hawkins, D. M., & Maboudou-Tchao, E. M. (2008). Multivariate Exponentially Weighted Moving Covariance Matrix. Technometrics, 50(2), 155-166.
+"""
+@with_kw mutable struct MEWMC{L,V,M} <: UnivariateStatistic 
+    λ::L = 0.1
+    p::Int
+    value::V = 0.0
+    z::M = diagm(ones(p))
+    @assert 0.0 < λ <= 1.0
+    @assert p > 0
+    @assert !isinf(value)
+end
+export MEWMC
+
+
+get_design(stat::MEWMC) = [stat.λ]
+set_design!(stat::MEWMC, λ::Float64) = stat.λ = λ
+set_design!(stat::MEWMC, λ::AbstractVector) = stat.λ = first(λ)
+
+
+function update_statistic!(stat::MEWMC, x::AbstractVector)
+    stat.z = (1 - stat.λ) * stat.z + stat.λ * x*x'
+    stat.value = tr(stat.z) - log(abs(det(stat.z))) - stat.p
+    return stat.value
+end
+
+update_statistic(stat::MEWMC, x::Real) = update_statistic!(deepcopy(stat), x)
