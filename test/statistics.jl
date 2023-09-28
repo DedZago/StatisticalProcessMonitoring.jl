@@ -4,6 +4,7 @@ using Test
 using Random
 using StatsBase
 using Distributions
+using GLM
 
 @testset "EWMA" begin
     λ = 0.1; value = 0.0
@@ -179,6 +180,7 @@ end
             @testset "backward selection" begin
                 Random.seed!(123)
                 n = 50
+                using DataFrames
                 df = DataFrame(y = rand(Poisson(3.0), n), x1 = randn(n), x2 = randn(n))
                 blmodel = backward_loglinear(df, :y)
                 @test size(blmodel.mm) == (n, 1)
@@ -220,6 +222,26 @@ end
             CH = ControlChart(STAT, LIM, NM, PH2)
             update_chart(CH, rand(DIST))
         end
+
+        @testset "Functional data" begin
+            using GLM, DataFrames
+            struct MyLinearModel
+                a
+                b
+            end
+            SPM.predict(mm::MyLinearModel, x::AbstractVector) = mm.a .+ mm.b .* x
+            NM = ARL(200)
+            n = 500
+            nj = 10
+            xs = 10 .* rand(n, nj)
+            ys = 1.0 .+ 1.0 * xs .+ randn(n, nj)
+            g = MyLinearModel(1.0, 1.0)
+            dat = FunctionalData(xs, ys)
+            STAT = NEWMA(0.2, g, dat)
+            z = update_statistic(STAT, dat[1])
+            @test 0 <= z < Inf
+        end
+
     end
 end
 

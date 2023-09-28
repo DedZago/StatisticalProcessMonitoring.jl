@@ -8,7 +8,9 @@ export FunctionalObservation
 FunctionalObservation(x::Float64, y::Float64) = FunctionalObservation([x], [y])
 
 get_covariates(FO::FunctionalObservation) = FO.x
+export get_covariates
 get_response(FO::FunctionalObservation) = FO.y
+export get_response
 
 
 const FunctionalData{A,B} = Vector{FunctionalObservation{A,B}} where {A,B}
