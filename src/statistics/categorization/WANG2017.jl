@@ -63,7 +63,7 @@ Estimates the probabilities of an ordinal loglinear model based on the observed 
 # Returns
 - `prob::Vector{Float64}`: A vector of estimated probabilities.
 """
-function estimate_ordinal_model_probabilities(df, table; order=2)
+function estimate_ordinal_model_probabilities(df::DataFrame, table; order=2)
     rhs_symbol = setdiff(Symbol.(names(df)), [:y])
     rhs = foldl(*, term.(rhs_symbol))
     terms_order = collect(length.(terms.(rhs)))     # Get the order of the terms in `rhs`

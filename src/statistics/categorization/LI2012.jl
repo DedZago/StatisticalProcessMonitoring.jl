@@ -42,7 +42,9 @@ SPM.set_design!(stat::LI2012, l::Float64) = stat.l = l
 
 function LI2012(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
     @assert length(ncuts) == size(x,2) "Must provide a number of classes for each variable ($(size(x,2)) total, $(length(ncuts)) provided)"
-    df, table, qtls = create_table(x, ncuts)
+    df_mat, table, qtls = create_table(x, ncuts)
+    df = DataFrame(df_mat, :auto)
+    rename!(df, Dict(Symbol("x"*string(size(df,2))) => :y))
     f0 = estimate_ordinal_model_probabilities(df, table)
     @assert isapprox(sum(f0), 1.0) "Sum of probabilities is different from 1 (value is $(sum(f0)))"
     #----- Create GLRT vcov matrix -----#

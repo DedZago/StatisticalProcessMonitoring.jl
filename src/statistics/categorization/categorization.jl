@@ -255,7 +255,7 @@ function step_backward(df, lhs::Symbol, rhs::Term, use_aic::Bool)
     (best_rhs, improved)
 end
 
-function backward_loglinear(df, lhs::Symbol; use_aic::Bool = false)
+function backward_loglinear(df::DataFrame, lhs::Symbol; use_aic::Bool = false)
     rhs_symbol = setdiff(Symbol.(names(df)), [lhs])
     rhs = foldl(*, term.(rhs_symbol))
     while true
