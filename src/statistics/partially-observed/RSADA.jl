@@ -23,7 +23,7 @@ The RSADA algorithm uses the local statistics to make decisions on which arms to
 # References
 Xian, X., Zhang, C., Bonk, S., & Liu, K. (2019). Online monitoring of big data streams: A rank-based sampling algorithm by data augmentation. Journal of Quality Technology, 53(2), 135-153. https://doi.org/10.1080/00224065.2019.1681924
 """
-@with_kw mutable struct RSADA{F,D} <: UnivariateStatistic
+@with_kw mutable struct RSADA{F,D,S <: AbstractSampling} <: UnivariateStatistic
     k::F = 0.1
     mu_min::F = 0.2
     p::Int = 1
@@ -35,10 +35,11 @@ Xian, X., Zhang, C., Bonk, S., & Liu, K. (2019). Online monitoring of big data s
     S1::Vector{F} = zeros(p)
     S2::Vector{F} = zeros(p)
     g::Vector{F} = fill(1/p, p)
+    sampler::S
 end
 export RSADA
 
-RSADA(k, mu_min, q, x::AbstractMatrix; dist = Normal(0,1)) = RSADA(k=k, mu_min=mu_min, p=size(x,2), q=q, dist=dist)
+RSADA(k, mu_min, q, x::AbstractMatrix; dist = Normal(0,1), sampler = ThompsonSampling()) = RSADA(k=k, mu_min=mu_min, p=size(x,2), q=q, dist=dist, sampler = sampler)
 
 get_design(STAT::RSADA) = [STAT.k, STAT.mu_min]
 
@@ -93,7 +94,7 @@ Update the monitored data streams of the RSADA monitoring statistic `STAT` by se
 - `STAT.obs`: The selected indices of the top `STAT.q` values of `STAT.S1`.
 """
 function update_sampling!(STAT::RSADA)
-    STAT.obs .= sortperm(-STAT.S1)[1:STAT.q]
+    STAT.obs .= new_layout(STAT.sampler, STAT.S1, STAT.q)
     return STAT.obs
 end
 

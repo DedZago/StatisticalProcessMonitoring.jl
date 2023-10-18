@@ -204,10 +204,14 @@ end
             p = 5
             q = 2
             x = randn(1,p)
-            STAT = RSADA(0.3, 1.0, q, x)
+            STAT = RSADA(0.3, 1.0, q, x, sampler = ThompsonSampling())
             LIM = OneSidedFixedLimit(1.0, true)
             DIST = MvNormal(zeros(p), ones(p))
             PH2 = Phase2Distribution(DIST)
+            CH = ControlChart(STAT, LIM, NM, PH2)
+            update_chart!(CH, rand(DIST))
+
+            STAT = RSADA(0.3, 1.0, q, x, sampler = TopQ())
             CH = ControlChart(STAT, LIM, NM, PH2)
             update_chart!(CH, rand(DIST))
         end
