@@ -53,7 +53,7 @@ end
 """
     augmented_vector(y, obs, mu, dist)
 
-Compute the augmented vector `eta` (Equation 10 of [Xian, 2019]) based on the given parameters.
+Compute the augmented vector `eta` (Equation 10 of [Xian et Al., 2019]) based on the given parameters.
 
 # Arguments
 - `y`: The input vector.
@@ -104,7 +104,7 @@ function update_statistic!(STAT::RSADA, x::AbstractVector)
     STAT.S1 .= STAT.S1 .+ STAT.eta
     STAT.S2 .= STAT.S2 .+ STAT.g
     C = sum((STAT.S1 - STAT.S2).^2 ./ STAT.S2)
-    # Equation (10)
+    # Equation (10) of [Xian et Al., 2019]
     if C <= STAT.k
         STAT.S1[:] .= STAT.g[:]
         STAT.S2[:] .= STAT.g[:]
