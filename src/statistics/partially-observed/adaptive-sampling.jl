@@ -102,6 +102,6 @@ struct TopQ <: AbstractSampling end
 export TopQ
 
 function new_layout(SPL::TopQ, local_statistics::AbstractVector, q::Int)
-    # Add some random noise to solve ties in the local statistics
+    # Add a small amount of random noise to remove ties in the local statistics
     return sortperm(local_statistics .+ 1e-10*randn(length(local_statistics)), rev=true)[1:q]
 end
