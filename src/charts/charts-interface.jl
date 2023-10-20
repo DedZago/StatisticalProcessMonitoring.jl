@@ -1,16 +1,16 @@
 using SPM
 using Parameters
 
-abstract type AbstractChart{STAT, LIM, NOM, PH1} end
+abstract type AbstractChart{STAT, LIM, NOM, PH2} end
 
 #################################################################
 #               Generic control chart interface                 #
 #################################################################
-mutable struct ControlChart{STAT, LIM, NOM, PH1} <: AbstractChart{STAT, LIM, NOM, PH1}
+mutable struct ControlChart{STAT, LIM, NOM, PH2} <: AbstractChart{STAT, LIM, NOM, PH2}
     stat::STAT
     limit::LIM
     nominal::NOM
-    phase2::PH1
+    phase2::PH2
     t::Int
 
     ControlChart(stat::S, limit::L, nominal::N, phase2::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), t)
@@ -54,13 +54,13 @@ get_limit_value(CH::AbstractChart) = get_value(get_limit(CH))
 
 get_limit_value(CH::MultipleControlChart) = get_value.(get_limit(CH))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH2} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH2} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = get_value.(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH2} = get_value.(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = get_value.(get_limit(CH), get_t(CH), get_statistic(CH))
+get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH2} = get_value.(get_limit(CH), get_t(CH), get_statistic(CH))
 export get_limit_value
 
 
@@ -167,9 +167,9 @@ is_IC(CH::AbstractChart) = is_IC(get_limit(CH), get_statistic(CH))
 
 is_IC(CH::MultipleControlChart) = all(is_IC_vec(get_limit(CH), get_statistic(CH)))
 
-is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
+is_IC(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH2} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
 
-is_IC(CH::AbstractChart{STAT,LIM,NOM,PH1}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH1} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
+is_IC(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH2} = is_IC(get_limit(CH), get_t(CH), get_statistic(CH))
 
 is_OC(CH::AbstractChart) = !is_IC(CH)
 export is_IC
@@ -334,7 +334,7 @@ function update_chart!(CH::MultipleControlChart, x)
     end
 end
 
-function update_chart!(CH::AbstractChart{STAT, LIM, NOM, PH1}, x) where {STAT, LIM <: DynamicLimit, NOM, PH1}
+function update_chart!(CH::AbstractChart{STAT, LIM, NOM, PH2}, x) where {STAT, LIM <: DynamicLimit, NOM, PH2}
     CH.t += 1
     update_limit!(CH)
     update_statistic!(get_statistic(CH), x)
