@@ -23,7 +23,7 @@ The RSADA algorithm uses the local statistics to make decisions on which arms to
 # References
 Xian, X., Zhang, C., Bonk, S., & Liu, K. (2019). Online monitoring of big data streams: A rank-based sampling algorithm by data augmentation. Journal of Quality Technology, 53(2), 135-153. https://doi.org/10.1080/00224065.2019.1681924
 """
-@with_kw mutable struct RSADA{F,D,S <: AbstractSampling} <: UnivariateStatistic
+@with_kw mutable struct RSADA{F,D,S <: AbstractSampling} <: AbstractStatistic
     k::F = 0.1
     mu_min::F = 0.2
     p::Int = 1

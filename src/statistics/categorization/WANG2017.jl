@@ -22,7 +22,7 @@ A mutable struct representing the WANG2017 statistic based on data categorizatio
 Wang, J., Li, J., & Su, Q. (2017). Multivariate Ordinal Categorical Process Control Based on Log-Linear Modeling. Journal of Quality Technology, 49(2), 108-122. https://doi.org/10.1080/00224065.2017.11917983
 
 """
-@with_kw mutable struct WANG2017 <: UnivariateStatistic
+@with_kw mutable struct WANG2017 <: AbstractStatistic
     l::Float64
     value::Float64 = 0.0
     qtls::Vector{Vector{Float64}}

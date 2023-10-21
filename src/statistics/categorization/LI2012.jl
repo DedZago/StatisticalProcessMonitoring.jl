@@ -22,7 +22,7 @@ A mutable struct representing the LI2012 statistic based on data categorization.
 - Li, J., Tsung, F., & Zou, C. (2012). Directional Control Schemes for Multivariate Categorical Processes. Journal of Quality Technology, 44(2), 136â€“154. https://doi.org/10.1080/00224065.2012.11917889
 - Wang, J., Li, J., & Su, Q. (2017). Multivariate Ordinal Categorical Process Control Based on Log-Linear Modeling. Journal of Quality Technology, 49(2), 108-122. https://doi.org/10.1080/00224065.2017.11917983
 """
-@with_kw mutable struct LI2012 <: UnivariateStatistic
+@with_kw mutable struct LI2012 <: AbstractStatistic
     l::Float64
     value::Float64 = 0.0
     qtls::Vector{Vector{Float64}}

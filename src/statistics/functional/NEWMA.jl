@@ -19,7 +19,7 @@ Nonparametric Exponentially Weighted Moving Average object for monitoring nonpar
 # References
 Zou, C., Tsung, F., & Wang, Z. (2008). Monitoring Profiles Based on Nonparametric Regression Methods. Technometrics, 50(4), 512-526. https://doi.org/10.1198/004017008000000433
 """
-@with_kw mutable struct NEWMA{E,S} <: UnivariateStatistic
+@with_kw mutable struct NEWMA{E,S} <: AbstractStatistic
     λ::Float64              # EWMA smoothing constant
     value::Float64 = 0.0
     σ::Float64              # Noise standard deviation

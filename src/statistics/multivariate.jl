@@ -12,7 +12,7 @@ The update mechanism based on a new observation `x` is given by
 ### References 
 * Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
 """
-@with_kw mutable struct MShewhart{VF,VM,V} <: UnivariateStatistic 
+@with_kw mutable struct MShewhart{VF,VM,V} <: AbstractStatistic 
     μ::VF
     Σ_m1::VM
     value::V = 0.0
@@ -47,7 +47,7 @@ and the chart value is defined as
 ### References 
 Lowry, C. A., Woodall, W. H., Champ, C. W., & Rigdon, S. E. (1992). A Multivariate Exponentially Weighted Moving Average Control Chart. Technometrics, 34(1), 46-53. https://doi.org/10.1080/00401706.1992.10485232
 """
-@with_kw mutable struct DiagMEWMA{L,V} <: UnivariateStatistic 
+@with_kw mutable struct DiagMEWMA{L,V} <: AbstractStatistic 
     Λ::Vector{L}
     value::V = 0.0
     z::Vector{L} = zeros(length(Λ))
@@ -94,7 +94,7 @@ A mutable struct representing a Multivariate Cumulative Sum (MCUSUM) statistic.
 # References
 - Crosier, R. B. (1988). Multivariate Generalizations of Cumulative Sum Quality-Control Schemes. Technometrics, 30(3), 291-303. https://doi.org/10.2307/1270083
 """
-@with_kw mutable struct MCUSUM{L,V} <: UnivariateStatistic 
+@with_kw mutable struct MCUSUM{L,V} <: AbstractStatistic 
     k::L
     p::Int
     value::V = 0.0
@@ -141,7 +141,7 @@ A mutable struct representing an Adaptive Multivariate Cumulative Sum (MCUSUM) s
 # References
 - Dai, Y., Luo, Y., Li, Z., & Wang, Z. (2011). A new adaptive CUSUM control chart for detecting the multivariate process mean. Quality and Reliability Engineering International, 27(7), 877-884. https://doi.org/10.1002/qre.1177
 """
-@with_kw mutable struct AMCUSUM{C,L,V} <: UnivariateStatistic 
+@with_kw mutable struct AMCUSUM{C,L,V} <: AbstractStatistic 
     λ::L
     p::Int
     minshift::L = 0.1
@@ -196,7 +196,7 @@ and the chart value is defined as
 ### References 
 Hawkins, D. M., & Maboudou-Tchao, E. M. (2008). Multivariate Exponentially Weighted Moving Covariance Matrix. Technometrics, 50(2), 155-166.
 """
-@with_kw mutable struct MEWMC{L,V,M} <: UnivariateStatistic 
+@with_kw mutable struct MEWMC{L,V,M} <: AbstractStatistic 
     λ::L = 0.1
     p::Int
     value::V = 0.0

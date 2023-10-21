@@ -21,7 +21,7 @@ A mutable struct representing the distibution-free CUSUM statistic based on data
 Qiu, P. (2008). Distribution-free multivariate process control based on log-linear modeling. IIE Transactions, 40(7), 664-677. https://doi.org/10.1080/07408170701744843
 
 """
-@with_kw mutable struct LLCUSUM{M} <: UnivariateStatistic
+@with_kw mutable struct LLCUSUM{M} <: AbstractStatistic
     k::Float64
     value::Float64 = 0.0
     Sobs::Vector{Float64}

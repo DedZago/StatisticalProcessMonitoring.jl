@@ -1,7 +1,3 @@
-abstract type UnivariateStatistic <: AbstractStatistic end
-export UnivariateStatistic
-
-
 """
     Shewhart(value)
 
@@ -14,7 +10,7 @@ The update mechanism based on a new observation `x` is given by
 ### References 
 * Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
 """
-@with_kw mutable struct Shewhart{V} <: UnivariateStatistic 
+@with_kw mutable struct Shewhart{V} <: AbstractStatistic 
     value::V = 0.0
     @assert !isinf(value)
 end
@@ -40,7 +36,7 @@ The update mechanism based on a new observation `x` is given by
 ### References 
 * Roberts, S. W. (1959). Control Chart Tests Based on Geometric Moving Averages. Technometrics, 1(3), 239-250. https://doi.org/10.1080/00401706.1959.10489860
 """
-@with_kw mutable struct EWMA{L,V} <: UnivariateStatistic 
+@with_kw mutable struct EWMA{L,V} <: AbstractStatistic 
     λ::L = 0.1
     value::V = 0.0
     @assert 0.0 < λ <= 1.0
@@ -67,7 +63,7 @@ The update mechanism based on a new observation `x` is given by:
 * if `upw == true`, then ``value = \\min\\{0, (1-λ)\\cdot value + λ\\cdot x\\}``;
 
 """
-@with_kw mutable struct OneSidedEWMA{L,V} <: UnivariateStatistic 
+@with_kw mutable struct OneSidedEWMA{L,V} <: AbstractStatistic 
     λ::L = 0.1
     value::V = 0.0
     upw::Bool = true
@@ -105,7 +101,7 @@ The update mechanism based on a new observation `x` is given by:
 ### References 
 * Page, E. S. (1954). Continuous Inspection Schemes. Biometrika, 41(1/2), 100. https://doi.org/10.2307/2333009
 """
-@with_kw mutable struct CUSUM{K,V} <: UnivariateStatistic 
+@with_kw mutable struct CUSUM{K,V} <: AbstractStatistic 
     k::K = 1.0
     value::V = 0.0
     upw::Bool = true
@@ -146,7 +142,7 @@ where `phi(e)` is a forecast error function based on the Huber function.
 ### References 
 Capizzi, G. & Masarotto, G. (2003). An Adaptive Exponentially Weighted Moving Average Control Chart. Technometrics, 45(3), 199-207.
 """
-@with_kw mutable struct AEWMA{L,V} <: UnivariateStatistic 
+@with_kw mutable struct AEWMA{L,V} <: AbstractStatistic 
     λ::L = 0.1
     k::L = 3.0
     value::V = 0.0
