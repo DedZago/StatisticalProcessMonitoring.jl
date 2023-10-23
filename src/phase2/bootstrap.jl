@@ -1,5 +1,16 @@
 using Distributions 
 
+############## IID OBSERVATIONS ##############
+abstract type AbstractSampling end
+struct Bootstrap <: AbstractSampling end
+export Bootstrap
+
+new_data(B::Bootstrap, data::AbstractVector) = data[rand(1:length(data))]
+new_data(B::Bootstrap, data::AbstractMatrix) = view(data, rand(1:size(data)[1]), :)
+new_data!(B::Bootstrap, data::AbstractVecOrMat) = new_data(B, data) 
+
+############## TIME SERIES ##############
+
 """
     BlockBootstrap{T} <: AbstractSampling
 

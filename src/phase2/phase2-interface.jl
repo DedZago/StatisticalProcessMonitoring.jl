@@ -1,22 +1,11 @@
-abstract type AbstractSampling end
-export new_data
-export new_data!
 
-############## IID OBSERVATIONS ##############
-struct Bootstrap <: AbstractSampling end
-export Bootstrap
-
-new_data(B::Bootstrap, data::AbstractVector) = data[rand(1:length(data))]
-new_data(B::Bootstrap, data::AbstractMatrix) = view(data, rand(1:size(data)[1]), :)
-new_data!(B::Bootstrap, data::AbstractVecOrMat) = new_data(B, data) 
-
-############## TIME SERIES ##############
-include("tsboot.jl")
-
+include("bootstrap.jl")
 
 abstract type AbstractPhase2 end
-# new_data(PH2::AbstractPhase2) = 
+new_data(::AbstractPhase2) = error("Not implemented for abstract interface.")
+export new_data
 new_data!(::AbstractPhase2) = error("Not implemented for abstract interface.")
+export new_data!
 
 function shallow_copy_sim(PH2::T) where T <: AbstractPhase2
     return T(deepcopy(PH2.samp), PH2.data)
@@ -51,8 +40,7 @@ export get_data
     new_data(PH2::Phase2{S,AbstractVector})
     new_data(PH2::Phase2{S,AbstractMatrix})
 
-Generates a new observation based on the observed Phase I (in-control) data.
-If it is not overloaded, then it defaults to generating data using a nonparametric bootstrap.
+Generates a new observation based on the observed Phase II (in-control) data.
 """
 new_data(PH2::Phase2) = new_data(PH2.samp, PH2.data)
 new_data!(PH2::Phase2) = new_data!(PH2.samp, PH2.data)
