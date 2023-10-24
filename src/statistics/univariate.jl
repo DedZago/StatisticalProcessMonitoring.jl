@@ -129,6 +129,65 @@ update_statistic!(stat::CUSUM, x::Real) = stat.value = update_statistic(stat, x)
 
 
 """
+    WCUSUM <: AbstractStatistic
+
+Type representing a weighted cumulative sum statistic.
+
+# Arguments
+- `k::Float64`: The allowance constant of the CUSUM used for calculating the WCUSUM statistic. Default is 1.0.
+- `λ::Float64`: The forgetting factor for updating the weighted cumulative sum. Must be a value between 0 and 1. Default is 0.2.
+- `value::Float64`: The initial value of the weighted cumulative sum statistic. Default is 0.0.
+- `Q::Float64`: The residual value of the weighted cumulative sum. Default is 0.0.
+- `upw::Bool`: Whether to monitor increases in the mean (`true`) or decreases (`false`). Default is `true`.
+
+# References
+Reynolds, M. R., & Stoumbos, Z. G. (2006). Comparisons of Some Exponentially Weighted Moving Average Control Charts for Monitoring the Process Mean and Variance. Technometrics, 48(4), 550-567. https://doi.org/10.1198/004017006000000255
+
+# Examples
+```julia
+stat = WCUSUM()
+get_design(stat)            # returns [1.0, 0.2]
+update_statistic(stat, 3.0) # returns 1.2
+stat.Q                      # returns 0.6
+```
+"""
+@with_kw mutable struct WCUSUM <: AbstractStatistic 
+    k::Float64 = 1.0
+    λ::Float64 = 0.2
+    value::Float64 = 0.0
+    Q::Float64 = 0.0
+    upw::Bool = true
+    @assert !isinf(value)
+    @assert (k > 0.0) && !isinf(k) "k must be finite and positive"
+    @assert 0 < λ <= 1
+end
+export WCUSUM
+
+
+get_design(stat::WCUSUM) = [stat.k, stat.λ]
+
+function set_design!(stat::WCUSUM, par::AbstractVector)
+    stat.k = par[1]
+    stat.λ = par[2]
+    return par
+end
+
+function update_statistic(stat::WCUSUM, x::Real)
+    # Update wcusum residuals
+    stat.Q = (1 - stat.λ) * stat.Q + stat.λ*x
+    # Calculate fault signature
+    φ = abs(stat.Q)
+    if stat.upw
+        return max(0.0, stat.value + (x - stat.k)*φ)
+    else
+        return min(0.0, stat.value + (x + stat.k)*φ)
+    end
+end
+
+
+update_statistic!(stat::WCUSUM, x::Real) = stat.value = update_statistic(stat, x)
+
+"""
     AEWMA(λ, k, value)
 
 Adaptive exponentially weighted moving average with design parameters `λ`, `k`, and initial value `value`.
