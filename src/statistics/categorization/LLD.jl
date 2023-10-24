@@ -3,9 +3,9 @@ using Parameters
 using LinearAlgebra
 
 """
-    LI2012(x::AbstractMatrix, l::Real; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
+    LLD(x::AbstractMatrix, l::Real; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
 
-A mutable struct representing the LI2012 statistic based on data categorization.
+A mutable struct representing the LLD statistic based on data categorization.
 
 # Fields
 - `l::Float64`: The exponentially weighted smoothing constant of the statistic.
@@ -19,10 +19,11 @@ A mutable struct representing the LI2012 statistic based on data categorization.
 - `z_k::Vector{Float64}`: The current vector of smoothed values.
 
 # References
-- Li, J., Tsung, F., & Zou, C. (2012). Directional Control Schemes for Multivariate Categorical Processes. Journal of Quality Technology, 44(2), 136â€“154. https://doi.org/10.1080/00224065.2012.11917889
-- Wang, J., Li, J., & Su, Q. (2017). Multivariate Ordinal Categorical Process Control Based on Log-Linear Modeling. Journal of Quality Technology, 49(2), 108-122. https://doi.org/10.1080/00224065.2017.11917983
+Li, J., Tsung, F., & Zou, C. (2012). Directional Control Schemes for Multivariate Categorical Processes. Journal of Quality Technology, 44(2), 136â€“154. https://doi.org/10.1080/00224065.2012.11917889
+
+Wang, J., Li, J., & Su, Q. (2017). Multivariate Ordinal Categorical Process Control Based on Log-Linear Modeling. Journal of Quality Technology, 49(2), 108-122. https://doi.org/10.1080/00224065.2017.11917983
 """
-@with_kw mutable struct LI2012 <: AbstractStatistic
+@with_kw mutable struct LLD <: AbstractStatistic
     l::Float64
     value::Float64 = 0.0
     qtls::Vector{Vector{Float64}}
@@ -33,14 +34,14 @@ A mutable struct representing the LI2012 statistic based on data categorization.
     N::Int = 1
     z_k::Vector{Float64} = deepcopy(f0)
 end
-export LI2012
+export LLD
 
-SPM.get_design(stat::LI2012) = [stat.l]
-SPM.set_design!(stat::LI2012, l::AbstractVector) = stat.l = first(l)
-SPM.set_design!(stat::LI2012, l::Float64) = stat.l = l
+SPM.get_design(stat::LLD) = [stat.l]
+SPM.set_design!(stat::LLD, l::AbstractVector) = stat.l = first(l)
+SPM.set_design!(stat::LLD, l::Float64) = stat.l = l
 
 
-function LI2012(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
+function LLD(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
     @assert length(ncuts) == size(x,2) "Must provide a number of classes for each variable ($(size(x,2)) total, $(length(ncuts)) provided)"
     df_mat, table, qtls = create_table(x, ncuts)
     df = DataFrame(df_mat, :auto)
@@ -48,11 +49,11 @@ function LI2012(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in 
     f0 = estimate_ordinal_model_probabilities(df, table)
     @assert isapprox(sum(f0), 1.0) "Sum of probabilities is different from 1 (value is $(sum(f0)))"
     #----- Create GLRT vcov matrix -----#
-    return LI2012(l=l, value=0.0, qtls=qtls, f0=f0, table=table, N = N)
+    return LLD(l=l, value=0.0, qtls=qtls, f0=f0, table=table, N = N)
 end
 
 
-function SPM.update_statistic!(STAT::LI2012, x)
+function SPM.update_statistic!(STAT::LLD, x)
     ncells = length(STAT.f0)
     g_n = zeros(ncells)
     gObs = categorize_data(x, STAT.qtls)

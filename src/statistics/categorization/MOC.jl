@@ -4,9 +4,9 @@ using LinearAlgebra
 import LinearAlgebra: kron
 
 """
-    WANG2017(x::AbstractMatrix, l::Real; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
+    MOC(x::AbstractMatrix, l::Real; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
 
-A mutable struct representing the WANG2017 statistic based on data categorization.
+A mutable struct representing the MOC statistic based on data categorization.
 
 # Fields
 - `l::Float64`: The exponentially weighted smoothing constant of the statistic.
@@ -22,7 +22,7 @@ A mutable struct representing the WANG2017 statistic based on data categorizatio
 Wang, J., Li, J., & Su, Q. (2017). Multivariate Ordinal Categorical Process Control Based on Log-Linear Modeling. Journal of Quality Technology, 49(2), 108-122. https://doi.org/10.1080/00224065.2017.11917983
 
 """
-@with_kw mutable struct WANG2017 <: AbstractStatistic
+@with_kw mutable struct MOC <: AbstractStatistic
     l::Float64
     value::Float64 = 0.0
     qtls::Vector{Vector{Float64}}
@@ -32,13 +32,13 @@ Wang, J., Li, J., & Su, Q. (2017). Multivariate Ordinal Categorical Process Cont
     N::Int = 1
     z_k::Vector{Float64} = deepcopy(f0)
 end
-export WANG2017
+export MOC
 
-SPM.get_design(stat::WANG2017) = [stat.l]
-SPM.set_design!(stat::WANG2017, l::AbstractVector) = stat.l = first(l)
-SPM.set_design!(stat::WANG2017, l::Float64) = stat.l = l
+SPM.get_design(stat::MOC) = [stat.l]
+SPM.set_design!(stat::MOC, l::AbstractVector) = stat.l = first(l)
+SPM.set_design!(stat::MOC, l::Float64) = stat.l = l
 
-function WANG2017(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
+function MOC(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
     @assert length(ncuts) == size(x,2) "Must provide a number of classes for each variable ($(size(x,2)) total, $(length(ncuts)) provided)"
     df_mat, table, qtls = create_table(x, ncuts)
     df = DataFrame(df_mat, :auto)
@@ -48,7 +48,7 @@ function WANG2017(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ i
     #----- Create GLRT vcov matrix -----#
     Y::Matrix{Float64} = kronecker_matrix(qtls)
     Lambda::Matrix{Float64} = diagm(f0) - f0*f0'
-    return WANG2017(l=l, value=0.0, qtls=qtls, f0=f0, table=table, N = N, inv_VCOV = Y*inv(Y'*Lambda*Y)*Y')
+    return MOC(l=l, value=0.0, qtls=qtls, f0=f0, table=table, N = N, inv_VCOV = Y*inv(Y'*Lambda*Y)*Y')
 end
 
 """
@@ -74,7 +74,7 @@ end
 export estimate_ordinal_model_probabilities
 
 
-function SPM.update_statistic!(STAT::WANG2017, x)
+function SPM.update_statistic!(STAT::MOC, x)
     ncells = length(STAT.f0)
     g_n = zeros(ncells)
     gObs = categorize_data(x, STAT.qtls)
