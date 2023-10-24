@@ -141,7 +141,7 @@ Type representing a weighted cumulative sum statistic.
 - `upw::Bool`: Whether to monitor increases in the mean (`true`) or decreases (`false`). Default is `true`.
 
 # References
-Reynolds, M. R., & Stoumbos, Z. G. (2006). Comparisons of Some Exponentially Weighted Moving Average Control Charts for Monitoring the Process Mean and Variance. Technometrics, 48(4), 550-567. https://doi.org/10.1198/004017006000000255
+Shu, L., Jiang, W., & Tsui, K.-L. (2008). A Weighted CUSUM Chart for Detecting Patterned Mean Shifts. Journal of Quality Technology, 40(2), 194-213. https://doi.org/10.1080/00224065.2008.11917725
 
 # Examples
 ```julia
