@@ -7,6 +7,9 @@ using Distributions
 Abstract type representing a generic sampling method for partially-observed data.
 
 """
+abstract type AbstractSampling end
+export AbstractSampling
+
 
 """
     new_layout(sampling::AbstractSampling, local_statistics) -> layout
@@ -32,10 +35,8 @@ stats = [1, 2, 3, 4]
 layout = new_layout(ts, stats, 2)
 ```
 """
-abstract type AbstractSampling end
-export AbstractSampling
-
 new_layout(sampler::AbstractSampling, local_statistics, q::Int) = error("Not defined for abstract class.")
+
 
 """
     ThompsonSampling <: AbstractSampling
@@ -43,46 +44,17 @@ new_layout(sampler::AbstractSampling, local_statistics, q::Int) = error("Not def
 Type representing the Thompson Sampling method.
 
 # Fields
-- `β::Float64`: A parameter regulating the concentration due to the thompson sampling.
+- `β::Float64`: A parameter regulating the concentration of the `Dirichlet` distribution for Thompson sampling.
 
 # Examples
 ```julia
 ts = ThompsonSampling(2.0)
 ```
 """
-
 @with_kw struct ThompsonSampling <: AbstractSampling
     β::Float64 = 1.0
 end
 export ThompsonSampling
-
-"""
-    new_layout(sampling::ThompsonSampling, local_statistics, q)
-
-Generate a layout using Thompson Sampling sampling method.
-
-# Arguments
-- `sampling::ThompsonSampling`: An instance of ThompsonSampling.
-- `local_statistics`: The local statistics used for generating the layout.
-
-# Returns
-- `layout`: The generated layout.
-
-# References
-* Thompson, W. R. (1933). On the Likelihood that One Unknown Probability Exceeds Another in View of the Evidence of Two Samples. Biometrika, 25(3/4), 285-294. https://doi.org/10.2307/2332286
-* Thompson, W. R. (1935). On the Theory of Apportionment. American Journal of Mathematics, 57(2), 450-456. https://doi.org/10.2307/2371219
-
-# Examples
-```julia
-# Create an instance of ThompsonSampling
-ts = ThompsonSampling(2.0)
-
-# Generate a layout using ThompsonSampling
-stats = [1, 2, 3, 4]
-q = 2
-layout = new_layout(ts, stats, q)
-```
-"""
 
 function new_layout(SPL::ThompsonSampling, local_statistics::AbstractVector, q::Int)
     # Use Thompson sampling from the Dirichlet distribution, local statistics should be non-negative 

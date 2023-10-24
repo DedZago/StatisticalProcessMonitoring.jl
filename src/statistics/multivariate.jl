@@ -15,23 +15,17 @@ The update mechanism based on a new observation `x` is given by
 ### References 
 * Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
 """
-@with_kw mutable struct MShewhart{VF,VM,V} <: AbstractStatistic 
-    μ::VF
-    Σ_m1::VM
-    value::V = 0.0
-    @assert length(μ) == size(Σ_m1, 1)
-    @assert size(Σ_m1, 1) == size(Σ_m1, 2)
+@with_kw mutable struct MShewhart <: AbstractStatistic 
+    value::Float64 = 0.0
     @assert !isinf(value)
 end
 export MShewhart
 
-#TODO: test MShewhart control chart
-MShewhart(x::AbstractMatrix; value = 0.0) = MShewhart(mean.(eachcol(x)), inv(cov(x)), value)
+get_design(::MShewhart) = Vector{Float64}()
+set_design!(::MShewhart, par::Float64) = error("Cannot set a design for Shewhart chart.")
+set_design!(::MShewhart, par::AbstractVector) = error("Cannot set a design for Shewhart chart.")
 
-get_design(stat::MShewhart) = Vector{Float64}()
-set_design!(stat::MShewhart, p::Float64) = error("Cannot set a design for Shewhart chart.")
-
-update_statistic(stat::MShewhart, x::AbstractVector) = dot(x - stat.μ, stat.Σ_m1, x - stat.μ)
+update_statistic(stat::MShewhart, x::AbstractVector) = x'x
 update_statistic!(stat::MShewhart, x::AbstractVector) = stat.value = update_statistic(stat, x)
 
 """
@@ -50,11 +44,11 @@ and the chart value is defined as
 ### References 
 Lowry, C. A., Woodall, W. H., Champ, C. W., & Rigdon, S. E. (1992). A Multivariate Exponentially Weighted Moving Average Control Chart. Technometrics, 34(1), 46-53. https://doi.org/10.1080/00401706.1992.10485232
 """
-@with_kw mutable struct DiagMEWMA{L,V} <: AbstractStatistic 
-    Λ::Vector{L}
-    value::V = 0.0
-    z::Vector{L} = zeros(length(Λ))
-    inv_Σz::Matrix{L} = inv(diagm([Λ[k]^2/(2*Λ[k]-Λ[k]^2) for k in 1:length(Λ)]))
+@with_kw mutable struct DiagMEWMA <: AbstractStatistic 
+    Λ::Vector{Float64}
+    value::Float64 = 0.0
+    z::Vector{Float64} = zeros(length(Λ))
+    inv_Σz::Matrix{Float64} = inv(diagm([Λ[k]^2/(2*Λ[k]-Λ[k]^2) for k in 1:length(Λ)]))
     @assert !isinf(value)
 end
 export DiagMEWMA
@@ -97,11 +91,11 @@ A mutable struct representing a Multivariate Cumulative Sum (MCUSUM) statistic.
 # References
 - Crosier, R. B. (1988). Multivariate Generalizations of Cumulative Sum Quality-Control Schemes. Technometrics, 30(3), 291-303. https://doi.org/10.2307/1270083
 """
-@with_kw mutable struct MCUSUM{L,V} <: AbstractStatistic 
-    k::L
+@with_kw mutable struct MCUSUM <: AbstractStatistic 
+    k::Float64
     p::Int
-    value::V = 0.0
-    St::Vector{L} = zeros(p)
+    value::Float64 = 0.0
+    St::Vector{Float64} = zeros(p)
     @assert !isinf(value)
     @assert p > 0
     @assert k > 0
@@ -144,12 +138,12 @@ A mutable struct representing an Adaptive Multivariate Cumulative Sum (MCUSUM) s
 # References
 - Dai, Y., Luo, Y., Li, Z., & Wang, Z. (2011). A new adaptive CUSUM control chart for detecting the multivariate process mean. Quality and Reliability Engineering International, 27(7), 877-884. https://doi.org/10.1002/qre.1177
 """
-@with_kw mutable struct AMCUSUM{C,L,V} <: AbstractStatistic 
-    λ::L
+@with_kw mutable struct AMCUSUM{C} <: AbstractStatistic 
+    λ::Float64
     p::Int
-    minshift::L = 0.1
-    shift::L = 0.0
-    Et::Vector{V} = zeros(p)
+    minshift::Float64 = 0.1
+    shift::Float64 = 0.0
+    Et::Vector{Float64} = zeros(p)
     t::Int = 0
     stat::C = MCUSUM(k=0.1, p=p)
 
@@ -228,8 +222,6 @@ function update_statistic!(stat::MAEWMA, x::AbstractVector)
 end
 
 
-
-
 #############################################################################################################
 #                                        COVARIANCE MONITORING                                              #
 #############################################################################################################
@@ -293,10 +285,10 @@ and the chart value is defined as
 ### References 
 Hawkins, D. M., & Maboudou-Tchao, E. M. (2008). Multivariate Exponentially Weighted Moving Covariance Matrix. Technometrics, 50(2), 155-166.
 """
-@with_kw mutable struct MEWMC{L,V,M} <: AbstractStatistic 
-    λ::L = 0.1
+@with_kw mutable struct MEWMC{M} <: AbstractStatistic 
+    λ::Float64 = 0.1
     p::Int
-    value::V = 0.0
+    value::Float64 = 0.0
     z::M = diagm(ones(p))
     @assert 0.0 < λ <= 1.0
     @assert p > 0
@@ -335,9 +327,9 @@ and the chart value is defined as
 ### References 
 Huwang, L., Yeh, A. B., & Wu, C.-W. (2007). Monitoring Multivariate Process Variability for Individual Observations. Journal of Quality Technology, 39(3), 258-278. https://doi.org/10.1080/00224065.2007.11917692
 """
-@with_kw mutable struct MEWMS{L,V,M} <: AbstractStatistic 
-    λ::L = 0.1
-    value::V = 0.0
+@with_kw mutable struct MEWMS{M} <: AbstractStatistic 
+    λ::Float64 = 0.1
+    value::Float64 = 0.0
     z::M
     @assert 0.0 < λ < 1.0
     @assert !isinf(value)

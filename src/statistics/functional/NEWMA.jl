@@ -68,7 +68,6 @@ function NEWMA(λ::Float64, g, dat::FunctionalData)
     ecdf_σ = ecdf(σjs)
     return NEWMA(λ, 0.0, mean(σjs), ecdf_σ, g, zeros(n + 1))
 end
-#FIXME: test
 
 update_statistic(STAT::NEWMA, x::FunctionalObservation) = update_statistic!(deepcopy(STAT), x)
 
@@ -79,7 +78,5 @@ function update_statistic!(STAT::NEWMA, x::FunctionalObservation)
     new_σ = quantile(Normal(0,1), uniform_sigma)
     STAT.Ej[1:(end-1)] = (1 - STAT.λ) * STAT.Ej[1:(end-1)] + STAT.λ * zj
     STAT.Ej[end] = (1 - STAT.λ) * STAT.Ej[end] + STAT.λ * new_σ
-    # @show STAT.Ej[end]
     STAT.value = dot(STAT.Ej, STAT.Ej)
 end
-#FIXME: test

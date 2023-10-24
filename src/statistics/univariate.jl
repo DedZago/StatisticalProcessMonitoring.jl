@@ -16,10 +16,10 @@ The update mechanism based on a new observation `x` is given by
 end
 export Shewhart
 
-get_design(stat::Shewhart) = Vector{Float64}()
-set_design!(stat::Shewhart, x) = error("Cannot set a design for Shewhart chart.")
+get_design(::Shewhart) = Vector{Float64}()
+set_design!(::Shewhart, x) = error("Cannot set a design for Shewhart chart.")
 
-update_statistic(stat::Shewhart, x::Real) = x
+update_statistic(::Shewhart, x::Real) = x
 update_statistic!(stat::Shewhart, x::Real) = stat.value = update_statistic(stat, x)
 
 
@@ -167,8 +167,9 @@ export WCUSUM
 get_design(stat::WCUSUM) = [stat.k, stat.λ]
 
 function set_design!(stat::WCUSUM, par::AbstractVector)
-    stat.k = par[1]
-    stat.λ = par[2]
+    @assert length(par) == 2
+    stat.k = first(par)
+    stat.λ = last(par)
     return par
 end
 
@@ -177,6 +178,7 @@ function update_statistic(stat::WCUSUM, x::Real)
     stat.Q = (1 - stat.λ) * stat.Q + stat.λ*x
     # Calculate fault signature
     φ = abs(stat.Q)
+    # Update statistic
     if stat.upw
         return max(0.0, stat.value + (x - stat.k)*φ)
     else
@@ -210,15 +212,13 @@ Capizzi, G. & Masarotto, G. (2003). An Adaptive Exponentially Weighted Moving Av
     @assert !isinf(value)
 end
 export AEWMA
-#TODO: test
-
 
 get_design(stat::AEWMA) = [stat.λ, stat.k]
 
 function set_design!(stat::AEWMA, par::AbstractVector)
     @assert length(par) == 2
-    stat.λ = par[1]
-    stat.k = par[2]   
+    stat.λ = first(par)
+    stat.k = last(par)
     return par
 end
  
