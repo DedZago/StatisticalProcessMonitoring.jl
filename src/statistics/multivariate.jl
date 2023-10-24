@@ -4,13 +4,13 @@ using LinearAlgebra
 #                                          LOCATION MONITORING                                              #
 #############################################################################################################
 """
-    MShewhart(μ, Σ, value)
+    MShewhart(value)
 
-Multivariate Shewhart control chart for observations with mean `μ`, variance-covariance `Σ` and initial value `value`.
+Shewhart control chart for monitoring multivariate observations with initial value `value`.
 
 The update mechanism based on a new observation `x` is given by
 
-``value = (x - μ) Σ^(-1) (x - μ)``.
+``value = x'x``.
 
 ### References 
 * Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
@@ -35,11 +35,18 @@ Exponentially weighted moving average with diagonal smoothing matrix `Λ` and in
 
 The update mechanism based on a new observation `x` is given by
 
-``Z_t = (I-Λ)*Z_{t-1} + Λ * x_t``,
+``Z_t = (I-Λ)Z_{t-1} + Λ x_t``,
 
 and the chart value is defined as
 
-``value_t = Z_t' Λ^(-1) Z_t``.
+``value_t = Z_t' Λ^{-1} Z_t``.
+
+### Arguments
+- `Λ::Vector{Float64}`: Vector of smoothing constants.
+- `value::Float64`: Current value of the statistic (default = 0.0).
+- `z::Vector{Float64}`: Vector of smoothed observations (Default: `zeros(length(Λ))`).
+- `inv_Σz::Matrix{Float64}`: Inverse of the covariance matrix of the control variates.
+
 
 ### References 
 Lowry, C. A., Woodall, W. H., Champ, C. W., & Rigdon, S. E. (1992). A Multivariate Exponentially Weighted Moving Average Control Chart. Technometrics, 34(1), 46-53. https://doi.org/10.1080/00401706.1992.10485232
@@ -76,19 +83,20 @@ end
 
 
 """
-    MCUSUM{L,V}(k::L, value::V = 0.0, St::Vector{L})
+    MCUSUM(k, p, value = 0.0, St = zeros(p))
 
 A mutable struct representing a Multivariate Cumulative Sum (MCUSUM) statistic.
 
-# Arguments
-- `k::L`: The value of the allowance parameter.
-- `value::V`: The initial value of the statistic. Default is 0.0.
-- `St::Vector{L}`: A vector representing the multivariate cumulative sum at the current time `t`.
+### Arguments
+- `k::Float64`: The value of the allowance parameter.
+- `p::Int`: The number of variables to be monitored. 
+- `value::Float64`: The initial value of the statistic. Default is 0.0.
+- `St::Vector{Float64}`: A vector representing the multivariate cumulative sum at the current time `t`.
 
-# Examples
-    stat = MCUSUM(0.25, 0.0, [0.0, 0.0])
+### Examples
+    stat = MCUSUM(0.25, 2, 0.0, [0.0, 0.0])
 
-# References
+### References
 - Crosier, R. B. (1988). Multivariate Generalizations of Cumulative Sum Quality-Control Schemes. Technometrics, 30(3), 291-303. https://doi.org/10.2307/1270083
 """
 @with_kw mutable struct MCUSUM <: AbstractStatistic 
@@ -126,16 +134,16 @@ end
 
 A mutable struct representing an Adaptive Multivariate Cumulative Sum (MCUSUM) statistic.
 
-# Arguments
-- `λ::L`: The value of λ, where 0.0 <= λ <= 1.0.
+### Arguments
+- `λ::Float64`: The value of λ, where 0.0 <= λ <= 1.0.
 - `p::Int`: The number of quality variables to monitor.
-- `minshift::L`: The minimum shift value to be detected. Default is 0.1.
-- `shift::L`: The current shift value. Default is 0.0.
-- `Et::Vector{V}`: The vector Et of smoothed deviations from the zero mean. Has to be exactly equal to `zeros(p)`
+- `minshift::Float64`: The minimum shift value to be detected. Default is 0.1.
+- `shift::Float64`: The current shift value. Default is 0.0.
+- `Et::Vector{Float64}`: The vector Et of smoothed deviations from the zero mean. Has to be exactly equal to `zeros(p)`
 - `t::Int`: The current value of time. Has to be exactly 0.
 - `stat::C`: The underlying classical MCUSUM statistic. Default is MCUSUM(k=0.1, p=p).
 
-# References
+### References
 - Dai, Y., Luo, Y., Li, Z., & Wang, Z. (2011). A new adaptive CUSUM control chart for detecting the multivariate process mean. Quality and Reliability Engineering International, 27(7), 877-884. https://doi.org/10.1002/qre.1177
 """
 @with_kw mutable struct AMCUSUM{C} <: AbstractStatistic 
@@ -177,7 +185,7 @@ end
 
 
 """
-    MAEWMA(λ, k, value)
+    MAEWMA(λ, k, value, z::Vector{Float64})
 
 Multivariate Adaptive Exponentially Weighted Moving Average control chart.
 
@@ -189,6 +197,12 @@ where Ω = ω(e)*I is an adaptive generalization of the classical MEWMA smoothin
 The chart value is defined as
 
 ``value_t = Z_t' Z_t``.
+
+### Arguments
+- `λ::Float64`: The value of the EWMA smoothing parameter.
+- `k::Float64`: The value of the parameter of the Huber score.
+- `value::Float64`: The value of the statistic. (default: `0.0`)
+- `z::Vector{Float64}`: The vector of smoothed observations.
 
 ### References 
 Mahmoud, M. A., & Zahran, A. R. (2010). A Multivariate Adaptive Exponentially Weighted Moving Average Control Chart. Communications in Statistics - Theory and Methods, 39(4), 606-625. https://doi.org/10.1080/03610920902755813
