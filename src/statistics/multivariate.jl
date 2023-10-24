@@ -1,5 +1,8 @@
 using LinearAlgebra
 
+#############################################################################################################
+#                                          LOCATION MONITORING                                              #
+#############################################################################################################
 """
     MShewhart(μ, Σ, value)
 
@@ -179,6 +182,100 @@ function update_statistic!(stat::AMCUSUM, x::AbstractVector)
 end
 
 
+"""
+    MAEWMA(λ, k, value)
+
+Multivariate Adaptive Exponentially Weighted Moving Average control chart.
+
+The update mechanism based on a new observation `x` is given by
+
+``Z_t = (I-Ω)*Z_{t-1} + Ω * x_t``,
+
+where Ω = ω(e)*I is an adaptive generalization of the classical MEWMA smoothing matrix.
+The chart value is defined as
+
+``value_t = Z_t' Z_t``.
+
+### References 
+Mahmoud, M. A., & Zahran, A. R. (2010). A Multivariate Adaptive Exponentially Weighted Moving Average Control Chart. Communications in Statistics - Theory and Methods, 39(4), 606-625. https://doi.org/10.1080/03610920902755813
+"""
+@with_kw mutable struct MAEWMA <: AbstractStatistic 
+    λ::Float64
+    k::Float64
+    value::Float64 = 0.0
+    z::Vector{Float64}
+    @assert !isinf(value)
+end
+export MAEWMA
+
+function set_design!(stat::MAEWMA, par::AbstractVector)
+    stat.λ = par[1]    
+    stat.k = par[2]    
+    return par
+end
+get_design(stat::MAEWMA) = [stat.λ, stat.k]
+
+
+function update_statistic!(stat::MAEWMA, x::AbstractVector)
+    e = norm(dot(x - stat.z, x - stat.z)) + eps()
+    @show e
+    omega = huber(e, stat.λ, stat.k)/e
+    @show omega
+    stat.z = (I - omega*I)*stat.z + omega*I*x
+    @show stat.z
+    stat.value = dot(stat.z, stat.z)
+    return stat.value
+end
+
+
+
+
+#############################################################################################################
+#                                        COVARIANCE MONITORING                                              #
+#############################################################################################################
+"""
+    ALT{M}
+
+Generalized Likelihood Ratio statistic for monitoring changes in the variance-covariance matrix introduced by [Alt].
+
+### Fields
+- `value::Float64`: The value of the statistic, initialized to 0.0.
+- `Ω::M`: The precision matrix of the in-control process.
+- `detΣ::Float64`: The determinant of the in-control process variance.
+
+### References
+Alt, F. A. (1984). Multivariate quality control. In N. L. Johnson, S. Kotz, & C. R. Read (Eds.), The encyclopedia of statistical sciences (Vol. 6, pp. 110-122). Wiley.
+"""
+@with_kw mutable struct ALT{M} <: AbstractStatistic
+    value::Float64 = 0.0
+    Ω::M
+    detΣ::Float64 = 1.0/det(Ω)
+end
+export ALT
+
+ALT(x::AbstractVector) = ALT(value = 0.0, Ω = 1.0/cov(x))
+ALT(x::AbstractMatrix) = ALT(value = 0.0, Ω = inv(cov(x)))
+
+get_design(stat::ALT) = []
+
+function update_statistic!(stat::ALT, x::AbstractVector)
+    m = length(x)
+    @assert m > 1 "Must have at least two observations"
+    S_i = var(x)
+    stat.value = -(m-1)*(log(S_i) - log(stat.detΣ) - stat.Ω*S_i) 
+end
+
+function update_statistic!(stat::ALT, x::AbstractMatrix)
+    m,p = size(x)
+    @assert m > 1 "Must have at least two observations"
+    @assert m >= p "Must have at least as many observations ($(m)) as the number of variables ($(p))"
+    S_i = cov(x)
+    stat.value = -(m-1)*(p + log(det(S_i)) - log(stat.detΣ) - tr(stat.Ω*S_i)) 
+end
+
+
+update_statistic(stat::ALT, x::Real) = update_statistic!(deepcopy(stat), x)
+
 
 """
     MEWMC(λ, value)
@@ -220,3 +317,61 @@ function update_statistic!(stat::MEWMC, x::AbstractVector)
 end
 
 update_statistic(stat::MEWMC, x::Real) = update_statistic!(deepcopy(stat), x)
+
+
+"""
+    MEWMS(λ, value)
+
+Exponentially weighted moving covariance matrix control chart with smoothing constant `λ`.
+
+The update mechanism based on a new observation `x \\in \\mathbb{R}^p` is given by
+
+``Z_t = (1 - λ)*Z_{t-1} + λ \\cdot xx'``,
+
+and the chart value is defined as
+
+``value_t = \\text{tr}(Z_t).
+
+### References 
+Huwang, L., Yeh, A. B., & Wu, C.-W. (2007). Monitoring Multivariate Process Variability for Individual Observations. Journal of Quality Technology, 39(3), 258-278. https://doi.org/10.1080/00224065.2007.11917692
+"""
+@with_kw mutable struct MEWMS{L,V,M} <: AbstractStatistic 
+    λ::L = 0.1
+    value::V = 0.0
+    z::M
+    @assert 0.0 < λ < 1.0
+    @assert !isinf(value)
+end
+export MEWMS
+
+MEWMS(λ, x::Real) = MEWMS(λ=λ, value=0.0, z=x^2) 
+MEWMS(λ, x::AbstractVector) = MEWMS(λ=λ, value=0.0, z=x'x) 
+
+function MEWMS(λ, x::AbstractMatrix)
+    n,p = size(x)
+    Σ = Matrix{Float64}(undef, p, p)
+    if n > 1
+        Σ[:] = cov(x)
+    else
+        Σ[:] = x'x
+    end
+    MEWMS(λ=λ, value=0.0, z=Σ) 
+end
+
+get_design(stat::MEWMS) = [stat.λ]
+set_design!(stat::MEWMS, λ::Float64) = stat.λ = λ
+set_design!(stat::MEWMS, λ::AbstractVector) = stat.λ = first(λ)
+
+function update_statistic!(stat::MEWMS, x::Real)
+    stat.z = (1 - stat.λ) * stat.z + stat.λ * x^2
+    stat.value = tr(stat.z)
+    return stat.value
+end
+
+function update_statistic!(stat::MEWMS, x::AbstractVector)
+    stat.z = (1 - stat.λ) * stat.z + stat.λ * x*x'
+    stat.value = tr(stat.z)
+    return stat.value
+end
+
+update_statistic(stat::MEWMS, x::Real) = update_statistic!(deepcopy(stat), x)
