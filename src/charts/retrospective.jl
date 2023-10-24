@@ -58,12 +58,20 @@ export apply_chart
 
 #FIXME: construct interface for plotting and diagnosing.
 
-# function plot_series(PCTL::ProcessControl)
-#     plt = plot(PCTL.stat)
-#     limits = hcat(get_value.(PCTL.lim)...)
-#     for i in axes(limits, 1)
-#         plot!(plt, limits[i,:], label = "", linestyle=:dashed)
+# function plot_series(PCTL::ProcessControl; kw_ind::Dict = Dict(), kw_main::Dict = Dict())
+#     vals = hcat(PCTL.stat...)
+#     lims = hcat(PCTL.lim...)
+#     plt_i = []
+#     val_row = eachrow(vals)
+#     lim_row = eachrow(lims)
+#     for i in 1:length(val_row)
+#         push!(plt_i, plot(val_row[i]; title="Chart " * string(i), label=""))
+#         limits = hcat(get_value.(lim_row[i])...)
+#         for h in axes(limits, 1)
+#             plot!(plt_i[i], limits[h,:], label = "", linestyle=:dash)
+#         end
 #     end
+#     plt = plot(plt_i...; kw_main...)
 #     plt
 # end
 # export plot_series
