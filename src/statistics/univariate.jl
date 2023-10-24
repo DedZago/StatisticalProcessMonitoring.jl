@@ -33,12 +33,16 @@ The update mechanism based on a new observation `x` is given by
 
 ``value = (1-λ)*value + λ * x``.
 
+### Arguments
+- `λ::Float64`: The smoothing constant. Defaults to `0.1`.
+- `value::Float64`: The initial value for the EWMA statistic. Defaults to `0.0`.
+
 ### References 
 * Roberts, S. W. (1959). Control Chart Tests Based on Geometric Moving Averages. Technometrics, 1(3), 239-250. https://doi.org/10.1080/00401706.1959.10489860
 """
-@with_kw mutable struct EWMA{L,V} <: AbstractStatistic 
-    λ::L = 0.1
-    value::V = 0.0
+@with_kw mutable struct EWMA <: AbstractStatistic 
+    λ::Float64 = 0.1
+    value::Float64 = 0.0
     @assert 0.0 < λ <= 1.0
     @assert !isinf(value)
 end
@@ -62,10 +66,14 @@ The update mechanism based on a new observation `x` is given by:
 * if `upw == true`, then ``value = \\max\\{0, (1-λ)\\cdot value + λ\\cdot x\\}``;
 * if `upw == true`, then ``value = \\min\\{0, (1-λ)\\cdot value + λ\\cdot x\\}``;
 
+### Arguments
+- `λ::Float64`: The smoothing constant. Default is `0.1`.
+- `value::Float64`: The current value of the statistic. Default is `0.0`.
+- `upw::Bool`: Whether the statistic should monitor increases (`true`) or decrease (`falses`) in the process mean. Default is `true`.
 """
-@with_kw mutable struct OneSidedEWMA{L,V} <: AbstractStatistic 
-    λ::L = 0.1
-    value::V = 0.0
+@with_kw mutable struct OneSidedEWMA <: AbstractStatistic 
+    λ::Float64 = 0.1
+    value::Float64 = 0.0
     upw::Bool = true
     @assert !isinf(value)
     @assert 0.0 < λ <= 1.0
@@ -98,12 +106,17 @@ The update mechanism based on a new observation `x` is given by:
 * if `upw == true`, then ``value = \\max\\{0, value + x - k\\}``;
 * if `upw == false`, then ``value = \\min\\{0, value + x + k\\}``.
 
+### Arguments
+- `k::Float64`: The allowance constant of the CUSUM statistic. Defaults to `1.0`.
+- `value::Float64`: The current value of the cumulative sum. Defaults to `0.0`.
+- `upw::Bool`: A boolean indicating whether the CUSUM statistic is increasing or decreasing. Defaults to `true`.
+
 ### References 
 * Page, E. S. (1954). Continuous Inspection Schemes. Biometrika, 41(1/2), 100. https://doi.org/10.2307/2333009
 """
-@with_kw mutable struct CUSUM{K,V} <: AbstractStatistic 
-    k::K = 1.0
-    value::V = 0.0
+@with_kw mutable struct CUSUM <: AbstractStatistic 
+    k::Float64 = 1.0
+    value::Float64 = 0.0
     upw::Bool = true
     @assert !isinf(value)
     @assert (k > 0.0) && !isinf(k)
@@ -200,13 +213,18 @@ The update mechanism based on a new observation `x` is given by
 
 where `phi(e)` is a forecast error function based on the Huber function.
 
+### Arguments
+- `λ::Float64`: The smoothing constant. Default is `0.1`.
+- `k::Float64`: The threshold value in the Huber score. Default is `3.0``.
+- `value::Float64`: The initial value of the statistic. Default is 0.0.
+
 ### References 
 Capizzi, G. & Masarotto, G. (2003). An Adaptive Exponentially Weighted Moving Average Control Chart. Technometrics, 45(3), 199-207.
 """
-@with_kw mutable struct AEWMA{L,V} <: AbstractStatistic 
-    λ::L = 0.1
-    k::L = 3.0
-    value::V = 0.0
+@with_kw mutable struct AEWMA <: AbstractStatistic 
+    λ::Float64 = 0.1
+    k::Float64 = 3.0
+    value::Float64 = 0.0
     @assert 0.0 < λ <= 1.0
     @assert 0.0 < k
     @assert !isinf(value)
