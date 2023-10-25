@@ -149,6 +149,7 @@ function run_sim_sa(CH::MultipleControlChart; maxiter::Real = Inf, delta::Real =
                 end
             end
             notDone[:] = notDoneRl + notDoneM + notDoneP
+            # @show notDone
         end
     end
     set_limit!(CH_, h)

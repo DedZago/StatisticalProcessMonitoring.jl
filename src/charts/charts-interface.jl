@@ -14,15 +14,22 @@ mutable struct ControlChart{STAT, LIM, NOM, PH2} <: AbstractChart{STAT, LIM, NOM
     t::Int
 
     ControlChart(stat::S, limit::L, nominal::N, phase2::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), t)
+
     ControlChart(stat::S, limit::L, nominal::N, phase2::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), 0)
+
     ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase2::P) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{Vector{S},Vector{L},N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), 0)
+
     ControlChart(stat::Vector{S}, limit::Vector{L}, nominal::N, phase2::P, t::Int) where {S <: AbstractStatistic, L <: AbstractLimit, N <: NominalProperties, P <: AbstractPhase2} = new{Vector{S},Vector{L},N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), t)
+
+    ControlChart(stat::S, limit::L, nominal::N, phase2::P, t::Int) where {S <: Tuple, L <: Tuple, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), t)
+
+    ControlChart(stat::S, limit::L, nominal::N, phase2::P) where {S <: Tuple, L <: Tuple, N <: NominalProperties, P <: AbstractPhase2} = new{S,L,N,P}(deepcopy(stat), deepcopy(limit), deepcopy(nominal), deepcopy(phase2), 0)
 end
 export ControlChart
 
 Base.show(io::IO, CH::ControlChart) = print(io, "stat: $(get_statistic(CH))\nlimit: $(get_limit(CH))\nnominal: $(get_nominal(CH))\nphase2: $(typeof(get_phase2(CH)))\n\nt: $(get_t(CH))")
 
-const MultipleControlChart{S,L,N,P} = ControlChart{Vector{S}, Vector{L},N,P} where {S,L,N,P}
+const MultipleControlChart{S,L,N,P} = ControlChart{S,L,N,P} where {S<:Tuple,L<:Tuple,N,P}
 export MultipleControlChart
 
 
@@ -52,7 +59,7 @@ Get the control limit value of a control chart.
 """
 get_limit_value(CH::AbstractChart) = get_value(get_limit(CH))
 
-get_limit_value(CH::MultipleControlChart) = get_value.(get_limit(CH))
+get_limit_value(CH::MultipleControlChart) = collect(get_value.(get_limit(CH)))
 
 get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH2} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
@@ -79,7 +86,7 @@ export get_statistic
 Get the current value of the control chart statistic.
 """
 get_value(CH::AbstractChart) = get_value(get_statistic(CH))
-get_value(CH::MultipleControlChart) = get_value.(get_statistic(CH))
+get_value(CH::MultipleControlChart) = collect(get_value.(get_statistic(CH)))
 export get_value
 
 
@@ -125,7 +132,7 @@ Get the designs of the control chart statistic.
 """
 get_design(CH::AbstractChart) = get_design(get_statistic(CH))
 
-get_design(CH::MultipleControlChart) = get_design.(get_statistic(CH))
+get_design(CH::MultipleControlChart) = collect(get_design.(get_statistic(CH)))
 export get_design
 
 

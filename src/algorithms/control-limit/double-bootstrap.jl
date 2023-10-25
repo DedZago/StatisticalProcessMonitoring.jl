@@ -1,5 +1,4 @@
 using Statistics
-# FIXME: test double bootstrap functions
 # FIXME: understand why double bootstrap does not work with curved limits 
 
 """
@@ -28,7 +27,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
 
 """
-function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Real = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, B::Int = nsims, verbose::Bool = false, parallel::Bool = false)
+function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Real = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), x_tol::Float64 = 1e-03, f_tol::Float64 = 1.0, B::Int = nsims, verbose::Bool = false, parallel::Bool = false)
 
     @assert maxiter > 0 "maxiter must be positive"
     @assert nsims > 0 "nsims must be positive"
@@ -38,12 +37,12 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
     @assert B > 0 "B must be positive"
 
     tmp_rlpath = rlsim(CH, maxiter=2)
-    if isa(CH, MultipleControlChart)
-        @assert isa(tmp_rlpath, Matrix) "rlsim must be a matrix"
-        @assert size(tmp_rlpath) == (2, length(get_limit(CH))) "incorrect size for rlsim"
+    if isa(CH, MultipleControlChart) || isa(CH, FixedMultipleControlChart)
+        @assert isa(tmp_rlpath, Matrix) "output of rlsim must be a matrix"
+        @assert size(tmp_rlpath) == (2, length(get_limit(CH))) "incorrect size for output of rlsim"
     else
-        @assert isa(tmp_rlpath, Vector) "rlsim must be a matrix"
-        @assert length(tmp_rlpath) == 2 "rlsim must be of length maxiter"
+        @assert isa(tmp_rlpath, Vector) "output of rlsim must be a matrix"
+        @assert length(tmp_rlpath) == 2 "output of rlsim must be of length maxiter"
     end
 
     if verbose println("Generating $(nsims) run length paths ...") end
@@ -54,11 +53,6 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
 
     target = get_nominal_value(CH)                  # Target nominal ARL/QRL/...
     h, iter, conv = _bisection_paths(deepcopy(CH), rl_paths, target, maxrl_i, nsims_i, x_tol, f_tol, maxiter, B, verbose)
-    # for b in 1:B
-    #     h_boot[b] = bisection_paths(CH, rl_paths[sample(1:nsims_i, nsims_i), :], target, maxrl, nsims_i, x_tol, f_tol, maxiter, false)
-    # end
-    # h = 2*h - mean(h_boot)
-    # while abs(last_E_RL_estimate - target) > f_tol
     set_limit!(CH, h)
     return (h=h, iter=iter, status = conv)
 end
@@ -116,7 +110,8 @@ export approximateBisectionCL
 
 function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
     #TODO: multiply the maximum value by the asymptotic inflating factor for curved control limits
-    hmax = maximum(rl_paths)
+    maximum_inflation_factor = _calculate_curved_limit_asymptote(CH)
+    hmax = maximum(rl_paths) .* maximum_inflation_factor
     hmin = 0.0
     if verbose println("Running bisection on simulated paths with endpoints [$(hmin), $(hmax)] ...") end
     hold = hmax + x_tol + 1.0                 # Starting value to assess convergence
@@ -181,7 +176,8 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
     @assert length(size(rl_paths)) == 3 "rl_paths must be a 3-dimensional array <currently is <$(length(size(rl_paths)))>"
     @assert size(rl_paths)[3] == length(get_statistic(CH)) "Must have a rl_path for each statistic. Got instead <$(size(rl_paths)[3])> and <$(length(get_statistic(CH)))>"
 
-    hmax = maximum(view(rl_paths,:,:,1))
+    maximum_inflation_factor = _calculate_curved_limit_asymptote(CH)
+    hmax = maximum(view(rl_paths,:,:,1)) * first(maximum_inflation_factor)
     hmin = 0.0
     if verbose println("Running bisection on simulated paths with endpoints [$(hmin), $(hmax)] ...") end
     hold = hmax + x_tol + 1.0                 # Starting value to assess convergence
@@ -196,7 +192,7 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
     NOM = deepcopy(get_nominal(CH))
     L = length(get_statistic(CH))
     h_l_current = zeros(L)
-    hmax_l = [maximum(view(rl_paths,:,:,l)) for l in 1:L]
+    hmax_l = [maximum(view(rl_paths,:,:,l)) for l in 1:L] .* maximum_inflation_factor
     hmin_l = [0.0 for _ in 1:L]
     while i < maxiter
         i = i+1
@@ -231,7 +227,7 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
 
         # Use E_RL as target for the remaining control charts
         for l in 2:L
-            h_l_current[l] = _bisection_paths_multiple_j(CH::MultipleControlChart, l, view(rl_paths,:,:,l), E_RL1, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose, hmin=hmin_l[l], hmax=hmax_l[l])
+            h_l_current[l] = _bisection_paths_multiple_j(CH, l, view(rl_paths,:,:,l), E_RL1, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose, hmin=hmin_l[l], hmax=hmax_l[l])
             set_t!(CH, 0)
             set_value!(CH, starting_chart_value[l], l)
             set_limit!(CH, h_l_current[l], l)
@@ -335,4 +331,10 @@ function _bisection_paths_multiple_j(CH::MultipleControlChart, l, rl_paths, targ
         hold = h
     end
     return h
+end
+
+
+function _calculate_curved_limit_asymptote(CH)
+    @warn "Not implemented yet."
+    return 1.0
 end

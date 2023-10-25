@@ -52,6 +52,7 @@ Get the maximum value of the run length for a statistic `stat`.
 """
 get_maxrl(::AbstractStatistic) = Inf
 get_maxrl(stat::Vector{T}) where T <: AbstractStatistic = minimum(get_maxrl.(stat))
+get_maxrl(stat::Tuple) = minimum(get_maxrl.(stat))
 export get_maxrl
 
 include("univariate.jl")
