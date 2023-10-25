@@ -345,7 +345,7 @@ function _calculate_curved_limit_asymptote(CH::MultipleControlChart, maxrl)
     ret = [1.0 for _ in eachindex(get_limit(CH))]
     for i in eachindex(get_limit(CH))
         if isa(get_limit(CH)[i], OneSidedCurvedLimit) || isa(get_limit(CH)[i], TwoSidedCurvedLimit)
-            ret[i] = maximum([get_limit(CH)[i].fun(t, get_statistic(CH)[i]) for t in 1:maxrl])
+            ret[i] = minimum([get_limit(CH)[i].fun(t, get_statistic(CH)[i]) for t in 1:maxrl])
         end
     end
     return ret
