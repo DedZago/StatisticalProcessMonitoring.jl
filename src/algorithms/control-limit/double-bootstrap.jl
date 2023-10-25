@@ -1,5 +1,4 @@
 using Statistics
-# FIXME: understand why double bootstrap does not work with curved limits 
 
 """
     approximateBisectionCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
@@ -110,8 +109,8 @@ export approximateBisectionCL
 
 function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
     #TODO: multiply the maximum value by the asymptotic inflating factor for curved control limits
-    maximum_inflation_factor = _calculate_curved_limit_asymptote(CH)
-    hmax = maximum(rl_paths) .* maximum_inflation_factor
+    maximum_inflation_factor = _calculate_curved_limit_asymptote(CH, maxrl)
+    hmax = maximum(rl_paths) / first(maximum_inflation_factor)
     hmin = 0.0
     if verbose println("Running bisection on simulated paths with endpoints [$(hmin), $(hmax)] ...") end
     hold = hmax + x_tol + 1.0                 # Starting value to assess convergence
@@ -176,8 +175,8 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
     @assert length(size(rl_paths)) == 3 "rl_paths must be a 3-dimensional array <currently is <$(length(size(rl_paths)))>"
     @assert size(rl_paths)[3] == length(get_statistic(CH)) "Must have a rl_path for each statistic. Got instead <$(size(rl_paths)[3])> and <$(length(get_statistic(CH)))>"
 
-    maximum_inflation_factor = _calculate_curved_limit_asymptote(CH)
-    hmax = maximum(view(rl_paths,:,:,1)) * first(maximum_inflation_factor)
+    maximum_inflation_factor = _calculate_curved_limit_asymptote(CH, maxrl)
+    hmax = maximum(view(rl_paths,:,:,1)) / first(maximum_inflation_factor)
     hmin = 0.0
     if verbose println("Running bisection on simulated paths with endpoints [$(hmin), $(hmax)] ...") end
     hold = hmax + x_tol + 1.0                 # Starting value to assess convergence
@@ -192,7 +191,7 @@ function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsi
     NOM = deepcopy(get_nominal(CH))
     L = length(get_statistic(CH))
     h_l_current = zeros(L)
-    hmax_l = [maximum(view(rl_paths,:,:,l)) for l in 1:L] .* maximum_inflation_factor
+    hmax_l = [maximum(view(rl_paths,:,:,l)) for l in 1:L] ./ maximum_inflation_factor
     hmin_l = [0.0 for _ in 1:L]
     while i < maxiter
         i = i+1
@@ -334,7 +333,20 @@ function _bisection_paths_multiple_j(CH::MultipleControlChart, l, rl_paths, targ
 end
 
 
-function _calculate_curved_limit_asymptote(CH)
-    @warn "Not implemented yet."
-    return 1.0
+function _calculate_curved_limit_asymptote(CH::AbstractChart, maxrl)
+    ret = 1.0
+    if isa(get_limit(CH), OneSidedCurvedLimit) || isa(get_limit(CH), TwoSidedCurvedLimit)
+        ret = maximum([get_limit(CH).fun(t, get_statistic(CH)) for t in 1:maxrl])
+    end
+    return ret
+end
+
+function _calculate_curved_limit_asymptote(CH::MultipleControlChart, maxrl)
+    ret = [1.0 for _ in eachindex(get_limit(CH))]
+    for i in eachindex(get_limit(CH))
+        if isa(get_limit(CH)[i], OneSidedCurvedLimit) || isa(get_limit(CH)[i], TwoSidedCurvedLimit)
+            ret[i] = maximum([get_limit(CH)[i].fun(t, get_statistic(CH)[i]) for t in 1:maxrl])
+        end
+    end
+    return ret
 end
