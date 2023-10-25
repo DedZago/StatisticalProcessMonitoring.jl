@@ -64,7 +64,7 @@ end
     LIM1 = TwoSidedCurvedLimit(2.0, f)
     LIM2 = OneSidedFixedLimit(2.3, true)
     PH1 = Phase2(Bootstrap(), x)
-    CH = ControlChart([STAT1, STAT2], [LIM1, LIM2], NM, PH1)
+    CH = ControlChart((STAT1, STAT2), (LIM1, LIM2), NM, PH1)
     @testset "call" begin
         saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
     end
@@ -79,7 +79,7 @@ end
     STAT2 = Shewhart()
     LIM1 = TwoSidedFixedLimit(2.0)
     LIM2 = TwoSidedFixedLimit(2.0)
-    CH = ControlChart([STAT1, STAT2], [LIM1, LIM2], NM, PH1)
+    CH = ControlChart((STAT1, STAT2), (LIM1, LIM2), NM, PH1)
     @testset "call" begin
         saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
         approximateBisectionCL(CH, nsims=1, maxiter=1)
@@ -90,7 +90,7 @@ end
     x = randn(1000)
     NM = QRL(200, 0.5)
     PH1 = Phase2(BlockBootstrap(10, x), x)
-    CH = ControlChart([STAT1, STAT2], [LIM1, LIM2], NM, PH1)
+    CH = ControlChart((STAT1, STAT2), (LIM1, LIM2), NM, PH1)
     @testset "call" begin
         saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
         approximateBisectionCL(CH, nsims=1, maxiter=1)

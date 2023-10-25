@@ -37,7 +37,7 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
     @assert B > 0 "B must be positive"
 
     tmp_rlpath = rlsim(CH, maxiter=2)
-    if isa(CH, MultipleControlChart) || isa(CH, FixedMultipleControlChart)
+    if isa(CH, MultipleControlChart)
         @assert isa(tmp_rlpath, Matrix) "output of rlsim must be a matrix"
         @assert size(tmp_rlpath) == (2, length(get_limit(CH))) "incorrect size for output of rlsim"
     else

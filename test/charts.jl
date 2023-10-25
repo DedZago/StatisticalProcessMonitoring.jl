@@ -148,7 +148,7 @@ end
         λ2 = 0.5
         STAT1 = EWMA(λ = λ1)
         STAT2 = EWMA(λ = λ2)
-        CH = ControlChart([STAT1, STAT2], [deepcopy(LIM), deepcopy(LIM)], NM, PH1)
+        CH = ControlChart((STAT1, STAT2), (deepcopy(LIM), deepcopy(LIM)), NM, PH1)
         @test get_t(CH) == 0
         @test typeof(get_design(CH)) <: Vector
         @test length(get_design(CH)) == 2
@@ -158,7 +158,7 @@ end
         @test get_limit_value(CH) == fill(h, 2)
         @test isa(get_limit_value(CH), Vector)
         @test get_value(CH) == zeros(2)
-        @test typeof(get_statistic(CH)) <: Vector
+        @test typeof(get_statistic(CH)) <: Tuple
         @test length(get_statistic(CH)) == 2
         @test get_nominal(CH) == NM
         @test get_nominal_value(CH) == 200.0
@@ -226,7 +226,7 @@ end
             STAT1 = CUSUM(k = k, value=val)
             λ = 0.2
             STAT2 = EWMA(λ = λ, value=val)
-            CH = ControlChart([STAT1,STAT2], [deepcopy(LIM), deepcopy(LIM)], NM, PH1)
+            CH = ControlChart((STAT1,STAT2), (deepcopy(LIM), deepcopy(LIM)), NM, PH1)
             CH_ = shallow_copy_sim(CH)
             knew = 0.2
             λnew = 0.5

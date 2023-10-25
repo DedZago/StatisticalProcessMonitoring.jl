@@ -64,10 +64,6 @@ get_limit_value(CH::MultipleControlChart) = collect(get_value.(get_limit(CH)))
 get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH2} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
 get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH2} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
-
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH2} = get_value.(get_limit(CH), get_t(CH), get_statistic(CH))
-
-get_limit_value(CH::MultipleControlChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH2} = get_value.(get_limit(CH), get_t(CH), get_statistic(CH))
 export get_limit_value
 
 

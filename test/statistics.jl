@@ -157,7 +157,7 @@ end
         end
 
         @testset "other multivariate" begin
-            STAT = MShewhart(randn(100,3))
+            STAT = MShewhart()
             update_statistic!(STAT, randn(3))            
             update_statistic(STAT, randn(3))            
             @test get_design(STAT) == Vector{Float64}()
@@ -190,11 +190,11 @@ end
             PH2 = MultinomialBootstrap(STAT)
             update_statistic(STAT, new_data!(PH2, x))
 
-            STAT = WANG2017(0.1, x) 
+            STAT = MOC(0.1, x) 
             PH2 = MultinomialBootstrap(STAT)
             update_statistic(STAT, new_data!(PH2, x))
 
-            STAT = LI2012(0.1, x) 
+            STAT = LLD(0.1, x) 
             PH2 = MultinomialBootstrap(STAT)
             update_statistic(STAT, new_data!(PH2, x))
         end
