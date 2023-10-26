@@ -108,7 +108,6 @@ export approximateBisectionCL
 
 
 function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
-    #TODO: multiply the maximum value by the asymptotic inflating factor for curved control limits
     maximum_inflation_factor = _calculate_curved_limit_asymptote(CH, maxrl)
     hmax = maximum(rl_paths) / first(maximum_inflation_factor)
     hmin = 0.0
@@ -170,8 +169,6 @@ export _bisection_paths
 
 
 function _bisection_paths(CH::MultipleControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
-    #TODO: multiply the maximum value by the asymptotic inflating factor for curved control limits
-    #TODO: From here
     @assert length(size(rl_paths)) == 3 "rl_paths must be a 3-dimensional array <currently is <$(length(size(rl_paths)))>"
     @assert size(rl_paths)[3] == length(get_statistic(CH)) "Must have a rl_path for each statistic. Got instead <$(size(rl_paths)[3])> and <$(length(get_statistic(CH)))>"
 
