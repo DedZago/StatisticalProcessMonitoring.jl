@@ -57,13 +57,12 @@ update_score(s2::Vector{Float64}, score::AbstractVector, Ndenom) = s2 .+ (score 
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the stochastic approximation algorithm described in Capizzi and Masarotto (2016).
 
-### Inputs
+### Arguments
 * `CH` - A control chart.
-* `rlsim` - A function that generates new data with signature `rlsim(CH; maxiter, delta)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information about the signature of the function.
-* `settings` - An `OptSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see Capizzi and Masarotto (2016).
 
-### Settings
-The following settings control the behaviour of the algorithm: 
+### Keyword arguments
+* `rlsim` - A function that generates new data with signature `rlsim(CH; maxiter, delta)`. If left unspecified, defaults to `run_sim_sa`. See the help for `run_sim_sa` for more information about the requirements of the function.
+* `settings` - An `OptSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see Capizzi and Masarotto (2016).
 * `Nfixed` - The number of iterations for the gain estimation stage (default: 500).
 * `Afixed` - The fixed gain during the gain estimation stage (default: 0.1).
 * `Amin` - The minimum allowed value of gain (default: 0.1).
@@ -186,6 +185,8 @@ export saCL!
     saCL(CH::ControlChart[; rlsim::Function, settings::OptSettings])
 
 Applies the stochastic approximation algorithm of Capizzi and Masarotto (2016) without modifying the control chart object `CH`.
+
+### Keyword arguments
 See the documentation of `saCL!` for more information about the algorithm and the keyword arguments.
 
 ### Returns

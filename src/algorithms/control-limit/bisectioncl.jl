@@ -1,15 +1,15 @@
 using Statistics
 
 """
-    bisectionCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
+    bisectionCL!(CH::ControlChart, hmax[; rlsim::Function, settings::OptSettings, kw...])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm (see for instance Qiu, 2013)
 
-### Inputs
+### Arguments
 * `CH` - A control chart.
 * `hmax` - The maximum value for the control limit.
 
-### Accepted settings:
+### Keyword arguments
 * `rlsim` - A function that generates a run length for the control chart with signature `rlsim(CH; maxiter)`. If left unspecified, defaults to `run_sim`. See the help for `run_sim` for more information about the signature of the function.
 * `nsims` - The number of run lengths used to estimate the target nominal property (default: 10000).
 * `hmin` - The minimum value of the control limit, (default: `sqrt(eps())`).
@@ -28,7 +28,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
 
 ### References
-* Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
+* Qiu, P. (2013). Introduction to Statistical Process Control. Boca Raton: CRC Press.
 
 """
 function bisectionCL!(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::Int = 10000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, maxrl::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false, parallel::Bool = false)
@@ -93,9 +93,11 @@ end
 export bisectionCL!
 
 """
-    bisectionCL(CH::ControlChart; kw...)
+    bisectionCL(CH::ControlChart, hmax; kw...)
 
 Applies the bisection algorithm to find the control limit of a control chart without modifying the control chart object `CH`.
+
+### Keyword arguments
 See the documentation of `bisectionCL!` for more information about the algorithm and keyword arguments.
 
 ### Returns
@@ -127,14 +129,14 @@ export measure
 
 
 """
-    combinedCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
+    combinedCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings, kw...])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm (see for instance Qiu, 2013). The control limit upper bound `hmax` for the bisection algorithm is found using the stochastic approximation algorithm of Capizzi and Masarotto (2016)
 
-### Inputs
+### Arguments
 * `CH` - A control chart.
 
-### Accepted settings
+### Keyword arguments 
 * `inflate::Real` - An inflation constant for the starting control limit value so that, on average, the first iteration will move the control limit to lower values. This usually saves computational time (default: 1.05).
 * `parallel::Bool` - Whether the algorithm should be run in parallel, using available threads (default: false)
 
@@ -168,7 +170,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
 
 ### References
-* Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
+* Qiu, P. (2013). Introduction to Statistical Process Control. Boca Raton: CRC Press.
 * Capizzi, G., & Masarotto, G. (2016). Efficient control chart calibration by simulated stochastic approximation. IIE Transactions, 48(1), 57-65. https://doi.org/10.1080/0740817X.2015.1055392
 
 """
@@ -186,14 +188,14 @@ export combinedCL!
 Applies the bisection algorithm to find the control limit of a control chart without modifying the control chart object `CH`. The control limit upper bound `hmax` for the bisection algorithm is found using the stochastic approximation algorithm of Capizzi and Masarotto (2016).
 See the documentation of `combinedCL!` for more information about the algorithm and keyword arguments.
 
-### Keyword arguments:
+### Keyword arguments
 * See the documentation of `combinedCL!` for a list of keyword arguments.
 
 ### Returns
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
 
 ### References
-* Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
+* Qiu, P. (2013). Introduction to Statistical Process Control. Boca Raton: CRC Press.
 * Capizzi, G., & Masarotto, G. (2016). Efficient control chart calibration by simulated stochastic approximation. IIE Transactions, 48(1), 57-65. https://doi.org/10.1080/0740817X.2015.1055392
 """
 function combinedCL(CH::ControlChart; kw...)

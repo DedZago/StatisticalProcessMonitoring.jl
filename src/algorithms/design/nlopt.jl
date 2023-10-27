@@ -6,9 +6,9 @@ using NLopt
 Optimizes the Control Chart design parameter using the NLOpt library.
 
 ### Args
-* `CH`: The ControlChart object to be optimized.
-* `rlconstr`: The objective function to be minimized.
-* `settings`: The settings for the optimization process. Includes:
+* `CH::ControlChart`: The ControlChart object whose parameters must be optimized.
+* `rlconstr::Function`: The objective function to be minimized.
+* `settings::OptSettings`: The settings for the optimization process. Includes:
     - `minpar`: The lower bounds for the parameters.
     - `maxpar`: The upper bounds for the parameters.
     - `x_tol`: The relative tolerance for convergence.
@@ -16,7 +16,7 @@ Optimizes the Control Chart design parameter using the NLOpt library.
     - `optimizer`: The optimization method to be used.
 
 ### Returns
-* `minx::Vector{Float64}`: The set of optimal parameters for the Control Chart.
+* `minx::Vector{Float64}`: The set of optimal parameters for the control chart.
 """
 function optimize_nlopt(CH::ControlChart, rlconstr::Function, settings::OptSettings; optimizer::Symbol = :LN_BOBYQA)
     @unpack minpar, maxpar, x_tol, maxiter = settings

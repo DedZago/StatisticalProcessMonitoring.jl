@@ -3,10 +3,12 @@
 
 Optimizes the control limit of a ControlChart object.
 
-### Args
+### Arguments
 - `CH::ControlChart`: The ControlChart object to optimize.
 - `solver::Symbol`: The solver algorithm to use (default: `:Bootstrap`).
-- `hmax::Float64`: The maximum value of the control limit, used only for the bisection algorithm (default: 20.0)
+
+### Keyword Arguments
+- `hmax::Float64`: The maximum value of the control limit. Only used for the bisection algorithm (default: 100.0)
 - `kw...`: Additional keyword arguments to pass to the algorithm.
 
 ### Returns
@@ -14,11 +16,8 @@ Optimizes the control limit of a ControlChart object.
 
 ### Raises
     ValueError: If the optimization method specified in settings is unknown.
-
-### Example
-    optimize_limit!(my_chart, settings=OptSettings(ic_solver=:SA))
 """
-function optimize_limit!(CH::ControlChart, solver::Symbol=:Bootstrap; hmax::Float64 = 20.0, kw...)
+function optimize_limit!(CH::ControlChart, solver::Symbol=:Bootstrap; hmax::Float64 = 100.0, kw...)
     valid_solvers = [:SA, :Bisection, :Combined, :Bootstrap]
     @assert solver in valid_solvers "Unknown control limit solver. Valid solvers are $(valid_solvers)"
 
@@ -39,10 +38,12 @@ export optimize_limit!
 
 Optimizes the control limit of a ControlChart object, without modifying the original ControlChart object.
 
-### Args
+### Arguments
 - `CH::ControlChart`: The ControlChart object to optimize.
 - `solver::Symbol`: The solver algorithm to use (default: `:Bootstrap`).
-- `hmax::Float64`: The maximum value of the control limit, used only for the bisection algorithm (default: 20.0)
+
+### Keyword Arguments
+- `hmax::Float64`: The maximum value of the control limit. Used only for the bisection algorithm (default: 100.0)
 - `kw...`: Additional keyword arguments to pass to the algorithm.
 
 ### Returns
@@ -54,7 +55,7 @@ Optimizes the control limit of a ControlChart object, without modifying the orig
 ### Example
     optimize_limit(my_chart, settings=OptSettings(ic_solver=:SA))
 """
-function optimize_limit(CH::ControlChart, solver::Symbol = :Bootstrap; hmax::Float64 = 20.0, kw...)
+function optimize_limit(CH::ControlChart, solver::Symbol = :Bootstrap; hmax::Float64 = 100.0, kw...)
     CH_ = deepcopy(CH)
     optimize_limit!(CH_, solver; hmax = hmax, kw...)
 end
@@ -66,19 +67,21 @@ export optimize_limit
 
 Optimizes the design of a control chart `CH` using a specified optimization algorithm.
 
-# Arguments
+### Arguments
 - `CH::ControlChart`: The control chart object to optimize.
 - `rlsim_oc::Function`: A function that simulates the out-of-control state of the control chart.
 - `settings::OptSettings`: The optimization settings that control the optimization routine (default: `OptSettings(CH)`).
+
+### Keyword Arguments
 - `optimizer::Symbol`: The optimization algorithm to use (default: `:LN_BOBYQA`).
 - `solver::Symbol`: The root-finding algorithm to use for control limit estimation (default: `:Bootstrap`).
-- `hmax::Float64`: The maximum value of the control limit, used only for the bisection algorithm (default: 20.0)
+- `hmax::Float64`: The maximum value of the control limit, used only when the solver is set to `:Bisection` (default: 100.0)
 - `kw...`: Additional keyword arguments to pass to the solver algorithm.
 
 # Returns
 The optimized design parameters of the control chart.
 """
-function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :Bootstrap, hmax::Float64 = 20.0, kw...)
+function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :Bootstrap, hmax::Float64 = 100.0, kw...)
     CH_ = deepcopy(CH)
 
     @unpack nsims = settings
@@ -114,20 +117,22 @@ export optimize_design!
 
 Optimizes the design of a control chart using a specified optimization algorithm.
 
-# Arguments
+### Arguments
 - `CH::ControlChart`: The control chart object to optimize.
 - `rlsim_oc::Function`: A function that simulates the out-of-control state of the control chart.
 - `settings::OptSettings`: The optimization settings that control the optimization routine (default: `OptSettings(CH)`).
+
+### Keyword Arguments
 - `optimizer::Symbol`: The optimization algorithm to use (default: `:LN_BOBYQA`).
 - `solver::Symbol`: The root-finding algorithm to use for control limit estimation (default: `:Bootstrap`).
-- `hmax::Float64`: The maximum value of the control limit, used only for the bisection algorithm (default: 20.0)
+- `hmax::Float64`: The maximum value of the control limit, used only for the bisection algorithm (default: 100.0)
 - `kw...`: Additional keyword arguments to pass to the solver algorithm.
 
 # Returns
 The optimized design parameters of the control chart.
 """
-function optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :Bootstrap, hmax::Float64 = 20.0, kw...)
+function optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :Bootstrap, hmax::Float64 = 100.0, kw...)
     CH_ = deepcopy(CH)
-    optimize_design!(CH_, rlsim_oc, settings; optimizer=optimizer, solver=solver, hmax = 20.0, kw...)
+    optimize_design!(CH_, rlsim_oc, settings; optimizer=optimizer, solver=solver, hmax = hmax, kw...)
 end
 export optimize_design

@@ -5,12 +5,12 @@ using Statistics
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm on bootstrapped paths (see for instance Qiu, 2013).
 
-### Inputs
+### Arguments
 * `CH` - A control chart.
+
+### Keyword arguments
 * `rlsim` - A function that generates a path of the control chart statistic with signature `rlsim(CH; maxiter)`. If left unspecified, defaults to `run_path_sim`. See the help for `run_path_sim` for more information about the signature of the function.
 * `settings` - An `OptSettings` objects which contains variables that control the behaviour of the algorithm. See the `Accepted settings` section below for information about the settings that control the behaviour of the algorithm. For more information about the specifics of each keyword argument, see for instance Qiu (2013).
-
-### Accepted settings:
 * `maxiter` - The maximum number of bisection iterations.
 * `nsims` - The number of run lengths used to estimate the target nominal property.
 * `maxrl` - The maximum run length after which the run length is truncated, to avoid excessive computations.
@@ -23,7 +23,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
 
 ### References
-* Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
+* Qiu, P. (2013). Introduction to Statistical Process Control. Boca Raton: CRC Press.
 
 """
 function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Real = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), x_tol::Float64 = 1e-03, f_tol::Float64 = 1.0, B::Int = nsims, verbose::Bool = false, parallel::Bool = false)
@@ -91,13 +91,15 @@ export _calculate_rl_paths
     approximateBisectionCL(CH::ControlChart; kw...)
 
 Applies the bisection algorithm on simulated run length paths to find the control limit of a control chart without modifying the control chart object `CH`.
+
+### Keyword arguments
 See the documentation of `approximateBisectionCL!` for more information about the algorithm and keyword arguments.
 
 ### Returns
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
 
 ### References
-* Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
+* Qiu, P. (2013). Introduction to Statistical Process Control. Boca Raton: CRC Press.
 
 """
 function approximateBisectionCL(CH::ControlChart; kw...)
