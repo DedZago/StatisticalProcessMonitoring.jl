@@ -2,9 +2,9 @@ module PlottingSPM # Should be same name as the file (just like a normal package
 
 using SPM, Plots
 
-function SPM.plot_series(PCTL::ProcessControl; kw_ind::Dict = Dict(), kw_main::Dict = Dict())
-    vals = hcat(PCTL.stat...)
-    lims = hcat(collect.(PCTL.lim)...)
+function SPM.plot_series(proc::ProcessControl; kw_ind::Dict = Dict(), kw_main::Dict = Dict())
+    vals = hcat(proc.stat...)
+    lims = hcat(vec(proc.lim)...)
     plt_i = []
     val_row = eachrow(vals)
     lim_row = eachrow(lims)
