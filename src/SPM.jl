@@ -14,7 +14,7 @@ include("algorithms/interface.jl")
 include("algorithms/control-limit/sacl.jl")
 include("algorithms/control-limit/bisectioncl.jl")
 include("algorithms/control-limit/double-bootstrap.jl")
-include("algorithms/design/nlopt.jl")
 include("algorithms/design/grid-search.jl")
 include("algorithms/design/spsa.jl")
+include("algorithms/design/nlopt.jl")
 end

@@ -277,7 +277,7 @@ end
 
 
 function _bisection_paths_multiple_j(CH::MultipleControlChart, l, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose; hmax = maximum(rl_paths), hmin = 0.0)
-    if verbose println("Inner bosection loop, endpoints [$(hmin), $(hmax)] ...") end
+    if verbose println("  Inner bisection loop, endpoints [$(hmin), $(hmax)] ...") end
     hold = hmax + x_tol + 1.0                 # Starting value to assess convergence
     RLs = Vector{Float64}(undef, B)        # Vector of simulated run lenghts
     E_RL = 0.0                                      # Estimated ARL/QRL/...
@@ -289,7 +289,7 @@ function _bisection_paths_multiple_j(CH::MultipleControlChart, l, rl_paths, targ
     while i < maxiter
         i = i+1
         h = (hmin + hmax) / 2
-        if verbose print("i: $(i)/$(maxiter),\th: $(h)\t") end
+        if verbose print("    i: $(i)/$(maxiter),\th: $(h)\t") end
 
         idx .= sample(rows, B)
         # Calculate run length on simulated paths

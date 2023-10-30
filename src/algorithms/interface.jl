@@ -81,7 +81,7 @@ Optimizes the design of a control chart `CH` using a specified optimization algo
 # Returns
 The optimized design parameters of the control chart.
 """
-function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :Bootstrap, hmax::Float64 = 100.0, kw...)
+function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :Grid, solver::Symbol = :Bootstrap, hmax::Float64 = 100.0, kw...)
     CH_ = deepcopy(CH)
 
     @unpack nsims = settings
@@ -131,8 +131,8 @@ Optimizes the design of a control chart using a specified optimization algorithm
 # Returns
 The optimized design parameters of the control chart.
 """
-function optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); optimizer::Symbol = :LN_BOBYQA, solver::Symbol = :Bootstrap, hmax::Float64 = 100.0, kw...)
+function optimize_design(CH::ControlChart, rlsim_oc::Function, settings::OptSettings=OptSettings(CH); kw...)
     CH_ = deepcopy(CH)
-    optimize_design!(CH_, rlsim_oc, settings; optimizer=optimizer, solver=solver, hmax = hmax, kw...)
+    optimize_design!(CH_, rlsim_oc, settings; kw...)
 end
 export optimize_design
