@@ -10,7 +10,7 @@ get_statistic(S::ResidualStatistic) = S.stat
 set_value!(S::ResidualStatistic, x) = set_value!(get_statistic(S), x)
 get_value(S::ResidualStatistic) = get_value(get_statistic(S))
 get_design(S::ResidualStatistic) = get_design(get_statistic(S))
-set_design!(S::ResidualStatistic, par) = set_design!(get_statistic(S), par)
+set_design!(S::ResidualStatistic, par::AbstractVector) = set_design!(get_statistic(S), par)
 get_maxrl(S::ResidualStatistic) = get_maxrl(get_statistic(S))
 
 update_statistic(S::ResidualStatistic, x) = update_statistic(get_statistic(S), residual!(x, deepcopy(S)))
@@ -41,3 +41,4 @@ export LocationScaleStatistic
 LocationScaleStatistic(stat, x::AbstractVector) = LocationScaleStatistic(stat, mean(x), 1.0/std(x))
 LocationScaleStatistic(stat, x::AbstractMatrix) = LocationScaleStatistic(stat, mean.(eachcol(x)), inv(sqrt(cov(x))))
 residual!(x, S::LocationScaleStatistic) = S.Ω * (x .- S.μ)
+

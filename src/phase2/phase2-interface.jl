@@ -7,8 +7,8 @@ export new_data
 new_data!(::AbstractPhase2) = error("Not implemented for abstract interface.")
 export new_data!
 
-function shallow_copy_sim(PH2::T) where T <: AbstractPhase2
-    return T(deepcopy(PH2.samp), PH2.data)
+function shallow_copy_sim(PH2::AbstractPhase2)
+    return deepcopy(PH2)
 end
 
 """
@@ -32,7 +32,9 @@ get_sampler(PH2::Phase2) = PH2.samp
 export get_sampler
 get_data(PH2::Phase2) = PH2.data
 export get_data
-
+function shallow_copy_sim(PH2::Phase2)
+    return Phase2(deepcopy(PH2.samp), PH2.data)
+end
 
 
 """

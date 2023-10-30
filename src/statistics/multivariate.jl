@@ -381,3 +381,23 @@ function update_statistic!(stat::MEWMS, x::AbstractVector)
 end
 
 update_statistic(stat::MEWMS, x::Real) = update_statistic!(deepcopy(stat), x)
+
+
+
+@with_kw mutable struct RiskAdjustedCUSUM{G} <: SPM.AbstractStatistic
+    Δ::Float64
+    model::G
+    response::Symbol
+    value::Float64 = 0.0
+end
+export RiskAdjustedCUSUM
+
+logit(x::Real) = log(x / (one(x) - x))
+
+import SPM.update_statistic!
+function update_statistic!(S::RiskAdjustedCUSUM, x)
+    pred = logit(first(predict(S.model, x)))            # Linear predictor estimate Xβ
+    Rt = log(exp(first(x[:,S.response]) * S.Δ) * (1 + exp(pred))/(1 + exp(S.Δ + pred)))
+    S.value = max(0.0, S.value + Rt)
+    return S.value
+end
