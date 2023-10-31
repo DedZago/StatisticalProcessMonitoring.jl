@@ -2,6 +2,7 @@ module PlottingSPM # Should be same name as the file (just like a normal package
 
 using SPM, Plots
 
+#TODO: write plot_series for single and multiple control charts separately
 function SPM.plot_series(proc::ProcessControl; kw_ind::Dict = Dict(), kw_main::Dict = Dict())
     vals = hcat(proc.stat...)
     lims = hcat(vec(proc.lim)...)
