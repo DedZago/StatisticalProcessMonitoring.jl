@@ -10,6 +10,7 @@ get_statistic(S::ResidualStatistic) = S.stat
 set_value!(S::ResidualStatistic, x) = set_value!(get_statistic(S), x)
 get_value(S::ResidualStatistic) = get_value(get_statistic(S))
 get_design(S::ResidualStatistic) = get_design(get_statistic(S))
+set_design!(S::ResidualStatistic, par::Real) = set_design!(get_statistic(S), par)
 set_design!(S::ResidualStatistic, par::AbstractVector) = set_design!(get_statistic(S), par)
 get_maxrl(S::ResidualStatistic) = get_maxrl(get_statistic(S))
 

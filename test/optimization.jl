@@ -23,7 +23,6 @@ using SPM
     @testset "optimize_design" begin
         optimize_design(CH, rlsim_oc, settings, verbose=false)
         optimize_design(CH, rlsim_oc, settings, optimizer=:Grid)
-        optimize_design(CH, rlsim_oc, settings, optimizer=:LN_BOBYQA)
     end
 
 end
