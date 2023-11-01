@@ -382,21 +382,34 @@ end
 
 update_statistic(stat::MEWMS, x::Real) = update_statistic!(deepcopy(stat), x)
 
+"""
+    RiskAdjustedCUSUM{G} <: AbstractStatistic
 
+Risk-adjusted CUSUM monitoring statistic.
 
-@with_kw mutable struct RiskAdjustedCUSUM{G} <: SPM.AbstractStatistic
+# Arguments
+- `Δ::Float64`: Shift in the linear predictor of the logistic regression model to be detected.
+- `model::G`: Logistic regression model used for prediction. Must have a `predict(model, x)` function.
+- `response::Symbol`: Name of the response variable in the `DataFrame`.
+- `value::Float64`: Initial value of the statistic. Defaults to `0.0`.
+
+# References
+Steiner, S. H., Cook, R. J., Farewell, V. T., Treasure, T. (2000). Monitoring surgical performance using risk-adjusted cumulative sum charts. Biostatistics, 1(4), 441-452. https://doi.org/10.1093/biostatistics/1.4.441
+```
+"""
+mutable struct RiskAdjustedCUSUM{G} <: AbstractStatistic
     Δ::Float64
     model::G
     response::Symbol
     value::Float64 = 0.0
 end
+
 export RiskAdjustedCUSUM
 
 logit(x::Real) = log(x / (one(x) - x))
 
-import SPM.update_statistic!
 function update_statistic!(S::RiskAdjustedCUSUM, x)
-    pred = logit(first(predict(S.model, x)))            # Linear predictor estimate Xβ
+    pred = logit(first(predict(S.model, x)))
     Rt = log(exp(first(x[:,S.response]) * S.Δ) * (1 + exp(pred))/(1 + exp(S.Δ + pred)))
     S.value = max(0.0, S.value + Rt)
     return S.value
