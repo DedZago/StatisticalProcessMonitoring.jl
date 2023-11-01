@@ -397,7 +397,7 @@ Risk-adjusted CUSUM monitoring statistic.
 Steiner, S. H., Cook, R. J., Farewell, V. T., Treasure, T. (2000). Monitoring surgical performance using risk-adjusted cumulative sum charts. Biostatistics, 1(4), 441-452. https://doi.org/10.1093/biostatistics/1.4.441
 ```
 """
-mutable struct RiskAdjustedCUSUM{G} <: AbstractStatistic
+@with_kw mutable struct RiskAdjustedCUSUM{G} <: AbstractStatistic
     Δ::Float64
     model::G
     response::Symbol
