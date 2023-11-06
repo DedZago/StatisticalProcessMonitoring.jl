@@ -34,7 +34,7 @@ A mutable struct representing a statistic applied to a location-scale family.
 @with_kw mutable struct LocationScaleStatistic{S, M, P} <: ResidualStatistic
     stat::S
     μ::M = 0.0
-    Ω::P = 0.0
+    Ω::P = 1.0
 end
 export LocationScaleStatistic
 
