@@ -2,15 +2,15 @@ using Parameters
 
 @with_kw mutable struct OptSettings{F, I, B} 
     # Global parameter optimization options
-    x_tol::F = 1e-03
-    nsims::I = 1000
-    maxiter::I = 1000
-    verbose::B = true
-    minpar::Vector{F} = [-Inf]
-    maxpar::Vector{F} = [Inf]
+    x_tol::F = 1e-03                            # Tolerance for the parameter
+    nsims::I = 1000                             # Number of simulations for approximating the OC RL
+    maxiter::I = 1000                           # Maximum number of iterations in the algorithm
+    verbose::B = true                           # Verbosity of the optimization algorithm
+    minpar::Vector{F} = [-Inf]                  # Minimum value(s) of the tuning parameter(s)
+    maxpar::Vector{F} = [Inf]                   # Maximum value(s) of the tuning parameter(s)
 
     # Grid settings
-    m_grid::I = 10
+    m_grid::I = 10                              # Number of segments in the grid search algorithm
 
     # SPSA settings
     initial_step_size_spsa::F = 0.05
