@@ -22,9 +22,9 @@ end
         saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
         bisectionCL(CH, 1.0, maxiter=1, nsims = 10)
         combinedCL(CH, maxiter=1, maxiter_sa=1, nsims=1)
-        approximateBisectionCL(CH, nsims=1, maxiter=1)
+        bootstrapCL(CH, nsims=1, maxiter=1)
         saCL(CH, Nmin=1, maxiter=1, Nfixed=1, parallel=true)
-        approximateBisectionCL(CH, nsims=1, maxiter=1, parallel=true)
+        bootstrapCL(CH, nsims=1, maxiter=1, parallel=true)
         optimize_limit(CH, :SA, Nmin=1, maxiter=1, Nfixed=1)
         optimize_limit(CH, :Bisection, hmax=1.0, maxiter=1, nsims = 10)
         optimize_limit(CH, :Combined, maxiter=1, maxiter_sa=1, nsims=1)
@@ -82,7 +82,7 @@ end
     CH = ControlChart((STAT1, STAT2), (LIM1, LIM2), NM, PH1)
     @testset "call" begin
         saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
-        approximateBisectionCL(CH, nsims=1, maxiter=1)
+        bootstrapCL(CH, nsims=1, maxiter=1)
         optimize_limit(CH, :SA, Nmin=1, maxiter=1, Nfixed=1)
         optimize_limit(CH, :Bootstrap, nsims=1, maxiter=1)
     end
@@ -93,7 +93,7 @@ end
     CH = ControlChart((STAT1, STAT2), (LIM1, LIM2), NM, PH1)
     @testset "call" begin
         saCL(CH, Nmin=1, maxiter=1, Nfixed=1)
-        approximateBisectionCL(CH, nsims=1, maxiter=1)
+        bootstrapCL(CH, nsims=1, maxiter=1)
         optimize_limit(CH, :SA, Nmin=1, maxiter=1, Nfixed=1)
         optimize_limit(CH, :Bootstrap, nsims=1, maxiter=1)
     end

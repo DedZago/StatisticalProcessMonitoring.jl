@@ -28,7 +28,7 @@ function optimize_limit!(CH::ControlChart, solver::Symbol=:Bootstrap; hmax::Floa
     elseif solver == :Combined
         return combinedCL!(CH; kw...)
     elseif solver == :Bootstrap
-        return approximateBisectionCL!(CH; kw...)
+        return bootstrapCL!(CH; kw...)
     end
 end
 export optimize_limit!

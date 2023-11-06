@@ -1,7 +1,7 @@
 using Statistics
 
 """
-    approximateBisectionCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
+    bootstrapCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm on bootstrapped paths (see for instance Qiu, 2013).
 
@@ -26,7 +26,7 @@ Computes the control limit to satisfy the nominal properties of a control chart,
 * Qiu, P. (2013). Introduction to Statistical Process Control. Boca Raton: CRC Press.
 
 """
-function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Real = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), x_tol::Float64 = 1e-03, f_tol::Float64 = 1.0, B::Int = nsims, verbose::Bool = false, parallel::Bool = false)
+function bootstrapCL!(CH::ControlChart; rlsim::Function = run_path_sim, maxiter::Int = 30, nsims::Int = 1000, maxrl::Real = Int(min(get_maxrl(CH), 10*get_nominal_value(CH))), x_tol::Float64 = 1e-03, f_tol::Float64 = 1.0, B::Int = nsims, verbose::Bool = false, parallel::Bool = false)
 
     @assert maxiter > 0 "maxiter must be positive"
     @assert nsims > 0 "nsims must be positive"
@@ -55,7 +55,7 @@ function approximateBisectionCL!(CH::ControlChart; rlsim::Function = run_path_si
     set_limit!(CH, h)
     return (h=h, iter=iter, status = conv)
 end
-export approximateBisectionCL!
+export bootstrapCL!
 
 function _calculate_rl_paths(CH::AbstractChart, rlsim::Function, nsims_i, maxrl_i, parallel)
     rl_paths = Matrix{Float64}(undef, nsims_i, maxrl_i)    # Generated run length paths
@@ -88,12 +88,12 @@ end
 export _calculate_rl_paths
 
 """
-    approximateBisectionCL(CH::ControlChart; kw...)
+    bootstrapCL(CH::ControlChart; kw...)
 
 Applies the bisection algorithm on simulated run length paths to find the control limit of a control chart without modifying the control chart object `CH`.
 
 ### Keyword arguments
-See the documentation of `approximateBisectionCL!` for more information about the algorithm and keyword arguments.
+See the documentation of `bootstrapCL!` for more information about the algorithm and keyword arguments.
 
 ### Returns
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
@@ -102,11 +102,11 @@ See the documentation of `approximateBisectionCL!` for more information about th
 * Qiu, P. (2013). Introduction to Statistical Process Control. Boca Raton: CRC Press.
 
 """
-function approximateBisectionCL(CH::ControlChart; kw...)
+function bootstrapCL(CH::ControlChart; kw...)
     CH_ = shallow_copy_sim(CH)
-    return approximateBisectionCL!(CH_; kw...)
+    return bootstrapCL!(CH_; kw...)
 end
-export approximateBisectionCL
+export bootstrapCL
 
 
 function _bisection_paths(CH::ControlChart, rl_paths, target, maxrl, nsims_i, x_tol, f_tol, maxiter, B, verbose)
