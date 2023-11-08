@@ -5,7 +5,7 @@ using Distributions
     TRAS{F,D}
 
 # Fields
-A type representing the TRAS (Top-r based Adaptive Sampling) monitoring statistic.
+A Top-r-based Adaptive Sampling monitoring statistic for monitoring multiple data streams with partial observations.
 
 ## Fields
 - `k::Float64`: The allowance constant for the CUSUM statistic. Defaults to `0.1`.

@@ -6,7 +6,7 @@ using StatsBase
 """
     NEWMA
 
-Nonparametric Exponentially Weighted Moving Average object for monitoring nonparametric regression estimates.
+A Nonparametric Exponentially Weighted Moving Average statistic for monitoring profiles.
 
 # Fields
 - `λ::Float64`: The EWMA smoothing constant. Must be between 0 and 1.

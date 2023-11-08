@@ -1,14 +1,14 @@
 """
     Shewhart(value)
 
-Shewhart control chart with initial value `value`.
+Shewhart control chart.
 
-The update mechanism based on a new observation `x` is given by
+The update mechanism of ``C_t`` based on a new observation `x` is given by
 
-``value = x``.
+``C_t = x``.
 
 ### References 
-* Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
+Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
 """
 @with_kw mutable struct Shewhart{V} <: AbstractStatistic 
     value::V = 0.0
@@ -29,16 +29,16 @@ update_statistic!(stat::Shewhart, x::Real) = stat.value = update_statistic(stat,
 
 Exponentially weighted moving average with design parameter `λ` and initial value `value`.
 
-The update mechanism based on a new observation `x` is given by
+The update mechanism for the statistic ``C_t`` based on a new observation `x` is given by
 
-``value = (1-λ)*value + λ * x``.
+``C_t = (1-λ)\\cdot C_{t-1} + λ \\cdot x``.
 
 ### Arguments
 - `λ::Float64`: The smoothing constant. Defaults to `0.1`.
 - `value::Float64`: The initial value for the EWMA statistic. Defaults to `0.0`.
 
 ### References 
-* Roberts, S. W. (1959). Control Chart Tests Based on Geometric Moving Averages. Technometrics, 1(3), 239-250. https://doi.org/10.1080/00401706.1959.10489860
+Roberts, S. W. (1959). Control Chart Tests Based on Geometric Moving Averages. Technometrics, 1(3), 239-250. https://doi.org/10.1080/00401706.1959.10489860
 """
 @with_kw mutable struct EWMA <: AbstractStatistic 
     λ::Float64 = 0.1
@@ -63,8 +63,8 @@ update_statistic!(stat::EWMA, x::Real) = stat.value = update_statistic(stat, x)
 OneSidedEWMA statistic with design parameter `λ` and initial value `value`.
 
 The update mechanism based on a new observation `x` is given by:
-* if `upw == true`, then ``value = \\max\\{0, (1-λ)\\cdot value + λ\\cdot x\\}``;
-* if `upw == true`, then ``value = \\min\\{0, (1-λ)\\cdot value + λ\\cdot x\\}``;
+* if `upw == true`, then ``C_t = \\max\\{0, (1-λ)\\cdot C_{t-1} + λ\\cdot x\\}``;
+* if `upw == true`, then ``C_t = \\min\\{0, (1-λ)\\cdot C_{t-1} + λ\\cdot x\\}``;
 
 ### Arguments
 - `λ::Float64`: The smoothing constant. Default is `0.1`.
@@ -103,8 +103,8 @@ update_statistic!(stat::OneSidedEWMA, x::Real) = stat.value = update_statistic(s
 CUSUM statistic with design parameter `k` and initial value `value`.
 
 The update mechanism based on a new observation `x` is given by:
-* if `upw == true`, then ``value = \\max\\{0, value + x - k\\}``;
-* if `upw == false`, then ``value = \\min\\{0, value + x + k\\}``.
+* if `upw == true`, then ``C_t = \\max\\{0, C_{t-1} + x - k\\}``;
+* if `upw == false`, then ``C_t = \\min\\{0, C_{t-1} + x + k\\}``.
 
 ### Arguments
 - `k::Float64`: The allowance constant of the CUSUM statistic. Defaults to `1.0`.
@@ -112,7 +112,7 @@ The update mechanism based on a new observation `x` is given by:
 - `upw::Bool`: A boolean indicating whether the CUSUM statistic is increasing or decreasing. Defaults to `true`.
 
 ### References 
-* Page, E. S. (1954). Continuous Inspection Schemes. Biometrika, 41(1/2), 100. https://doi.org/10.2307/2333009
+Page, E. S. (1954). Continuous Inspection Schemes. Biometrika, 41(1/2), 100. https://doi.org/10.2307/2333009
 """
 @with_kw mutable struct CUSUM <: AbstractStatistic 
     k::Float64 = 1.0
@@ -144,11 +144,11 @@ update_statistic!(stat::CUSUM, x::Real) = stat.value = update_statistic(stat, x)
 """
     WCUSUM <: AbstractStatistic
 
-Type representing a weighted cumulative sum statistic.
+A weighted cumulative sum statistic.
 
 # Arguments
 - `k::Float64`: The allowance constant of the CUSUM used for calculating the WCUSUM statistic. Default is 1.0.
-- `λ::Float64`: The forgetting factor for updating the weighted cumulative sum. Must be a value between 0 and 1. Default is 0.2.
+- `λ::Float64`: The smoothing constant for updating the estimate of the fault signature. Must be a value between 0 and 1. Default is 0.2.
 - `value::Float64`: The initial value of the weighted cumulative sum statistic. Default is 0.0.
 - `Q::Float64`: The residual value of the weighted cumulative sum. Default is 0.0.
 - `upw::Bool`: Whether to monitor increases in the mean (`true`) or decreases (`false`). Default is `true`.
@@ -207,11 +207,11 @@ update_statistic!(stat::WCUSUM, x::Real) = stat.value = update_statistic(stat, x
 
 Adaptive exponentially weighted moving average with design parameters `λ`, `k`, and initial value `value`.
 
-The update mechanism based on a new observation `x` is given by
+The update mechanism for the statistic ``C_t`` based on a new observation `x` is given by
 
-``value = (1-phi(e))*value + phi(e) * x``,
+``C_t = (1-\\phi(e))\\cdot C_{t-1} + \\phi(e) * x``,
 
-where `phi(e)` is a forecast error function based on the Huber function.
+where `\\phi(e)` is a forecast error function based on the Huber score function.
 
 ### Arguments
 - `λ::Float64`: The smoothing constant. Default is `0.1`.

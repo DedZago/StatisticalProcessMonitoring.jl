@@ -6,7 +6,7 @@ using LinearAlgebra
 """
     LLCUSUM(x::AbstractMatrix, k::Real; ncuts::AbstractVector = [2 for _ in eachcol(x)])
 
-A mutable struct representing the distibution-free CUSUM statistic based on data categorization.
+A distibution-free Log-Linear CUSUM monitoring statistic based on data categorization.
 
 # Fields
 - `k::Float64`: The allowance constant of the CUSUM statistic.

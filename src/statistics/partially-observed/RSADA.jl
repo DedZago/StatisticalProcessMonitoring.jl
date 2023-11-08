@@ -4,7 +4,7 @@ using Distributions
 """
     RSADA{F,D}
 
-A struct representing the RSADA control chart, whcih is used for monitoring the mean of partially-observed independent data streams.
+A R-SADA monitoring statistic, whcih is used for monitoring the mean of partially-observed independent data streams.
 The monitoring statistic iteratively samples arms (data streams) and updates a set of local statistics based on the observed values of the data streams.
 The RSADA algorithm uses the local statistics to make decisions on which arms to sample at each iteration.
 

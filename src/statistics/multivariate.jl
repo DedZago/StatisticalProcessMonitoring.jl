@@ -8,12 +8,12 @@ using LinearAlgebra
 
 Shewhart control chart for monitoring multivariate observations with initial value `value`.
 
-The update mechanism based on a new observation `x` is given by
+The update mechanism of ``C_t`` based on a new observation `x` is given by
 
-``value = x'x``.
+``C_t = x'x``.
 
 ### References 
-* Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
+Shewhart, W. A. (1931). Economic Control of Quality Of Manufactured Product. D. Van Nostrand Company.
 """
 @with_kw mutable struct MShewhart <: AbstractStatistic 
     value::Float64 = 0.0
@@ -39,7 +39,7 @@ The update mechanism based on a new observation `x` is given by
 
 and the chart value is defined as
 
-``value_t = Z_t' Λ^{-1} Z_t``.
+``C_t = Z_t' Λ^{-1} Z_t``.
 
 ### Arguments
 - `Λ::Vector{Float64}`: Vector of smoothing constants.
@@ -85,7 +85,7 @@ end
 """
     MCUSUM(k, p, value = 0.0, St = zeros(p))
 
-A mutable struct representing a Multivariate Cumulative Sum (MCUSUM) statistic.
+A Multivariate Cumulative Sum (MCUSUM) statistic.
 
 ### Arguments
 - `k::Float64`: The value of the allowance parameter.
@@ -97,7 +97,7 @@ A mutable struct representing a Multivariate Cumulative Sum (MCUSUM) statistic.
     stat = MCUSUM(0.25, 2, 0.0, [0.0, 0.0])
 
 ### References
-- Crosier, R. B. (1988). Multivariate Generalizations of Cumulative Sum Quality-Control Schemes. Technometrics, 30(3), 291-303. https://doi.org/10.2307/1270083
+Crosier, R. B. (1988). Multivariate Generalizations of Cumulative Sum Quality-Control Schemes. Technometrics, 30(3), 291-303. https://doi.org/10.2307/1270083
 """
 @with_kw mutable struct MCUSUM <: AbstractStatistic 
     k::Float64
@@ -132,7 +132,7 @@ end
 """
     AMCUSUM(λ, p; minshift = 0.1, shift = 0.0, Et = zeros(p), t = 0, stat = MCUSUM(k=0.1, p=p))
 
-A mutable struct representing an Adaptive Multivariate Cumulative Sum (MCUSUM) statistic.
+An Adaptive Multivariate Cumulative Sum (MCUSUM) statistic.
 
 ### Arguments
 - `λ::Float64`: The value of λ, where 0.0 <= λ <= 1.0.
@@ -144,7 +144,7 @@ A mutable struct representing an Adaptive Multivariate Cumulative Sum (MCUSUM) s
 - `stat::C`: The underlying classical MCUSUM statistic. Default is MCUSUM(k=0.1, p=p).
 
 ### References
-- Dai, Y., Luo, Y., Li, Z., & Wang, Z. (2011). A new adaptive CUSUM control chart for detecting the multivariate process mean. Quality and Reliability Engineering International, 27(7), 877-884. https://doi.org/10.1002/qre.1177
+Dai, Y., Luo, Y., Li, Z., & Wang, Z. (2011). A new adaptive CUSUM control chart for detecting the multivariate process mean. Quality and Reliability Engineering International, 27(7), 877-884. https://doi.org/10.1002/qre.1177
 """
 @with_kw mutable struct AMCUSUM{C} <: AbstractStatistic 
     λ::Float64
@@ -187,7 +187,7 @@ end
 """
     MAEWMA(λ, k, value, z::Vector{Float64})
 
-Multivariate Adaptive Exponentially Weighted Moving Average control chart.
+A Multivariate Adaptive Exponentially Weighted Moving Average.
 
 The update mechanism based on a new observation `x` is given by
 
@@ -242,7 +242,7 @@ end
 """
     ALT{M}
 
-Generalized Likelihood Ratio statistic for monitoring changes in the variance-covariance matrix introduced by [Alt].
+A Generalized Likelihood Ratio statistic for monitoring changes in the variance-covariance matrix.
 
 ### Fields
 - `value::Float64`: The value of the statistic, initialized to 0.0.
@@ -286,15 +286,15 @@ update_statistic(stat::ALT, x::Real) = update_statistic!(deepcopy(stat), x)
 """
     MEWMC(λ, value)
 
-Exponentially weighted moving covariance matrix control chart with smoothing constant `λ` and initial value `value`.
+An Exponentially Weighted Moving Covariance Matrix statistic with smoothing constant `λ` and initial value `value`.
 
-The update mechanism based on a new observation `x \\in \\mathbb{R}^p` is given by
+The update mechanism for ``C_t`` based on a new observation `x \\in \\mathbb{R}^p` is given by
 
 ``Z_t = (1 - λ)*Z_{t-1} + λ \\cdot xx'``,
 
 and the chart value is defined as
 
-``value_t = \\text{tr}(Z_t) - \\log|Z_t| - p``.
+``C_t = \\text{tr}(Z_t) - \\log|Z_t| - p``.
 
 ### References 
 Hawkins, D. M., & Maboudou-Tchao, E. M. (2008). Multivariate Exponentially Weighted Moving Covariance Matrix. Technometrics, 50(2), 155-166.
@@ -328,7 +328,7 @@ update_statistic(stat::MEWMC, x::Real) = update_statistic!(deepcopy(stat), x)
 """
     MEWMS(λ, value)
 
-Exponentially weighted moving covariance matrix control chart with smoothing constant `λ`.
+Exponentially weighted moving covariance matrix with smoothing constant `λ`.
 
 The update mechanism based on a new observation `x \\in \\mathbb{R}^p` is given by
 

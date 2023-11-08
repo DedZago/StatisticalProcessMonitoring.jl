@@ -20,10 +20,3 @@ Documentation for [SPM](https://github.com/DedZago/SPM.jl), a package for Statis
 4. Extensibility to user-made control statistics
     * Users only need to define the behaviour of the control statistic (`struct` and sequential update function), everything else is taken care of by the package.
 
-```@index
-```
-
-```@autodocs
-Modules = [SPM]
-Order   = [:function, :type]
-```

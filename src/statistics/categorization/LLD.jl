@@ -5,7 +5,7 @@ using LinearAlgebra
 """
     LLD(x::AbstractMatrix, l::Real; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
 
-A mutable struct representing the LLD statistic based on data categorization.
+A Log-Linear Directional monitoring statistic based on data categorization.
 
 # Fields
 - `l::Float64`: The exponentially weighted smoothing constant of the statistic.
