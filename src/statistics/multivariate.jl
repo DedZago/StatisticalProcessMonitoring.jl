@@ -42,7 +42,7 @@ and the chart value is defined as
 ``C_t = Z_t' Λ^{-1} Z_t``.
 
 ### Arguments
-- `Λ::Vector{Float64}`: Vector of smoothing constants.
+- `Λ::Vector{Float64}`: The vector of smoothing constants.
 - `value::Float64`: Current value of the statistic (default = 0.0).
 - `z::Vector{Float64}`: Vector of smoothed observations (Default: `zeros(length(Λ))`).
 - `inv_Σz::Matrix{Float64}`: Inverse of the covariance matrix of the control variates.
@@ -135,12 +135,12 @@ end
 An Adaptive Multivariate Cumulative Sum (MCUSUM) statistic.
 
 ### Arguments
-- `λ::Float64`: The value of λ, where 0.0 <= λ <= 1.0.
+- `λ::Float64`: The smoothing constant, such that 0.0 <= λ <= 1.0.
 - `p::Int`: The number of quality variables to monitor.
 - `minshift::Float64`: The minimum shift value to be detected. Default is 0.1.
 - `shift::Float64`: The current shift value. Default is 0.0.
 - `Et::Vector{Float64}`: The vector Et of smoothed deviations from the zero mean. Has to be exactly equal to `zeros(p)`
-- `t::Int`: The current value of time. Has to be exactly 0.
+- `t::Int`: The current value of time. Default is 0.
 - `stat::C`: The underlying classical MCUSUM statistic. Default is MCUSUM(k=0.1, p=p).
 
 ### References
