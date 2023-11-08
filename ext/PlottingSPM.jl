@@ -3,20 +3,20 @@ module PlottingSPM # Should be same name as the file (just like a normal package
 using SPM, Plots
 
 #TODO: write plot_series for single and multiple control charts separately
-function SPM.plot_series(proc::ProcessControl; kw...)
+function SPM.plot_series(proc::ProcessControl; l_linestyle=:dash, l_colour = "black", kw...)
     lims = hcat(vec(proc.lim)...)
     lim_row = eachrow(lims)
     plt = plot(proc.stat; kw...)
     for i in 1:length(lim_row)
         limits = hcat(get_value.(lim_row[i])...)
         for h in axes(limits, 1)
-            plot!(plt, limits[h,:], label = "", linestyle=:dash, colour="black")
+            plot!(plt, limits[h,:], label = "", linestyle=l_linestyle, colour=l_colour)
         end
     end
     plt
 end
 
-function SPM.plot_series(proc::ProcessControl{X,S,I,Vector{T}}; kw...) where {X,S,I,T <: NTuple}
+function SPM.plot_series(proc::ProcessControl{X,S,I,Vector{T}}; l_linestyle=:dash, l_colour = "black", kw...) where {X,S,I,T <: NTuple}
     y = ones(3) 
     keywords = Dict(kw)
     smaller_titlefontsize = 14
@@ -41,7 +41,7 @@ function SPM.plot_series(proc::ProcessControl{X,S,I,Vector{T}}; kw...) where {X,
         push!(plt_i, plot(val_row[i]; title=subtitles[i], label="", titlefontsize=smaller_titlefontsize))
         limits = hcat(get_value.(lim_row[i])...)
         for h in axes(limits, 1)
-            plot!(plt_i[i], limits[h,:], label = "", linestyle=:dash, colour="black")
+            plot!(plt_i[i], limits[h,:], label = "", linestyle=l_linestyle, colour=l_colour)
         end
     end
     if haskey(keywords, :title)
