@@ -87,7 +87,7 @@ function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSet
     @unpack nsims = settings
 
     valid_optimizers = [:Grid, :SPSA, :LN_BOBYQA, :LN_COBYLA, :LN_SBPLX, :LN_NELDERMEAD, :LN_PRAXIS, :LN_NEWOA]
-    @assert optimizer in valid_optimizers "Unknown tuning parameter optimizer. Valid optimizers are $(valid_optimizers)"
+    @assert optimizer in valid_optimizers "Unknown optimization algorithm. Valid optimizers are: $(valid_optimizers)"
 
     function rlconstr(par::Vector, grad::Vector)::Float64
         set_design!(CH_, par)
