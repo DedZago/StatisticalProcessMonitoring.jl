@@ -22,6 +22,7 @@ export set_design!
 Get the current value of a statistic.
 """
 get_value(stat::AbstractStatistic) = stat.value
+get_value(S::NTuple{N, AbstractStatistic}) where N = collect(get_value.(S))
 export get_value
 
 """

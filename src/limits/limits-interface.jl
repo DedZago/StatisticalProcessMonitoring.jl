@@ -20,7 +20,7 @@ export get_h
 
 get_value(L::AbstractLimit) = get_h(L)
 get_value(L::Vector{AbstractLimit{T}}) where T = get_h(L)
-get_value(L::Tuple) = get_h(L)
+get_value(L::NTuple{N, AbstractLimit}) where N = get_h(L)
 export get_value
 set_h!(L::AbstractLimit{T}, h::T) where T = L.h = h
 set_h!(L::AbstractLimit{T}, h::Vector{T}) where T = L.h = h
