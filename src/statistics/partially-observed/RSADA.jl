@@ -2,7 +2,7 @@ using Parameters
 using Distributions
 
 """
-    RSADA{F,D}
+    RSADA{D,S}
 
 A R-SADA monitoring statistic, whcih is used for monitoring the mean of partially-observed independent data streams.
 The monitoring statistic iteratively samples arms (data streams) and updates a set of local statistics based on the observed values of the data streams.
@@ -39,7 +39,7 @@ Xian, X., Zhang, C., Bonk, S., & Liu, K. (2019). Online monitoring of big data s
 end
 export RSADA
 
-RSADA(k, mu_min, q, x::AbstractMatrix; dist = Normal(0,1), sampler = ThompsonSampling()) = RSADA(k=k, mu_min=mu_min, p=size(x,2), q=q, dist=dist, sampler = sampler)
+RSADA(k, mu_min, q, x::AbstractMatrix; dist = Normal(0,1), sampler = TopQ()) = RSADA(k=k, mu_min=mu_min, p=size(x,2), q=q, dist=dist, sampler = sampler)
 
 get_design(STAT::RSADA) = [STAT.k, STAT.mu_min]
 

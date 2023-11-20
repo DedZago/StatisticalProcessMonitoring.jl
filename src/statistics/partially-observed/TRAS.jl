@@ -36,7 +36,7 @@ Liu, K., Mei, Y., & Shi, J. (2015). An Adaptive Sampling Strategy for Online Hig
     W1::Vector{Float64} = zeros(p)
     W2::Vector{Float64} = zeros(p)
     obs::Vector{Int} = sample(1:p, q)
-    sampler::S = ThompsonSampling()
+    sampler::S = TopQ()
     @assert 1 <= r < q  "Number of variables to sum ($(r)) must be less than total number of observable variables ($(q))"
     @assert 1 <= q <= p  "Number of observable variables ($(q)) must be less than total number of variables ($(p))"
     @assert k > 0 "Allowance constant must be positive"
