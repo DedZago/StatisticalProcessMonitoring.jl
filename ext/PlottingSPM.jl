@@ -23,10 +23,8 @@ function SPM.plot_series(proc::ProcessControl; kw...)
     plt
 end
 
-#TODO: update interface to fix curved control limits for multiple control charts
-#TODO: Need to specialize the _get_row_limit_value to act in a different way between single and multiple control charts
+
 function SPM.plot_series(proc::ProcessControl{X,S,I,Vector{T}}; kw...) where {X,S,I,T <: NTuple}
-    @warn "Cannot be used for curved control limits yet"
     y = ones(3) 
     keywords = Dict(kw)
     smaller_titlefontsize = 14
