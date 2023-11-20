@@ -61,9 +61,9 @@ get_limit_value(CH::AbstractChart) = get_value(get_limit(CH))
 
 get_limit_value(CH::MultipleControlChart) = collect(get_value.(get_limit(CH)))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH2} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+# get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: OneSidedCurvedLimit, NOM, PH2} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 
-get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH2} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
+# get_limit_value(CH::AbstractChart{STAT,LIM,NOM,PH2}) where {STAT, LIM <: TwoSidedCurvedLimit, NOM, PH2} = get_value(get_limit(CH), get_t(CH), get_statistic(CH))
 export get_limit_value
 
 
@@ -350,6 +350,10 @@ export update_chart!
     
 Update the dynamic control limit of a control chart inplace.
 """
+function update_limit!(CH::AbstractChart{S,L,N,P1}) where {S, L <: DynamicLimit, N, P1}
+    update_value!(get_limit(CH))
+end
+
 function update_limit!(CH::AbstractChart{S,L,N,P1}) where {S, L <: BootstrapLimit, N, P1}
     for b in 1:length(get_limit(CH).sim)
         get_limit(CH).sim[b] = update_statistic(get_statistic(CH), new_data(CH))

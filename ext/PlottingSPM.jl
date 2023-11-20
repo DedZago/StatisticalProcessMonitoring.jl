@@ -3,10 +3,6 @@ module PlottingSPM # Should be same name as the file (just like a normal package
 using SPM, Plots
 
 function SPM._get_row_limit_value(lim_row_i::AbstractArray, stat_vec)
-    if eltype(lim_row_i) <: OneSidedCurvedLimit || eltype(lim_row_i) <: TwoSidedCurvedLimit 
-        t = 1:length(lim_row_i)
-        return hcat(get_value.(lim_row_i, t, stat_vec)...)
-    end
     return hcat(get_value.(lim_row_i)...)
 end
 
@@ -23,8 +19,6 @@ function SPM.plot_series(proc::ProcessControl; kw...)
     plt
 end
 
-#TODO: update interface to fix curved control limits for multiple control charts
-#TODO: Need to specialize the _get_row_limit_value to act in a different way between single and multiple control charts
 function SPM.plot_series(proc::ProcessControl{X,S,I,Vector{T}}; kw...) where {X,S,I,T <: NTuple}
     @warn "Cannot be used for curved control limits yet"
     y = ones(3) 
