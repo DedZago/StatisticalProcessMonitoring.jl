@@ -3,10 +3,6 @@ module PlottingSPM # Should be same name as the file (just like a normal package
 using SPM, Plots
 
 function SPM._get_row_limit_value(lim_row_i::AbstractArray, stat_vec)
-    if eltype(lim_row_i) <: OneSidedCurvedLimit || eltype(lim_row_i) <: TwoSidedCurvedLimit 
-        t = 1:length(lim_row_i)
-        return hcat(get_value.(lim_row_i, t, stat_vec)...)
-    end
     return hcat(get_value.(lim_row_i)...)
 end
 

@@ -67,8 +67,6 @@ end
 export apply_chart!
 
 
-
-
 function apply_chart(CH::AbstractChart, x::Union{AbstractVecOrMat, DataFrame})
     CH_ = deepcopy(CH)
     return apply_chart!(CH_, x)
