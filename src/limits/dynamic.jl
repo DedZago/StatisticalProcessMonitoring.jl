@@ -19,7 +19,7 @@ Curved one-sided limit, such that the run length ``RL`` of a control chart is th
 * if `upw == true`, ``RL = \\inf\\{t : C_t > h\\cdot f(t)\\}``
 * if `upw == false`, ``RL = \\inf\\{t : C_t < -h\\cdot f(t)\\}``
 
-Note that `h > 0` by the way it is defined.
+Note that by definition, `h > 0`.
 """
 @with_kw mutable struct OneSidedCurvedLimit{T, F <: Function} <: DynamicLimit{T}
     h::T
@@ -58,7 +58,7 @@ Curved one-sided limit, such that the run length ``RL`` of a control chart is th
 
 ``RL = \\inf\\{t > 0 : |C_t| > h\\cdot f(t)\\}``.
 
-Note that `h > 0` by the way it is defined.
+Note that by definition, `h > 0`.
 """
 @with_kw mutable struct TwoSidedCurvedLimit{T, F <: Function} <: DynamicLimit{T}
     h::T
@@ -85,6 +85,19 @@ abstract type BootstrapLimit{T} <: DynamicLimit{T} end
 
 Base.show(io::IO, L::BootstrapLimit) = print(io, "$(typeof(L))\n  value: $(get_value(L))\n  Bootstrap samples: $(length(L.sim))\n")
 
+"""
+    OneSidedBootstrapLimit{T} <: BootstrapLimit{T}
+
+A one-sided bootstrap limit with constant false-alarm rate.
+
+# Fields
+- `sim::Vector{T}`: The vector of simulated statistics.
+- `h::T`: The current value of the control limit.
+- `upw::Bool`: Whether the control limit is an upper or lower control limit.
+
+# Constructors
+- `OneSidedBootstrapLimit(S::AbstractStatistic, upw, B::Int)`: Create a new `OneSidedBootstrapLimit` object. The argument `S` is an `AbstractStatistic` object. The argument `upw` determines whether the bootstrap is one-sided and upper-tailed or lower-tailed. The argument `B` is an integer indicating the number of bootstrap replications.
+"""
 mutable struct OneSidedBootstrapLimit{T} <: BootstrapLimit{T}
     sim::Vector{T}
     h::T
@@ -97,6 +110,19 @@ mutable struct OneSidedBootstrapLimit{T} <: BootstrapLimit{T}
 end
 export OneSidedBootstrapLimit
 
+
+"""
+    TwoSidedBootstrapLimit{T} <: BootstrapLimit{T}
+
+A two-sided bootstrap limit with constant false-alarm rate.
+
+# Fields
+- `sim::Vector{T}`: The vector of simulated statistics.
+- `h::Vector{T}`: The current value of the control limits.
+
+# Constructors
+- `TwoSidedBootstrapLimit(S::AbstractStatistic, B::Int)`: Create a new `TwoSidedBootstrapLimit` object. The argument `S` is an `AbstractStatistic` object. The argument `B` is an integer indicating the number of bootstrap replications.
+"""
 mutable struct TwoSidedBootstrapLimit{T} <: BootstrapLimit{T}
     sim::Vector{T}
     h::Vector{T}
@@ -112,6 +138,12 @@ export TwoSidedBootstrapLimit
 """
     update_value!(L::BootstrapLimit, NM::ARL)
     update_value!(L::BootstrapLimit, NM::QRL)
+
+Update the value of the `BootstrapLimit` object using the nominal value obtained from the `ARL` or `QRL` object.
+
+# Arguments
+- `L::BootstrapLimit`: The `BootstrapLimit` object to be updated.
+- `NM`: The `ARL` or `QRL` object used to obtain the value for the update.
 """
 update_value!(L::BootstrapLimit, NM::ARL) = update_value!(L, 1.0/get_value(NM))
 

@@ -7,16 +7,25 @@ CurrentModule = SPM
 Documentation for [SPM](https://github.com/DedZago/SPM.jl), a package for Statistical Process Monitoring.
 
 ## Package features
-1. Standard control charts
-    * Univariate Shewhart, EWMA, AEWMA, and CUSUM control charts;
-    * MEWMA and MAEWMA control charts;
+1. Control charts
+    * Univariate Shewhart, EWMA, AEWMA, CUSUM, adaptive CUSUM control charts.
+    * Multivariate Shewhart, MEWMA, MAEWMA, MCUSUM, AMCUSUM control charts.
+    * Control charts for monitoring the variance-covariance matrix.
+    * Control charts based on data categorization for monitoring the process mean.
+    * Control charts for partially-observed data streams.
+    * Control charts for profile monitoring.
+    * Support for multi-chart monitoring schemes.
 2. Control limits
-    * Classical one-sided and two-sided control limits;
-    * Support for multi-chart combinations;
-    * Dynamic control limits based on bootstrap and permutation methods;
-3. Optimization methods
-    * State-of-the-art methods for estimating control limits;
-    * Optimization of control chart parameters against user-defined out-of-control scenarios;
-4. Extensibility to user-made control statistics
-    * Users only need to define the behaviour of the control statistic (`struct` and sequential update function), everything else is taken care of by the package.
+    * Classical one-sided and two-sided fixed control limits-
+    * Deterministic time-varying control limits.
+    * Dynamic control limits based on bootstrap with constat false-alarm rate.
+3. Control limit design
+    * Classical and improved bisection methods.
+    * Stochastic approximation algorithms.
+    * Support for in-control ARL and in-control run length quantiles.
+    * Support for multi-chart control limit design.
+4. Hyperparameter tuning
+    * Optimization of control chart parameters for user-defined out-of-control scenarios.
+    * Algorithms based on grid search and nonlinear optimizers.
+5. Extensibility to user-defined monitoring statistics
 

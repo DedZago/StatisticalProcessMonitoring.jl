@@ -30,7 +30,7 @@ Classical fixed one-sided limit, such that the run length ``RL`` of a control ch
 * if `upw == true`, ``RL = \\inf\\{t : C_t > h\\}``
 * if `upw == false`, ``RL = \\inf\\{t : C_t < h\\}``
 
-Note that `h > 0` by the way it is defined.
+Note that by definition, `h > 0`.
 """
 @with_kw mutable struct OneSidedFixedLimit{T} <: OneSidedLimit{T}
     h::T
@@ -47,7 +47,7 @@ Classical fixed two-sided limit, such that the run length ``RL`` of a control ch
 
 ``RL = \\inf\\{t > 0 : |C_t| > h\\}``.
 
-Note that `h > 0` by the way it is defined.
+Note that by definition, `h > 0`.
 """
 @with_kw mutable struct TwoSidedFixedLimit{T} <: TwoSidedLimit{T}
     h::T
