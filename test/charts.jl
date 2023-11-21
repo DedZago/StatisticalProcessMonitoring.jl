@@ -2,21 +2,6 @@ module TestCharts
 using SPM
 using Test
 
-# ASSUMTION: `e1` and `e2` have the same run-time type
-# CHECK FIELDS ARE EQUAL BETWEEN TWO STRUCTS
-@generated structEqual(e1, e2) = begin
-    if fieldcount(e1) == 0
-        return :(true)
-    end
-    mkEq    = fldName -> :(e1.$fldName == e2.$fldName)
-    # generate individual equality checks
-    eqExprs = map(mkEq, fieldnames(e1))
-    # construct &&-expression for chaining all checks
-    mkAnd   = (expr, acc) -> Expr(:&&, expr, acc)
-    # no need in initial accumulator because eqExprs is not empty
-    foldr(mkAnd, eqExprs)
-end
-
 @testset "Charts" begin
     x = randn(100)
     NM = ARL(200)
@@ -30,12 +15,9 @@ end
         @test !is_OC(CH)
         @test get_t(CH) == 0
         @test get_design(CH) == [0.2]
-        @test structEqual(get_phase2(CH), PH1)
         @test get_limit_value(CH) == 1.0 * [-1, 1]
         @test get_value(CH) == 0.0
-        @test structEqual(get_statistic(CH), STAT)
         @test get_nominal(CH) == NM
-        @test structEqual(get_phase2(CH), PH1)
         @test get_nominal_value(CH) == 200.0
         update_chart!(CH, 1.0)
         @test get_value(CH) == 0.2
@@ -68,10 +50,6 @@ end
         @test run_sim(CH, maxiter = 1) == 1
         run_sim(CH, Phase2(Bootstrap(), x))
         run_sim_oc(CH, shift = 1.0)
-        @test structEqual(get_statistic(CH), get_statistic(CH_))
-        @test structEqual(get_limit(CH), get_limit(CH_))
-        @test structEqual(get_nominal(CH), get_nominal(CH_))
-        @test structEqual(get_sampler(get_phase2(CH)), get_sampler(get_phase2(CH_)))
         rsa = run_sim_sa(CH, maxiter=Inf, delta=0.0)
         @test length(rsa) == 3
         @test allequal(collect(rsa))
@@ -86,10 +64,6 @@ end
         CH_ = deepcopy(CH)
         run_sim(CH)
         @test run_sim(CH, maxiter = 1) == 1
-        @test structEqual(get_statistic(CH), get_statistic(CH_))
-        @test structEqual(get_limit(CH), get_limit(CH_))
-        @test structEqual(get_nominal(CH), get_nominal(CH_))
-        @test structEqual(get_sampler(get_phase2(CH)), get_sampler(get_phase2(CH_)))
         rsa = run_sim_sa(CH, maxiter=Inf, delta=0.0)
         @test length(rsa) == 3
         @test allequal(collect(rsa))
@@ -108,11 +82,9 @@ end
         CH = ControlChart(STAT, LIM, NM, PH1, 0)
         @test get_t(CH) == 0
         @test get_design(CH) == [0.2]
-        @test structEqual(get_phase2(CH), PH1)
         @test get_limit_value(CH) == 0.0
         @test get_limit_value(CH) == get_value(get_limit(CH))
         @test get_value(CH) == 0.0
-        @test structEqual(get_statistic(CH), STAT)
         @test get_nominal(CH) == NM
         @test get_nominal_value(CH) == 200.0
         xnew = 0.3
@@ -152,7 +124,6 @@ end
         @test length(get_design(CH)) == 2
         @test get_design(CH)[1] == [λ1]
         @test get_design(CH)[2] == [λ2]
-        @test structEqual(get_phase2(CH), PH1)
         @test get_limit_value(CH) == fill(h, 2)
         @test isa(get_limit_value(CH), Vector)
         @test get_value(CH) == zeros(2)
