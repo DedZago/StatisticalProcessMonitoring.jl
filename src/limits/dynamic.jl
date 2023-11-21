@@ -23,16 +23,16 @@ Note that `h > 0` by the way it is defined.
 """
 @with_kw mutable struct OneSidedCurvedLimit{T, F <: Function} <: DynamicLimit{T}
     h::T
-    upw::Bool = true
     fun::F
+    upw::Bool = true
     t::Int = 0
 
     @assert h > 0.0
 end
 export OneSidedCurvedLimit
 
-OneSidedCurvedLimit(h, upw, f) = OneSidedCurvedLimit(h, upw, f, 0)
-get_value(L::OneSidedCurvedLimit, t) = get_h(L) * L.fun(t)
+OneSidedCurvedLimit(h, f, upw) = OneSidedCurvedLimit(h, f, upw, 0)
+get_value(L::OneSidedCurvedLimit, t) = (2.0*float(L.upw) - 1.0) * get_h(L) * L.fun(t)
 get_value(L::OneSidedCurvedLimit) = get_value(L, L.t)
 
 function compare_values(lim_val, stat_val, L::OneSidedCurvedLimit)

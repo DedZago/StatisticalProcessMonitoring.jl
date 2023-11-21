@@ -335,7 +335,7 @@ end
 function _calculate_curved_limit_asymptote(CH::AbstractChart, maxrl)
     ret = 1.0
     if isa(get_limit(CH), OneSidedCurvedLimit) || isa(get_limit(CH), TwoSidedCurvedLimit)
-        ret = maximum([get_limit(CH).fun(t, get_statistic(CH)) for t in 1:maxrl])
+        ret = maximum([get_limit(CH).fun(t) for t in 1:maxrl])
     end
     return ret
 end

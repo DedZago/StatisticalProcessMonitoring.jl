@@ -102,8 +102,8 @@ end
     PH1 = Phase2(Bootstrap(), x)
     λ = 0.2
     STAT = EWMA(λ = λ)
-    f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
-    LIM = OneSidedCurvedLimit(1.0, true, f)
+    f(t) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
+    LIM = OneSidedCurvedLimit(1.0, f, true)
 
     @testset "Curved chart" begin
         CH = ControlChart(STAT, LIM, NM, PH1)
@@ -112,7 +112,7 @@ end
         @test get_design(CH) == [0.2]
         @test structEqual(get_phase2(CH), PH1)
         @test get_limit_value(CH) == 0.0
-        @test get_limit_value(CH) != get_value(get_limit(CH))
+        @test get_limit_value(CH) == get_value(get_limit(CH))
         @test get_value(CH) == 0.0
         @test structEqual(get_statistic(CH), STAT)
         @test get_nominal(CH) == NM
@@ -130,8 +130,8 @@ end
         set_statistic!(CH, STAT)
         set_limit!(CH, LIM)
         set_limit!(CH, 0.1)
-        @test get_limit_value(CH) != 0.0
-        @test get_limit_value(CH) != get_value(get_limit(CH))
+        @test get_limit_value(CH) == 0.0
+        @test get_limit_value(CH) == get_value(get_limit(CH))
         set_design!(CH, 0.3)
         @test get_design(CH)[1] == 0.3
         @test get_maxrl(CH) == Inf

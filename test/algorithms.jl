@@ -15,7 +15,7 @@ end
     NM = ARL(200)
     PH1 = Phase2(Bootstrap(), x)
     STAT = EWMA(λ = 0.2)
-    f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
+    f(t) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
     LIM = TwoSidedCurvedLimit(2.0, f)
     CH = ControlChart(STAT, LIM, NM, PH1)
     @testset "call" begin
@@ -61,7 +61,8 @@ end
     NM = ARL(200)
     STAT1 = EWMA(λ = 0.1)
     STAT2 = CUSUM(k = 1.0)
-    LIM1 = TwoSidedCurvedLimit(2.0, f)
+    g(t) = sqrt(STAT1.λ/(2.0 - STAT1.λ) * (1.0 - (1.0 - STAT1.λ)^(2.0*t)))
+    LIM1 = TwoSidedCurvedLimit(2.0, g)
     LIM2 = OneSidedFixedLimit(2.3, true)
     PH1 = Phase2(Bootstrap(), x)
     CH = ControlChart((STAT1, STAT2), (LIM1, LIM2), NM, PH1)

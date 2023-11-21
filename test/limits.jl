@@ -58,32 +58,35 @@ using Distributions
     end
 
     @testset "One-sided curved" begin
-        f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
+        f(t) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
         λ = 0.2
         STAT = EWMA(λ = λ, value = 0.0)
         h = 0.5
-        L = OneSidedCurvedLimit(h, true, f)
-        @test get_value(L) == h
-        @test get_value(L, 0, STAT) == h * f(0, STAT) 
-        @test get_value(L, 1, STAT) == h * f(1, STAT) 
-        @test get_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) 
-        L = OneSidedCurvedLimit(h, false, f)
-        @test get_value(L) == -h
-        @test get_value(L, 0, STAT) == -h * f(0, STAT) 
-        @test get_value(L, 1, STAT) == -h * f(1, STAT) 
-        @test get_value(L, 10^5, STAT) == -h * sqrt(λ/(2-λ)) 
-        @test_throws AssertionError OneSidedCurvedLimit(-0.5, true, f)
+        L = OneSidedCurvedLimit(h, f, true)
+        @test get_h(L) == h
+        @test get_value(L) == get_value(L, 0)
+        @test get_value(L, 0) == h * f(0) 
+        @test get_value(L, 1) == h * f(1) 
+        @test get_value(L, 10^5) == h * sqrt(λ/(2-λ)) 
+        L = OneSidedCurvedLimit(h, f, false)
+        @test get_h(L) == h
+        @test get_value(L) == get_value(L, 0)
+        @test get_value(L, 0) == -h * f(0) 
+        @test get_value(L, 1) == -h * f(1) 
+        @test get_value(L, 10^5) == -h * sqrt(λ/(2-λ)) 
+        @test_throws AssertionError OneSidedCurvedLimit(-0.5, f, true)
     end
     @testset "Two-sided curved" begin
-        f(t, STAT) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
         λ = 0.2
         STAT = EWMA(λ = λ, value = 0.0)
+        f(t) = sqrt(STAT.λ/(2.0 - STAT.λ) * (1.0 - (1.0 - STAT.λ)^(2.0*t)))
         h = 0.5
         L = TwoSidedCurvedLimit(h, f)
         @test get_h(L) == h
-        @test get_value(L, 0, STAT) == h * f(0, STAT) * [-1, 1]
-        @test get_value(L, 1, STAT) == h * f(1, STAT) * [-1, 1]
-        @test get_value(L, 10^5, STAT) == h * sqrt(λ/(2-λ)) * [-1, 1]
+        @test get_value(L) == get_value(L, 0)
+        @test get_value(L, 0) == h * f(0) * [-1, 1]
+        @test get_value(L, 1) == h * f(1) * [-1, 1]
+        @test get_value(L, 10^5) == h * sqrt(λ/(2-λ)) * [-1, 1]
         @test_throws MethodError TwoSidedCurvedLimit(-0.5, true, f)
     end
 
