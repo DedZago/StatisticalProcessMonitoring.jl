@@ -134,5 +134,11 @@ using Distributions
         CH = ControlChart(STAT, L, NM, PH2)
         update_chart!(CH, rand(Normal(0,1)))
     end
+
+    @testset "Limit vector" begin
+        LV = Tuple(TwoSidedFixedLimit(1.0) for _ in 1:5)
+        set_h!(LV, 0.5)
+        @test get_h(LV) == [0.5 for _ in 1:5]
+    end
 end
 end

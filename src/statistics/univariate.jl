@@ -186,7 +186,7 @@ function set_design!(stat::WCUSUM, par::AbstractVector)
     return par
 end
 
-function update_statistic(stat::WCUSUM, x::Real)
+function update_statistic!(stat::WCUSUM, x::Real)
     # Update wcusum residuals
     stat.Q = (1 - stat.λ) * stat.Q + stat.λ*x
     # Calculate fault signature
@@ -200,7 +200,7 @@ function update_statistic(stat::WCUSUM, x::Real)
 end
 
 
-update_statistic!(stat::WCUSUM, x::Real) = stat.value = update_statistic(stat, x)
+update_statistic(stat::WCUSUM, x::Real) = update_statistic!(deepcopy(stat), x)
 
 """
     AEWMA(λ, k, value)

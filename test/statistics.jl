@@ -58,6 +58,13 @@ end
         set_design!(STAT, knew)
         @test get_design(STAT)[1] == knew
     end
+
+    @testset "WCUSUM" begin
+        STAT = WCUSUM(k = 1.0, λ=0.1)
+        @test get_design(STAT) == [1.0, 0.1]
+        set_design!(STAT, [0.5, 0.2])
+        update_statistic(STAT, randn())
+    end
 end
 
 @testset "Shewhart" begin
@@ -154,6 +161,8 @@ end
             @test get_value(STAT) == 0.2
             set_design!(STAT, 0.2)
             @test get_design(STAT) == [0.2]
+            set_design!(STAT, [10.0])
+            update_statistic!(STAT, xnew)
         end
 
         @testset "other multivariate" begin
@@ -162,6 +171,7 @@ end
             update_statistic(STAT, randn(3))            
             @test get_design(STAT) == Vector{Float64}()
             @test_throws ErrorException set_design!(STAT, 3.0)
+            @test_throws ErrorException set_design!(STAT, [1.0])
 
             STAT = DiagMEWMA(Λ = [0.2,0.2])
             set_design!(STAT, [0.1,0.1])
@@ -174,6 +184,12 @@ end
             STAT = AMCUSUM(0.1, randn(100,3))
             get_value(STAT), set_value!(STAT, 0.1), get_design(STAT), set_design!(STAT, 0.1), set_design!(STAT, [0.5])
             update_statistic!(STAT, randn(3))
+
+            STAT = MAEWMA(λ = 0.1, k = 3.0, p = 2)
+            set_design!(STAT, [0.3, 0.5])
+            @test get_design(STAT) == [0.3, 0.5]
+            update_statistic!(STAT, [1.0,1.0])
+            get_value(STAT)
         end
 
         @testset "data categorization" begin
@@ -214,20 +230,50 @@ end
             STAT = RSADA(0.3, 1.0, q, x, sampler = TopQ())
             CH = ControlChart(STAT, LIM, NM, PH2)
             update_chart!(CH, rand(DIST))
+
+            STAT = TRAS(Δ = 0.5, r = q-1, p = p, q = q, sampler = TopQ())
+            CH = ControlChart(STAT, LIM, NM, PH2)
+            update_chart!(CH, rand(DIST))
+            get_design(STAT)
+            set_design!(STAT, [0.1, 0.2, 0.3, 1])
         end
 
         @testset "covariance matrix" begin
             NM = ARL(200)
             p = 3
             STAT = MEWMC(λ=0.1, p = p)
+            @test get_design(STAT) == [0.1]
+            set_design!(STAT, 0.2)
+            set_design!(STAT, [0.3])
+            update_statistic(STAT, [1.0 for _ in 1:p])
             LIM = OneSidedFixedLimit(1.0, true)
             DIST = MvNormal(zeros(p), ones(p))
             PH2 = Phase2Distribution(DIST)
             CH = ControlChart(STAT, LIM, NM, PH2)
             update_chart(CH, rand(DIST))
+
+            x = randn(10)
+            STAT = ALT(x)
+            @test get_design(STAT) == []
+            update_statistic!(STAT, x)
+            x = randn(10, 3)
+            STAT = ALT(x)
+            update_statistic!(STAT, x)
+
+            x = randn(10)
+            STAT = MEWMS(0.1, x)
+            @test get_design(STAT) == [0.1]
+            set_design!(STAT, 0.2)
+            set_design!(STAT, [0.3])
+            update_statistic(STAT, x[1])
+
+            x = randn(10, 3)
+            STAT = MEWMS(0.1, x)
+            update_statistic(STAT, x[1,:])
         end
 
         @testset "Functional data" begin
+            FunctionalObservation(0.5, 0.5)
             using GLM, DataFrames
             struct MyLinearModel
                 a
@@ -244,6 +290,10 @@ end
             STAT = NEWMA(0.2, g, dat)
             z = update_statistic(STAT, dat[1])
             @test 0 <= z < Inf
+
+            xs = 10 .* rand(n)
+            ys = 1.0 .+ 1.0 * xs .+ randn(n)
+            FunctionalData(xs, ys)
         end
 
     end

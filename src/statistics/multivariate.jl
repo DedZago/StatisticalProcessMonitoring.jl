@@ -210,8 +210,9 @@ Mahmoud, M. A., & Zahran, A. R. (2010). A Multivariate Adaptive Exponentially We
 @with_kw mutable struct MAEWMA <: AbstractStatistic 
     λ::Float64
     k::Float64
+    p::Int
     value::Float64 = 0.0
-    z::Vector{Float64}
+    z::Vector{Float64} = zeros(p)
     @assert !isinf(value)
 end
 export MAEWMA
@@ -226,11 +227,8 @@ get_design(stat::MAEWMA) = [stat.λ, stat.k]
 
 function update_statistic!(stat::MAEWMA, x::AbstractVector)
     e = norm(dot(x - stat.z, x - stat.z)) + eps()
-    @show e
     omega = huber(e, stat.λ, stat.k)/e
-    @show omega
     stat.z = (I - omega*I)*stat.z + omega*I*x
-    @show stat.z
     stat.value = dot(stat.z, stat.z)
     return stat.value
 end
