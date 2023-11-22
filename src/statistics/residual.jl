@@ -38,7 +38,6 @@ A mutable struct representing a statistic applied to a location-scale family.
 end
 export LocationScaleStatistic
 
-#FIXME: test whether the location scale constructors and the residual function work on vector and matrix data
 LocationScaleStatistic(stat, x::AbstractVector) = LocationScaleStatistic(stat, mean(x), 1.0/std(x))
 LocationScaleStatistic(stat, x::AbstractMatrix) = LocationScaleStatistic(stat, mean.(eachcol(x)), inv(sqrt(cov(x))))
 residual!(x, S::LocationScaleStatistic) = S.Ω * (x .- S.μ)

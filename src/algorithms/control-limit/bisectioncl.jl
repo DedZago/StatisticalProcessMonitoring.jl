@@ -104,7 +104,7 @@ See the documentation of `bisectionCL!` for more information about the algorithm
 * A `NamedTuple` containing the estimated control limit `h`, the total number of iterations `iter`, and information `status` about the convergence of the algorithm.
 
 ### References
-* Qiu, P. (2013). Introduction to Statistical Process Control. CRC Press.
+* Qiu, P. (2013). Introduction to Statistical Process Control. Boca Raton: CRC Press.
 
 """
 function bisectionCL(CH::ControlChart, hmax; rlsim::Function = run_sim, nsims::Int=1000, hmin::Float64 = sqrt(eps()), maxiter::Int = 30, maxrl::Real = Inf, x_tol::Float64 = 1e-06, f_tol::Float64 = 1.0, verbose::Bool = false)

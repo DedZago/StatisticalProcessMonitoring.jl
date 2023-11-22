@@ -3,6 +3,12 @@ using DataFrames
 
 ############## IID OBSERVATIONS ##############
 abstract type AbstractSampling end
+
+"""
+    Bootstrap <: AbstractSampling
+
+Represents a bootstrap sampling method.
+"""
 struct Bootstrap <: AbstractSampling end
 export Bootstrap
 

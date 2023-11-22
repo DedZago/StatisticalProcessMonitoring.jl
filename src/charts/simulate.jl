@@ -7,7 +7,7 @@ Simulates a run length for the control chart `CH` by sampling new data from its 
 * `CH` - A control chart.
 
 ### Returns
-* An `Int`.
+* An `Int` representing the simulated run length.
 """
 function run_sim(CH::AbstractChart; maxiter::Real = Inf)
     CH_ = shallow_copy_sim(CH)
@@ -32,7 +32,7 @@ Simulates a run length for the control chart `CH` by sampling new data from the 
 * `DGP` - An AbstractPhase2 object.
 
 ### Returns
-* An `Int`.
+* An `Int` representing the simulated run length.
 """
 function run_sim(CH::AbstractChart, DGP::AbstractPhase2)
     CH_ = shallow_copy_sim(CH)
@@ -163,11 +163,11 @@ export run_sim_sa
 Simulates a run length under location shift for the control chart `CH` by sampling new data from its Phase II object.
 
 ### Inputs
-* `CH` - A control chart.
-* `shift` - A location shift.
+* `CH::AbstractChart`:  A control chart.
+* `shift::Float64` - The magnitude of location shift.
 
 ### Returns
-* An `Int`.
+* An `Int` representing the simulated run length.
 """
 function run_sim_oc(CH::AbstractChart; shift = 0.0, maxiter::Real = Inf)
     CH_ = shallow_copy_sim(CH)
@@ -194,7 +194,7 @@ Simulates a run length path for the control chart `CH` by sampling new data from
 * `maxiter::Real` - The maximum value of the run length. Defaults to `min(maxrl(CH), 10*get_nominal_value(CH))`
 
 ### Returns
-* A vector containing values of the control chart.
+* A vector containing the simulated values of the control chart.
 """
 function run_path_sim(CH::AbstractChart; maxiter::Real = min(get_maxrl(CH), 10*get_nominal_value(CH)))
     CH_ = shallow_copy_sim(CH)

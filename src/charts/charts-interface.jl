@@ -34,7 +34,7 @@ export MultipleControlChart
 
 
 """
-    shallow_copy_sim(CH::AbstractChart)
+    shallow_copy_sim(CH::ControlChart)
 
 Create a shallow copy of a control chart, so that only the statistic and the control limit are copied.
 This is done to prevent copying eventual Phase 2 data multiple times and thus reduce computational effort when optimizing the control limit and the chart tuning parameters.
@@ -185,7 +185,7 @@ export is_OC
 Check whether each individual control chart that makes up a multiple control chart is in control or out of control.
 
 ### Returns
-A vector of Bool, whose length is the number of individual statistics.
+A vector of Bool, whose length is equal to the number of individual statistics.
 """
 is_IC_vec(CH::MultipleControlChart) = is_IC_vec(get_limit(CH), get_statistic(CH))
 is_OC_vec(CH::MultipleControlChart) = .!(is_IC_vec(get_limit(CH), get_statistic(CH)))
@@ -198,7 +198,7 @@ export is_OC_vec
 Set the statistic of a control chart.
 
 ### Returns
-The statistic that has been set.
+The new value of the statistic.
 """
 function set_statistic!(CH::C, statistic::STAT) where C <: AbstractChart where STAT <: AbstractStatistic
     CH.stat = statistic
@@ -210,10 +210,10 @@ export set_statistic!
 """
     function set_t!(CH::AbstractChart, t)
 
-Set the current time point of a control chart.
+Set the current time value of a control chart.
 
 ### Returns
-The time point of the statistic that has been set.
+The new time value of the control chart.
 """
 function set_t!(CH::C, t::Int) where C <: AbstractChart
     CH.t = t
@@ -227,7 +227,7 @@ export set_t!
 Set the value of the statistic of a control chart.
 
 ### Returns
-The value of the statistic that has been set.
+The new value of the control chart's statistic.
 """
 function set_value!(CH::C, value) where C <: AbstractChart
     set_value!(get_statistic(CH), value)
@@ -243,11 +243,15 @@ export set_value!
 
 """
     function set_limit!(CH::AbstractChart, limit::AbstractLimit)
+    function set_limit!(CH::AbstractChart, h::Float64)
+    function set_limit!(CH::MultipleControlChart, h::Vector{Float64})
+    function set_limit!(CH::MultipleControlChart, h::Float64)
+    function set_limit!(CH::MultipleControlChart, h::Float64, j::Int)
 
 Set the control limit of a control chart.
 
 ### Returns
-The control limit that has been set.
+The new control limit.
 """
 function set_limit!(CH::AbstractChart, limit::AbstractLimit)
     CH.limit = limit
@@ -285,7 +289,7 @@ export set_phase2!
 """
     new_data(CH::AbstractChart)
 
-Simulate a new observation for the control chart from the phase 2 data.
+Simulate a new observation based on the control chart's Phase II object.
 """
 new_data(CH::AbstractChart) = new_data(get_phase2(CH))
 export new_data
@@ -361,8 +365,6 @@ function update_limit!(CH::AbstractChart{S,L,N,P1}) where {S, L <: BootstrapLimi
     update_value!(get_limit(CH), get_nominal(CH))
     resample_sims!(get_limit(CH))
 end
-export update_limit!#FIXME: tests
-
-#FIXME: organize functions more neatly
+export update_limit!
 
 include("simulate.jl")

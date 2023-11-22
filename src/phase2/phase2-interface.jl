@@ -12,13 +12,13 @@ function shallow_copy_sim(PH2::AbstractPhase2)
 end
 
 """
-`Phase2` is a struct that holds the reference sample data and a sampling method to generate new observations from the reference data. 
+`Phase2` is a struct that holds the reference sample data and a sampling method, which is used to generate new observations from the reference data. 
 
-# Arguments
-- `samp = Bootstrap()`: The sampling method to be used to generate new observations. Defaults to `Bootstrap()`.
-- `data`: The data obtained after phase 1.
+### Arguments
+- `samp::AbstractSampling`: The sampling method to be used to generate new observations. Defaults to `Bootstrap()`.
+- `data`: The data from which observations need to be resampled.
 
-# Examples
+### Examples
 x = randn(500)
 PH2 = Phase2(data = x)
 """
@@ -42,10 +42,10 @@ end
     new_data(PH2::Phase2{S,AbstractVector})
     new_data(PH2::Phase2{S,AbstractMatrix})
 
-Generates a new observation based on the observed Phase II (in-control) data.
+Generates a new observation using the Phase II object.
 """
-new_data(PH2::Phase2) = new_data(PH2.samp, PH2.data)
-new_data!(PH2::Phase2) = new_data!(PH2.samp, PH2.data)
+new_data(PH2::Phase2) = new_data(get_sampler(PH2), get_data(PH2))
+new_data!(PH2::Phase2) = new_data!(get_sampler(PH2), get_data(PH2))
 export new_data!
 
 
@@ -54,12 +54,13 @@ export new_data!
 """
     Phase2Distribution{T} <: AbstractPhase2
 
-A struct representing Phase II observations, it is used to generate and monitor new data from the true data-generating process. It contains a field `dist` of type `T`, which represents the underlying data-generating process.
+A struct that is used to generate and new data from a distribution. It contains a sampleable field `dist` of type `T`, which represents the underlying data-generating process.
 
-# Notes
+### Notes
 A method `rand(::T)` is required to generate new data from `dist`.
 
-# Example
+### Example
+    using Distributions
     DGP = Phase2Distribution(Normal(0,1))
     new_data(DGP)
 """
@@ -71,7 +72,6 @@ export Phase2Distribution
 new_data(PH2::Phase2Distribution) = rand(PH2.dist)
 new_data!(PH2::Phase2Distribution) = rand(PH2.dist)
 
-#TODO: see if an abstraction is needed to avoid defining shallow_copy_sim for every type <: AbstractPhase2 that has to be defined.
 function shallow_copy_sim(PH2::Phase2Distribution) 
     return Phase2Distribution(deepcopy(PH2.dist))
 end
