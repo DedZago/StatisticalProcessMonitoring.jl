@@ -14,7 +14,7 @@
 
 ## Package Features
 
-This package provides a number of univariate and multivariate control charts, as well as control charts for monitoring partially-observed processes, profiles, and support for multi-chart designs.
+This package implements a number of univariate and multivariate control charts, as well as control charts for monitoring partially-observed processes, profiles, and support for multi-chart designs.
 
 Various type of control limits are implemented, with dedicated algorithms for estimating their values based on common metrics such as in-control average run length and in-control run length quantiles.
 
