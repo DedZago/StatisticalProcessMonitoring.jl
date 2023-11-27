@@ -12,56 +12,11 @@
 
 ## Package Features
 
-### Control Charts
+This package provides a number of univariate and multivariate control charts, as well as control charts for monitoring partially-observed processes, profiles, and support for multi-chart designs.
 
-- **Univariate Control Charts:**
-  - Shewhart
-  - Exponentially Weighted Moving Average (EWMA)
-  - Adaptive EWMA (AEWMA)
-  - Cumulative Sum (CUSUM)
-  - Adaptive CUSUM
+Various type of control limits are implemented, with dedicated algorithms for estimating their values based on common metrics such as in-control average run length and in-control run length quantiles.
 
-- **Multivariate Control Charts:**
-  - Shewhart
-  - Multivariate EWMA (MEWMA)
-  - Multivariate Adaptive EWMA (MAEWMA)
-  - Multivariate CUSUM (MCUSUM)
-  - Adaptive Multivariate CUSUM (AMCUSUM)
-  
-- **Other Control Charts:**
-  - Variance-Covariance Matrix Monitoring
-  - Data Categorization-based Mean Monitoring
-  - Partially-Observed Data Streams Monitoring
-  - Profile Monitoring
-  - Support for Multi-Chart Monitoring Schemes
+Hyperparameter tuning is supported with a native grid search implementation, as well as black-box optimization using the [NLopt](https://github.com/JuliaOpt/NLopt.jl) package.
 
-### Control Limits
-
-- **Fixed Control Limits:**
-  - Classical one-sided and two-sided limits
-  
-- **Time-Varying Control Limits:**
-  - Deterministic time-varying limits
-  
-- **Dynamic Control Limits:**
-  - Bootstrap-based limits with constant false-alarm rate
-
-### Control Limit Design
-
-- **Design Methods:**
-  - Classical and Improved Bisection Methods
-  - Stochastic Approximation Algorithms
-  - Support for In-Control Average Run Length (ARL) and Run Length Quantiles
-  - Support for Multi-Chart Control Limit Design
-
-### Hyperparameter Tuning
-
-- **Optimization:**
-  - Control Chart Parameter Optimization for User-Defined Out-of-Control Scenarios
-  - Algorithms based on Grid Search and Nonlinear Optimizers
-
-### Extensibility
-
-- **User-Defined Monitoring Statistics:**
-  - Easily extend SPM to incorporate custom monitoring statistics
+The package is highly extensible and can incorporate custom monitoring statistics.
 
