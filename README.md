@@ -26,4 +26,3 @@ To ensure the package loads quickly, two extensions are [conditionally loaded](h
 * **NLoptSPM.jl**: functionalities for hyperparameter tuning using the [NLopt](https://github.com/JuliaOpt/NLopt.jl) package. This extension can be loaded by running `using NLopt` after loading the **SPM.jl** package.
 
 The package is highly extensible and can incorporate custom monitoring statistics.
-
