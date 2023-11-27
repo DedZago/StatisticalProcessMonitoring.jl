@@ -1,16 +1,13 @@
 name = "SPM"
 uuid = "5c25986e-1fdd-4016-bfbf-d983868d020f"
 authors = ["Daniele Zago <daniele.zago.1@phd.unipd.it>"]
-version = "0.1.0"
+version = "1.0.0"
 
 [weakdeps]
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 NLopt = "76087f3c-5699-56af-9a33-bf431cd00edd"
 
 [extensions]
-# name of extension to the left
-# extension dependencies required to load the extension to the right
-# use a list for multiple extension dependencies
 PlottingSPM = "Plots"
 NLoptSPM = "NLopt"
 
