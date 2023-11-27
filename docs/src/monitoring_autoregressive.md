@@ -1,8 +1,6 @@
 # Monitoring residuals of an autoregressive process
 
 ```julia
-using DrWatson
-@quickactivate
 using SPM, Distributions, Random, NLopt, Plots, Parameters, LaTeXStrings
 ```
 

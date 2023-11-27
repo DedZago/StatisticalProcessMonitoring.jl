@@ -1,8 +1,6 @@
 # Monitoring nonparametric profiles
 
 ```julia
-using DrWatson
-@quickactivate
 using SPM, Distributions, Random, Loess, Plots, LaTeXStrings
 ```
 

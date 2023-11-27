@@ -1,8 +1,6 @@
 # Joint monitoring of mean and covariance matrix
 
 ```julia
-using DrWatson
-@quickactivate
 using SPM, LinearAlgebra, Random, Distributions, CSV, DataFrames, Plots
 ```
 

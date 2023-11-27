@@ -1,8 +1,6 @@
 # Monitoring risk-adjusted surgical outcomes
 
 ```julia
-using DrWatson
-@quickactivate
 using SPM, Distributions, Random, Parameters, CSV, DataFrames, CategoricalArrays, MixedModels, Plots
 ```
 
