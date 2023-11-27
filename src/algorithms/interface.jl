@@ -86,7 +86,7 @@ function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSet
 
     @unpack nsims = settings
 
-    valid_optimizers = [:Grid, :SPSA, :LN_BOBYQA, :LN_COBYLA, :LN_SBPLX, :LN_NELDERMEAD, :LN_PRAXIS, :LN_NEWOA]
+    valid_optimizers = [:Grid, :LN_BOBYQA, :LN_COBYLA, :LN_SBPLX, :LN_NELDERMEAD, :LN_PRAXIS, :LN_NEWOA]
     @assert optimizer in valid_optimizers "Unknown optimization algorithm. Valid optimizers are: $(valid_optimizers)"
 
     function rlconstr(par::Vector, grad::Vector)::Float64
@@ -101,9 +101,6 @@ function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSet
 
     if optimizer == :Grid
         set_design!(CH, optimize_grid(CH, rlconstr, settings))
-    elseif optimizer == :SPSA
-        #TODO: implement SPSA
-        set_design!(CH, optimize_SPSA(CH, rlconstr, settings))
     else
         set_design!(CH, optimize_nlopt(CH, rlconstr, settings, optimizer=optimizer))
     end
