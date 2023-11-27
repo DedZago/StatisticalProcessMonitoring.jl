@@ -1,7 +1,7 @@
 name = "SPM"
 uuid = "5c25986e-1fdd-4016-bfbf-d983868d020f"
 authors = ["Daniele Zago <daniele.zago.1@phd.unipd.it>"]
-version = "1.0.0"
+version = "0.1.0"
 
 [weakdeps]
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
