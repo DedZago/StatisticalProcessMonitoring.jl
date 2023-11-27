@@ -22,8 +22,8 @@ Hyperparameter tuning is supported with a native grid search implementation, as 
 
 To ensure the package loads quickly, two extensions are [conditionally loaded](https://pkgdocs.julialang.org/v1/creating-packages/#Conditional-loading-of-code-in-packages-(Extensions)) only if needed:
 
-* `PlottingSPM.jl`: functionalities for plotting the results of applying a control chart to a dataset. This extension can be loaded by running `using Plots` after loading the **SPM.jl** package.
-* `NLoptSPM.jl`: functionalities for hyperparameter tuning using the [NLopt](https://github.com/JuliaOpt/NLopt.jl) package. This extension can be loaded by running `using NLopt` after loading the **SPM.jl** package.
+* **PlottingSPM.jl**: functionalities for plotting the results of applying a control chart to a dataset. This extension can be loaded by running `using Plots` after loading the **SPM.jl** package.
+* **NLoptSPM.jl**: functionalities for hyperparameter tuning using the [NLopt](https://github.com/JuliaOpt/NLopt.jl) package. This extension can be loaded by running `using NLopt` after loading the **SPM.jl** package.
 
 The package is highly extensible and can incorporate custom monitoring statistics.
 
