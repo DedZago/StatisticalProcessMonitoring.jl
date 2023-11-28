@@ -23,14 +23,12 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 julia = "1.9"
-DataFrames = "<9.9.9,1.9"
-Distributions = "<9.9.9,1.9"
-GLM = "<9.9.9,1.9"
-LinearAlgebra = "<9.9.9,1.9"
-Parameters = "<9.9.9,1.9"
-Random = "<9.9.9,1.9"
-Statistics = "<9.9.9,1.9"
-StatsBase = "<9.9.9,1.9"
+DataFrames = "<1.6.2"
+Distributions = "<0.25.102"
+GLM = "<1.9.1"
+Parameters = "<0.12.4"
+Statistics = "<1.9.1"
+StatsBase = "<0.34.3"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
