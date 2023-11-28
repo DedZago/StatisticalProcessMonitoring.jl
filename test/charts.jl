@@ -1,5 +1,5 @@
 module TestCharts
-using SPM
+using StatisticalProcessMonitoring
 using Test
 
 @testset "Charts" begin
