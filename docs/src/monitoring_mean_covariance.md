@@ -1,7 +1,7 @@
 # Joint monitoring of mean and covariance matrix
 
 ```julia
-using SPM, LinearAlgebra, Random, Distributions, CSV, DataFrames, Plots
+using StatisticalProcessMonitoring, LinearAlgebra, Random, Distributions, CSV, DataFrames, Plots
 ```
 
 ```julia

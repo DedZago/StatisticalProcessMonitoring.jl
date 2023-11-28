@@ -1,7 +1,7 @@
 # Monitoring nonparametric profiles
 
 ```julia
-using SPM, Distributions, Random, Loess, Plots, LaTeXStrings
+using StatisticalProcessMonitoring, Distributions, Random, Loess, Plots, LaTeXStrings
 ```
 
 ```julia

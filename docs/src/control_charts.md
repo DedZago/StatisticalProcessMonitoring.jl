@@ -1,6 +1,6 @@
 # Control charts
 
 ```@autodocs
-Modules = [SPM]
+Modules = [StatisticalProcessMonitoring]
 Pages = ["charts-interface.jl", "simulate.jl", "retrospective.jl"]
 ```

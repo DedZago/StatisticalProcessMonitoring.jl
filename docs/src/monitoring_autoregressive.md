@@ -1,11 +1,11 @@
 # Monitoring residuals of an autoregressive process
 
 ```julia
-using SPM, Distributions, Random, NLopt, Plots, Parameters, LaTeXStrings
+using StatisticalProcessMonitoring, Distributions, Random, NLopt, Plots, Parameters, LaTeXStrings
 ```
 
 ```julia
-import SPM.residual!, SPM.new_data!
+import StatisticalProcessMonitoring.residual!, StatisticalProcessMonitoring.new_data!
 mutable struct AR1Statistic{S} <: ResidualStatistic
     stat::S
     phi::Float64
@@ -18,7 +18,7 @@ function residual!(x, S::AR1Statistic)
     return yhat
 end
 
-@with_kw mutable struct Phase2AR1<:SPM.AbstractPhase2
+@with_kw mutable struct Phase2AR1<:StatisticalProcessMonitoring.AbstractPhase2
     phi::Float64
     y::Float64 = 0.0
     init::Bool = false

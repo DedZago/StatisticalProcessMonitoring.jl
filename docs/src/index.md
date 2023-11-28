@@ -1,10 +1,10 @@
 ```@meta
-CurrentModule = SPM
+CurrentModule = StatisticalProcessMonitoring
 ```
 
-# SPM
+# StatisticalProcessMonitoring
 
-Documentation for [SPM](https://github.com/DedZago/SPM.jl), a package for Statistical Process Monitoring.
+Documentation for [StatisticalProcessMonitoring](https://github.com/DedZago/StatisticalProcessMonitoring.jl), a package for Statistical Process Monitoring.
 
 ## Package features
 #### Control charts

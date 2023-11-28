@@ -1,6 +1,6 @@
 # Nominal properties
 
 ```@autodocs
-Modules = [SPM]
+Modules = [StatisticalProcessMonitoring]
 Pages = ["nominal-interface.jl"]
 ```

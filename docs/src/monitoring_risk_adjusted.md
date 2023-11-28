@@ -1,7 +1,7 @@
 # Monitoring risk-adjusted surgical outcomes
 
 ```julia
-using SPM, Distributions, Random, Parameters, CSV, DataFrames, CategoricalArrays, MixedModels, Plots
+using StatisticalProcessMonitoring, Distributions, Random, Parameters, CSV, DataFrames, CategoricalArrays, MixedModels, Plots
 ```
 
 ```julia
