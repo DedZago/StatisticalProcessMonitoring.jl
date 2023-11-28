@@ -1,6 +1,6 @@
-module NLoptSPM # Should be same name as the file (just like a normal package)
+module NLoptSPM
 
-using SPM, NLopt
+using StatisticalProcessMonitoring, NLopt
 
 """
     optimize_nlopt(CH::ControlChart, rlconstr::Function, settings::OptSettings)
@@ -20,7 +20,7 @@ Optimizes the Control Chart design parameter using the NLOpt library.
 ### Returns
 * `minx::Vector{Float64}`: The set of optimal parameters for the control chart.
 """
-function SPM.optimize_nlopt(CH::ControlChart, rlconstr::Function, settings::OptSettings; optimizer::Symbol = :LN_BOBYQA)
+function StatisticalProcessMonitoring.optimize_nlopt(CH::ControlChart, rlconstr::Function, settings::OptSettings; optimizer::Symbol = :LN_BOBYQA)
     minpar = settings.minpar
     maxpar = settings.maxpar
     x_tol = settings.x_tol

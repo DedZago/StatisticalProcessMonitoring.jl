@@ -1,5 +1,5 @@
 module TestStatistics
-using SPM
+using StatisticalProcessMonitoring
 using Test
 using Random
 using StatsBase
@@ -279,7 +279,7 @@ end
                 a
                 b
             end
-            SPM.predict(mm::MyLinearModel, x::AbstractVector) = mm.a .+ mm.b .* x
+            StatisticalProcessMonitoring.predict(mm::MyLinearModel, x::AbstractVector) = mm.a .+ mm.b .* x
             NM = ARL(200)
             n = 500
             nj = 10

@@ -1,4 +1,4 @@
-using SPM
+using StatisticalProcessMonitoring
 using Test
 
 # Test suite for OptSettings

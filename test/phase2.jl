@@ -1,5 +1,5 @@
 module Testphase2
-using SPM
+using StatisticalProcessMonitoring
 using Test
 using Random
 

@@ -1,6 +1,6 @@
 
 module TestAlgorithms
-using SPM
+using StatisticalProcessMonitoring
 using Test
 using Distributions
 

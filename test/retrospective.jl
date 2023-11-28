@@ -1,5 +1,5 @@
 module TestRetrospective
-using SPM
+using StatisticalProcessMonitoring
 using Test
 using Random
 

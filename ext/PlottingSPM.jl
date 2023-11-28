@@ -1,12 +1,12 @@
-module PlottingSPM # Should be same name as the file (just like a normal package)
+module PlottingSPM
 
-using SPM, Plots
+using StatisticalProcessMonitoring, Plots
 
-function SPM._get_row_limit_value(lim_row_i::AbstractArray, stat_vec)
+function StatisticalProcessMonitoring._get_row_limit_value(lim_row_i::AbstractArray, stat_vec)
     return hcat(get_value.(lim_row_i)...)
 end
 
-function SPM.plot_series(proc::ProcessControl; kw...)
+function StatisticalProcessMonitoring.plot_series(proc::ProcessControl; kw...)
     lims = hcat(vec(proc.lim)...)
     lim_row = eachrow(lims)
     plt = plot(get_value.(proc.stat); kw...)
@@ -20,7 +20,7 @@ function SPM.plot_series(proc::ProcessControl; kw...)
 end
 
 
-function SPM.plot_series(proc::ProcessControl{X,S,I,Vector{T}}; kw...) where {X,S,I,T <: NTuple}
+function StatisticalProcessMonitoring.plot_series(proc::ProcessControl{X,S,I,Vector{T}}; kw...) where {X,S,I,T <: NTuple}
     y = ones(3) 
     keywords = Dict(kw)
     smaller_titlefontsize = 14

@@ -1,14 +1,14 @@
-# SPM.jl: Statistical Process Monitoring in Julia
+# StatisticalProcessMonitoring.jl: Statistical Process Monitoring in Julia
 
 | Build | Coverage | Documentation |
 |-------|----------|---------------|
-| [![Build status](https://github.com/DedZago/SPM.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/DedZago/SPM.jl/actions/workflows/CI.yml?query=branch%3Amain)| [![codecov](https://codecov.io/gh/DedZago/SPM.jl/graph/badge.svg?token=F1KFUFLD9A)](https://codecov.io/gh/DedZago/SPM.jl)| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://DedZago.github.io/SPM.jl/stable/)|
+| [![Build status](https://github.com/DedZago/StatisticalProcessMonitoring.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/DedZago/StatisticalProcessMonitoring.jl/actions/workflows/CI.yml?query=branch%3Amain)| [![codecov](https://codecov.io/gh/DedZago/StatisticalProcessMonitoring.jl/graph/badge.svg?token=F1KFUFLD9A)](https://codecov.io/gh/DedZago/StatisticalProcessMonitoring.jl)| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://DedZago.github.io/StatisticalProcessMonitoring.jl/stable/)|
 
 
 
 ## Overview
 
-**SPM.jl** is a comprehensive package for Statistical Process Monitoring, which provides users with tools for monitoring the stability of sequential processes.
+**StatisticalProcessMonitoring.jl** is a comprehensive package for Statistical Process Monitoring, which provides users with tools for monitoring the stability of sequential processes.
 
 ## Package Features
 
@@ -20,7 +20,7 @@ Hyperparameter tuning is supported with a native grid search implementation, as 
 
 To ensure the package loads quickly, two extensions are [conditionally loaded](https://pkgdocs.julialang.org/v1/creating-packages/#Conditional-loading-of-code-in-packages-(Extensions)) only if needed:
 
-* **PlottingSPM.jl**: functionalities for plotting the results of applying a control chart to a dataset. This extension can be loaded by running `using Plots` after loading the **SPM.jl** package.
-* **NLoptSPM.jl**: functionalities for hyperparameter tuning using the [NLopt](https://github.com/JuliaOpt/NLopt.jl) package. This extension can be loaded by running `using NLopt` after loading the **SPM.jl** package.
+* **PlottingSPM.jl**: functionalities for plotting the results of applying a control chart to a dataset. This extension can be loaded by running `using Plots` after loading the **StatisticalProcessMonitoring.jl** package.
+* **NLoptSPM.jl**: functionalities for hyperparameter tuning using the [NLopt](https://github.com/JuliaOpt/NLopt.jl) package. This extension can be loaded by running `using NLopt` after loading the **StatisticalProcessMonitoring.jl** package.
 
 The package is highly extensible and can incorporate custom monitoring statistics.

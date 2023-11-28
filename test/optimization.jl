@@ -2,7 +2,7 @@ module TestOptimization
 using Test
 using LinearAlgebra
 using Random
-using SPM
+using StatisticalProcessMonitoring
 
 # Unit test
 

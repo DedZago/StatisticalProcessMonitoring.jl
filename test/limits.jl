@@ -1,5 +1,5 @@
 module TestLimits
-using SPM
+using StatisticalProcessMonitoring
 using Test
 using StatsBase
 using Distributions

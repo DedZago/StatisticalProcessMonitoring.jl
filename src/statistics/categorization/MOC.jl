@@ -34,9 +34,9 @@ Wang, J., Li, J., & Su, Q. (2017). Multivariate Ordinal Categorical Process Cont
 end
 export MOC
 
-SPM.get_design(stat::MOC) = [stat.l]
-SPM.set_design!(stat::MOC, l::AbstractVector) = stat.l = first(l)
-SPM.set_design!(stat::MOC, l::Float64) = stat.l = l
+get_design(stat::MOC) = [stat.l]
+set_design!(stat::MOC, l::AbstractVector) = stat.l = first(l)
+set_design!(stat::MOC, l::Float64) = stat.l = l
 
 function MOC(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
     @assert length(ncuts) == size(x,2) "Must provide a number of classes for each variable ($(size(x,2)) total, $(length(ncuts)) provided)"
@@ -74,7 +74,7 @@ end
 export estimate_ordinal_model_probabilities
 
 
-function SPM.update_statistic!(STAT::MOC, x)
+function update_statistic!(STAT::MOC, x)
     ncells = length(STAT.f0)
     g_n = zeros(ncells)
     gObs = categorize_data(x, STAT.qtls)

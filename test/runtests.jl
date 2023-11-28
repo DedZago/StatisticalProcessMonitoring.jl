@@ -1,9 +1,9 @@
-using SPM
+using StatisticalProcessMonitoring
 using Test
 
 ti = time()
 
-@testset "SPM.jl" begin
+@testset "StatisticalProcessMonitoring.jl" begin
     include("nominal.jl")
     include("phase2.jl")
     include("limits.jl")

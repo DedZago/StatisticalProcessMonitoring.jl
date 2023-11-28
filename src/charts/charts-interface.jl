@@ -1,4 +1,4 @@
-using SPM
+using StatisticalProcessMonitoring
 using Parameters
 
 abstract type AbstractChart{STAT, LIM, NOM, PH2} end

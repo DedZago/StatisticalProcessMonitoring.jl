@@ -272,7 +272,7 @@ export backward_loglinear
 
 
 ############## MULTINOMIAL SAMPLER ##############
-@with_kw struct MultinomialBootstrap{V,M,VV,D} <: SPM.AbstractSampling
+@with_kw struct MultinomialBootstrap{V,M,VV,D} <: StatisticalProcessMonitoring.AbstractSampling
     f0::V
     table::M
     qtls::VV
@@ -280,11 +280,11 @@ export backward_loglinear
 end
 export MultinomialBootstrap
 
-MultinomialBootstrap(stat::SPM.AbstractStatistic) = MultinomialBootstrap(deepcopy(stat.f0), deepcopy(stat.table), deepcopy(stat.qtls), Multinomial(1, deepcopy(stat.f0)))
+MultinomialBootstrap(stat::StatisticalProcessMonitoring.AbstractStatistic) = MultinomialBootstrap(deepcopy(stat.f0), deepcopy(stat.table), deepcopy(stat.qtls), Multinomial(1, deepcopy(stat.f0)))
 
-SPM.new_data(B::MultinomialBootstrap, data::AbstractVector) = error("Not implemented yet.")
+StatisticalProcessMonitoring.new_data(B::MultinomialBootstrap, data::AbstractVector) = error("Not implemented yet.")
 
-function SPM.new_data(B::MultinomialBootstrap, data::AbstractMatrix)
+function StatisticalProcessMonitoring.new_data(B::MultinomialBootstrap, data::AbstractMatrix)
     idx = convert(Vector{Bool}, Distributions.rand(B.dist))
     # @show idx
     newx = B.table[idx, :]
@@ -302,4 +302,4 @@ function SPM.new_data(B::MultinomialBootstrap, data::AbstractMatrix)
     return vec(newx)
 end
 
-SPM.new_data!(B::MultinomialBootstrap, data::AbstractVecOrMat) = SPM.new_data(B, data) 
+StatisticalProcessMonitoring.new_data!(B::MultinomialBootstrap, data::AbstractVecOrMat) = StatisticalProcessMonitoring.new_data(B, data) 

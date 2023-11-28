@@ -1,4 +1,4 @@
-name = "SPM"
+name = "StatisticalProcessMonitoring"
 uuid = "5c25986e-1fdd-4016-bfbf-d983868d020f"
 authors = ["Daniele Zago <daniele.zago.1@phd.unipd.it>"]
 version = "0.1.0"

@@ -1,17 +1,17 @@
 push!(LOAD_PATH, "../src/")
-using SPM
+using StatisticalProcessMonitoring
 using Documenter
 
-DocMeta.setdocmeta!(SPM, :DocTestSetup, :(using SPM); recursive=true)
+DocMeta.setdocmeta!(StatisticalProcessMonitoring, :DocTestSetup, :(using StatisticalProcessMonitoring); recursive=true)
 
 makedocs(;
-   modules=[SPM],
+   modules=[StatisticalProcessMonitoring],
    authors="Daniele Zago <daniele.zago.1@phd.unipd.it>",
-   repo="https://github.com/DedZago/SPM.jl/blob/{commit}{path}#{line}",
-   sitename="SPM.jl",
+   repo="https://github.com/DedZago/StatisticalProcessMonitoring.jl/blob/{commit}{path}#{line}",
+   sitename="StatisticalProcessMonitoring.jl",
    format=Documenter.HTML(;
                           prettyurls=get(ENV, "CI", "false") == "true",
-                          canonical="https://DedZago.github.io/SPM.jl",
+                          canonical="https://DedZago.github.io/StatisticalProcessMonitoring.jl",
                           edit_link="main",
                           assets=String[],
                          ),
@@ -24,6 +24,6 @@ makedocs(;
   )
 
 deploydocs(;
-     repo="github.com/DedZago/SPM.jl",
+     repo="github.com/DedZago/StatisticalProcessMonitoring.jl",
      devbranch="main",
     )

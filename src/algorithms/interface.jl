@@ -95,7 +95,7 @@ function optimize_design!(CH::ControlChart, rlsim_oc::Function, settings::OptSet
         if settings.verbose
             print("$(round.(par, digits=6))\t")
         end
-        ret = SPM.measure([rlsim_oc(CH_) for _ in 1:nsims], CH_, verbose=settings.verbose)
+        ret = StatisticalProcessMonitoring.measure([rlsim_oc(CH_) for _ in 1:nsims], CH_, verbose=settings.verbose)
         return ret
     end
 

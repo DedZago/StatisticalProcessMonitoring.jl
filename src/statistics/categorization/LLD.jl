@@ -36,9 +36,9 @@ Wang, J., Li, J., & Su, Q. (2017). Multivariate Ordinal Categorical Process Cont
 end
 export LLD
 
-SPM.get_design(stat::LLD) = [stat.l]
-SPM.set_design!(stat::LLD, l::AbstractVector) = stat.l = first(l)
-SPM.set_design!(stat::LLD, l::Float64) = stat.l = l
+get_design(stat::LLD) = [stat.l]
+set_design!(stat::LLD, l::AbstractVector) = stat.l = first(l)
+set_design!(stat::LLD, l::Float64) = stat.l = l
 
 
 function LLD(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in eachcol(x)], N = 1)
@@ -53,7 +53,7 @@ function LLD(l::Real, x::AbstractMatrix; ncuts::AbstractVector = [3 for _ in eac
 end
 
 
-function SPM.update_statistic!(STAT::LLD, x)
+function update_statistic!(STAT::LLD, x)
     ncells = length(STAT.f0)
     g_n = zeros(ncells)
     gObs = categorize_data(x, STAT.qtls)

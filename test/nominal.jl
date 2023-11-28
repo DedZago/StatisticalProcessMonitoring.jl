@@ -1,5 +1,5 @@
 module TestNominal
-using SPM
+using StatisticalProcessMonitoring
 using Test
 
 @testset "NominalProperties" begin
