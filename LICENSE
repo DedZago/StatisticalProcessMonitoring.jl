@@ -1,4 +1,4 @@
-SPM.jl: Statistical Process Monitoring in Julia.
+StatisticalProcessMonitoring.jl: Statistical Process Monitoring in Julia.
 Copyright (C) 2023 Daniele Zago
 
 This program is free software: you can redistribute it and/or modify
