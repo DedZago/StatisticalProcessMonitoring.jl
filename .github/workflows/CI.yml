@@ -60,6 +60,6 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using SPM
-            DocMeta.setdocmeta!(SPM, :DocTestSetup, :(using SPM); recursive=true)
-            doctest(SPM)'    
+            using StatisticalProcessMonitoring
+            DocMeta.setdocmeta!(StatisticalProcessMonitoring, :DocTestSetup, :(using StatisticalProcessMonitoring); recursive=true)
+            doctest(StatisticalProcessMonitoring)'    
