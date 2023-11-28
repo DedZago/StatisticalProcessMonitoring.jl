@@ -5,7 +5,7 @@ using StatisticalProcessMonitoring, Distributions, Random, Parameters, CSV, Data
 ```
 
 ```julia
-dat = CSV.read(datadir("cardiacsurgery.csv"), DataFrame)
+dat = CSV.read("cardiacsurgery.csv", DataFrame)
 dat.surgeon = categorical(dat.surgeon)
 dat_ic = dat[dat.date .<= 730, :]
 dat_oc = dat[730 .< dat.date .<= 1095, :]

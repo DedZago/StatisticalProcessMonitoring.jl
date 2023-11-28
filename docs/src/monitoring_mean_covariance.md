@@ -22,15 +22,11 @@ bootstrapCL!(CH)
 ```
 
 ```julia
-data = CSV.read(datadir("example77.csv"), DataFrame)
+data = CSV.read("example77.csv", DataFrame)
 xnew = Matrix(data)[:, 1:3]
 proc = apply_chart(CH, xnew)
 subtitles = ["MCUSUM k = 0.25", "MCUSUM k = 0.5", "MCUSUM k = 1", "MEWMC λ = 0.2"]
 plt = plot_series(proc, dpi=300, subtitles=subtitles)
-```
-
-```julia
-save(plotsdir("example-multiple-mean-covariance.png"), plt)
 ```
 
 ![example-multiple-mean-covariance](./assets/img/example-multiple-mean-covariance.png)

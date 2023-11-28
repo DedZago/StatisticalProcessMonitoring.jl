@@ -62,8 +62,4 @@ plt = plot_series(proc, dpi=300, label="")
 vline!(plt, [tau], label=L"\tau", linestyle=:dot, colour="black")
 ```
 
-```julia
-save(plotsdir("example-autocorrelated.png"), plt)
-```
-
 ![example-autocorrelated](./assets/img/example-autocorrelated.png)
