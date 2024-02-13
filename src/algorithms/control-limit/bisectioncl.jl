@@ -1,7 +1,7 @@
 using Statistics
 
 """
-    bisectionCL!(CH::ControlChart, hmax[; rlsim::Function, settings::OptSettings, kw...])
+    bisectionCL!(CH::ControlChart, hmax[; rlsim::Function, kw...])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm (see for instance Qiu, 2013)
 
@@ -129,7 +129,7 @@ export measure
 
 
 """
-    combinedCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings, kw...])
+    combinedCL!(CH::ControlChart[; rlsim::Function, kw...])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm (see for instance Qiu, 2013). The control limit upper bound `hmax` for the bisection algorithm is found using the stochastic approximation algorithm of Capizzi and Masarotto (2016)
 

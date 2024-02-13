@@ -53,7 +53,7 @@ update_score(s2::Float64, score::Real, Ndenom) = s2 + (score * score - s2) / Nde
 update_score(s2::Vector{Float64}, score::AbstractVector, Ndenom) = s2 .+ (score .* score .- s2) ./ Ndenom
 
 """
-    saCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
+    saCL!(CH::ControlChart[; rlsim::Function, kw...])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the stochastic approximation algorithm described in Capizzi and Masarotto (2016).
 
@@ -182,7 +182,7 @@ end
 export saCL!
 
 """
-    saCL(CH::ControlChart[; rlsim::Function, settings::OptSettings])
+    saCL(CH::ControlChart[; rlsim::Function, kw...])
 
 Applies the stochastic approximation algorithm of Capizzi and Masarotto (2016) without modifying the control chart object `CH`.
 

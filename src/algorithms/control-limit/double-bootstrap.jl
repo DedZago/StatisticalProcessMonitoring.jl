@@ -1,7 +1,7 @@
 using Statistics
 
 """
-    bootstrapCL!(CH::ControlChart[; rlsim::Function, settings::OptSettings])
+    bootstrapCL!(CH::ControlChart[; rlsim::Function, kw...])
 
 Computes the control limit to satisfy the nominal properties of a control chart, using the bisection algorithm on bootstrapped paths (see for instance Qiu, 2013).
 
