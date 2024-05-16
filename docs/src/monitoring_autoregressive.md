@@ -1,10 +1,9 @@
 
-## Residual-Based Monitoring of Autocorrelated Data
+# Residual-Based Monitoring of Autocorrelated Data
 
-In this section, we demonstrate how the `ResidualStatistic` and `AbstractPhase2` interfaces can be extended to accommodate custom data types. Specifically, we focus on monitoring the residuals of an autoregressive AR(1) model [shumway2017](@citep),
-
+In this section, we demonstrate how the `ResidualStatistic` and `AbstractPhase2` interfaces can be extended to accommodate custom data types. Specifically, we focus on monitoring the residuals of an autoregressive $\text{AR}(1)$ model [shumway2017](@citep),
 $$
-  y_t = \phi y_{t-1} + \varepsilon_{t}, \quad \varepsilon_{t} \sim N(0,1),
+  y\_t = \phi y\_{t-1} + \varepsilon\_{t}, \quad \varepsilon\_{t} \sim N(0,1),
 $$
 using an EWMA control chart.
 
@@ -32,7 +31,7 @@ julia> function residual!(x, S::AR1Statistic)
        end
 ```
 
-To sample observations from an AR(1) process, we define a new type called `Phase2AR1`.
+To sample observations from an $\text{AR}(1)$ process, we define a new type called `Phase2AR1`.
 
 ```julia
 julia> @with_kw mutable struct Phase2AR1 <: 
@@ -57,7 +56,7 @@ julia> function new_data!(PH2::Phase2AR1)
        end
 ```
 
-We consider an AR(1) model with $\phi = 0.5$.
+We consider an $\text{AR}(1)$ model with $\phi = 0.5$.
 
 ```julia
 julia> seed = 4398354798
@@ -66,7 +65,7 @@ julia> phi = 0.5
 julia> PH2 = Phase2AR1(phi = phi)
 ```
 
-We define an EWMA control chart applied to the residuals of the AR(1) model using the `AR1Statistic` object.
+We define an EWMA control chart applied to the residuals of the $\text{AR}(1)$ model using the `AR1Statistic` object.
 
 ```julia
 julia> STAT = AR1Statistic(EWMA(λ = 0.1), phi, 0.0)
@@ -98,7 +97,7 @@ julia> print(opt)
  0.13830568163003895
 ```
 
-We consider 100 Phase II observations from the AR(1) process with $\phi = 0.5$.
+We consider 100 Phase II observations from the $\text{AR}(1)$ process with $\phi = 0.5$.
 
 ```julia
 julia> n = 100

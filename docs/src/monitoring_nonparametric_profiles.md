@@ -1,11 +1,9 @@
-## Detecting Changes in Profiles
+# Detecting Changes in Profiles
 
 Here, we demonstrate how the `Phase2` type can be used to also work with structured data types. In this example, we consider monitoring profiles:
-
 $$
-  Y_{tj} = f(x_{tj}) + \varepsilon_{ij}, \quad j = 1, 2, \ldots, n_t,
+  Y = f\_{tj} = f(x\_{tj}) + \varepsilon\_{ij}, \quad j = 1, 2, \ldots, n\_t,
 $$
-
 where $f(x_{tj})$ is the unknown function relating $x_{tj}$ to $Y_{tj}$, $\varepsilon_{ij} \sim F_\varepsilon$, $\mathbb{E}[\varepsilon_{ij}] = 0$, and $\mathbb{V}[\varepsilon_{ij}] = \sigma > 0$ for all $t$ and $j$.
 
 Let's load the required packages,

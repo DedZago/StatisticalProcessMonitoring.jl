@@ -1,5 +1,5 @@
 
-## Jointly Monitoring the Mean and Covariance Using a Multi-Chart Scheme
+# Jointly Monitoring the Mean and Covariance Using a Multi-Chart Scheme
 
 Here, we provide an example of multiple control charts being run simultaneously. We consider sequential monitoring of the data from Example 7.7 of [qiu2013](@citet).
 
@@ -42,7 +42,7 @@ julia> STATS = (MCUSUM(k = 0.25, p = p), MCUSUM(k = 0.5, p = p),
 
 To account for the mean and covariance of the distribution, the four control charts are applied to the standardized observations,
 $$
-  \bm{Z}_t = \Sigma_0^{-1 / 2}\bm{X}_t.
+  \bm{Z}\_t = \Sigma\_0^{-1 / 2}\bm{X}\_t.
 $$
 
 We use the type `LocationScaleStatistic` to standardize observations in location-scale families.

@@ -1,6 +1,4 @@
-# Monitoring risk-adjusted surgical outcomes
-
-## Monitoring Surgical Outcomes Using a Risk-Adjusted CUSUM Chart
+# Monitoring Surgical Outcomes Using a Risk-Adjusted CUSUM Chart
 
 In this example, we demonstrate the use of a risk-adjusted CUSUM chart. The data comes from a center for cardiac surgery in the UK and is available in the `cardiacsurgery.csv` file at this [Zenodo](https://zenodo.org/records/10683050) link.
 
@@ -105,5 +103,3 @@ julia> plt = plot_series(proc, dpi = 300, label = "", xlab = L"t",
 ```
 
 ![](./figures/example-risk-adjusted.png)
-
-![example-risk-adjusted](example-risk-adjusted.png "Risk-adjusted CUSUM control chart with $\Delta = 0.75\) applied to the Phase II observations in the dataset. The dashed line indicates the control limit such that $\ARLIC = 1000\).")
