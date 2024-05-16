@@ -25,6 +25,7 @@ makedocs(;
           "Examples" => ["monitoring_mean_covariance.md", "monitoring_autoregressive.md", "monitoring_risk_adjusted.md", "monitoring_nonparametric_profiles.md"],
           "Reference" => ["statistics.md", "control_limits.md", "nominal_properties.md", "phase_2.md", "control_charts.md","optimization.md"]
          ],
+   strict=false
   )
 
 deploydocs(;

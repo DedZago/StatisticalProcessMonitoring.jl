@@ -1,7 +1,7 @@
 
 # Residual-Based Monitoring of Autocorrelated Data
 
-In this section, we demonstrate how the `ResidualStatistic` and `AbstractPhase2` interfaces can be extended to accommodate custom data types. Specifically, we focus on monitoring the residuals of an autoregressive $\text{AR}(1)$ model [shumway2017](@citep),
+In this section, we demonstrate how the `ResidualStatistic` and `AbstractPhase2` interfaces can be extended to accommodate custom data types. Specifically, we focus on monitoring the residuals of an autoregressive $\text{AR}(1)$ model,
 $$
   y\_t = \phi y\_{t-1} + \varepsilon\_{t}, \quad \varepsilon\_{t} \sim N(0,1),
 $$

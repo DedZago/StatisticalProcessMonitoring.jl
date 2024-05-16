@@ -15,7 +15,7 @@ julia> dat = CSV.read("cardiacsurgery.csv", DataFrame)
 julia> dat.surgeon = categorical(dat.surgeon)
 ```
 
-Following [gandy2017](@citet), we divide the data into Phase I (first two years) for model estimation and Phase II (following year) for prospective monitoring.
+We divide the data into Phase I (first two years) for model estimation and Phase II (following year) for prospective monitoring.
 
 ```julia
 julia> dat_ic = dat[dat.date .<= 730, :]

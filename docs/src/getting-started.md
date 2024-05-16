@@ -1,12 +1,10 @@
 # Getting started
 
-## Overview of `StatisticalProcessMonitoring.jl`
-
-### Type Hierarchy
+## Type Hierarchy
 
 The `StatisticalProcessMonitoring.jl` package introduces a flexible definition of a control chart through the `ControlChart` type. The attributes of `ControlChart` determine its main properties.
 
-#### ControlChart Type
+### ControlChart Type
 ```julia
 mutable struct ControlChart{STAT, LIM, NOM, PH2} <: AbstractChart{STAT, LIM, NOM, PH2}
   stat::STAT
@@ -17,10 +15,10 @@ mutable struct ControlChart{STAT, LIM, NOM, PH2} <: AbstractChart{STAT, LIM, NOM
 end
 ```
 - **Attributes:**
-  - `stat`: Monitoring statistic (see Section Monitoring Statistic).
-  - `limit`: Control limit (see Section Control Limits).
-  - `nominal`: Nominal property (see Section Nominal Properties).
-  - `phase2`: Phase II data simulator (see Section Simulating New Observations).
+  - `stat`: Monitoring statistic (see [Monitoring Statistics](#Monitoring-Statistics)).
+  - `limit`: Control limit (see [Control Limits](#Control-Limits)).
+  - `nominal`: Nominal property (see Section [Nominal Properties](#Nominal-Properties)).
+  - `phase2`: Phase II data simulator (see [Simulating New Observations](#Simulating-New-Observations)).
   - `t`: Current time point indicator.
 
 This type is defined as `mutable`, allowing updates via functions such as `update_chart!`.
@@ -61,7 +59,7 @@ function update_statistic!(stat::AEWMA, x::Real)
   stat.value = stat.value + huber(x - stat.value, stat.λ, stat.k)
 end
 ```
-Here, the `huber` function implements Huber's score function [huber1981](@citep).
+Here, the `huber` function implements Huber's score function.
 Then, as an example, we can define two control charts as:
 
 ```julia
@@ -80,7 +78,7 @@ CH_AE = ControlChart(AEWMA(λ = 0.2, k=3.0),
 
 The two charts are defined with the same control limit, nominal properties, and Phase 2 object. However, their behaviour will be that of the EWMA and AEWMA control charts, respectively.
 
-### Implementation of Multi-Chart Monitoring Schemes
+#### Implementation of Multi-Chart Monitoring Schemes
 
 Multi-chart monitoring is supported by the `MultipleControlChart` type alias.
 ```julia
@@ -98,7 +96,7 @@ ControlChart(
     )
 ```
 
-### Control Limits
+## Control Limits
 
 #### Types of Control Limits
 
@@ -107,24 +105,26 @@ Control limits $(\text{LCL}_t, \text{UCL}_t)$ can be fixed or dynamic (time-vary
 ##### Fixed Control Limits
 
 Defined using constant boundaries. For $h > 0$,
-$$
-    \text{LCL}_t = -h, \quad \text{UCL}_t = h \quad \text{for all  } t.
-$$
 
+$\text{LCL}_t = -h, \quad \text{UCL}_t = h \quad \text{for all  } t.$
 
 
 Implemented as `TwoSidedFixedLimit` and `OneSidedFixedLimit`. The `OneSidedFixedLimit` allows choosing limits of the form $(0, h)$, if its `upw` attribute is set to `true`, or $(-h, 0)$ if set to `false`.
 
 ##### Deterministic Time-Varying Control Limits
 
-For example, time-varying limits for EWMA fast initial response [steiner1999](@citet):
-$$
-\text{LCL}_t = h \cdot g_l(t), \quad \text{UCL}_t = h \cdot g_u(t)
-$$
+For example, time-varying limits for the EWMA chart with fast initial response:
+
+$\text{LCL}_t = h \cdot g_l(t), \quad \text{UCL}_t = h \cdot g_u(t)$
 
 Implemented as `TwoSidedCurvedLimit` and `OneSidedCurvedLimit`, which also require specification of a deterministic function $g(t)$ .
 
-### Nominal Properties
+Alternatively, the `TwoSidedBootstrapLimit` and `OneSidedBootstrapLimit` allow defining control limits based on bootstrap resampling, which provide time-varying control limits with approximately constant false alarm rate
+
+$\mathbb{P}(C_{t} \not\in (\text{LCL}_t, \text{UCL}_t) | C_{s} \in (\text{LCL}_s, \text{UCL}_s)  \text{ for all } s < t) = \alpha.$ 
+
+
+## Nominal Properties
 
 Subtypes of `NominalProperties`, they define IC run length constraints for the control chart.
 - `ARL` specifies the nominal average run length, $\mathbb{E}_0[\text{RL}]$.
@@ -134,30 +134,9 @@ Subtypes of `NominalProperties`, they define IC run length constraints for the c
 
 Implemented in subtypes of `AbstractPhase2`.
 - `Phase2Distribution` samples data from distributions using the [Distributions.jl](https://github.com/JuliaStats/Distributions.jl) package.
-- `Phase2` resamples from an IC reference dataset (either a vector, a matrix or a data frame), supporting techniques like bootstrap [efron1993](@citet).
+- `Phase2` resamples from an IC reference dataset (either a vector, a matrix or a data frame), supporting techniques like bootstrap.
 
-### Control Limit Design
-
-#### Bisection Search
-
-A common method for determining control limits such that the nominal run length characteristic (e.g. `ARL` or `QRL`) equals the nominal value.
-Starting from an interval $[0, h_\text{max}]$, the method finds the appropriate control limit value via bisection, by approximating the run length characteristic at each iteration with a large number of simulated run lengths from the Phase 2 chart attribute.
-
-A more detailed description of the algorithm can be found in [qiu2013](@citet).
-This algorithm is implemented in the `bisectionCL!` and `bisectionCL` functions.
-
-#### Stochastic Approximations
-
-For single- and multi-chart schemes, the method simulates one run length at a time and applies a stochastic gradient descent algorithm,
-$$  
-\bm{h}_{k+1} = \Psi\left( \bm{h}_{k} - \frac{1}{(k+1)^{q}} D \bm{s}(\bm{h}_k) \right),
-$$
-which converges to the required control limit value. 
-For the full description of the algorithm, see [capizzi2016](@citet).
-This algorithm is implemented in the `saCL!` and `saCL` functions.
-
-
-### Monitoring Statistic
+## Monitoring Statistics
 
 Monitoring statistics, subtyped from `AbstractStatistic`, implement `update_statistic!` to define the update behaviour as new data is sequentially observed.
 
@@ -166,20 +145,38 @@ Monitoring statistics, subtyped from `AbstractStatistic`, implement `update_stat
 Separation of monitoring statistic and parameter estimation promotes code compartmentalization, facilitated by subtypes like `ResidualStatistic`.
 
 For example, the definition of a monitoring statistic that behaves for $k = 1.0$ as
-$$
-    C_{t} = \max\left\{ 0, \left( \frac{X_{t} - 0.5}{2} \right) - k \right\},
-$$
+
+$C_{t} = \max\left\{ 0, \left( \frac{X_{t} - 0.5}{2} \right) - k \right\},$
+
 can be defined using the `LocationScaleStatistic` subclass of `ResidualStatistic`.
 
 ```julia
 STAT = LocationScaleStatistic(CUSUM(k=1.0), 0.5, 2.0)
 ```
 
-### Hyperparameter Tuning
+## Control Limit Design
+
+### Bisection Search
+
+A common method for determining control limits such that the nominal run length characteristic (e.g. `ARL` or `QRL`) equals the nominal value.
+Starting from an interval $[0, h_\text{max}]$, the method finds the appropriate control limit value via bisection, by approximating the run length characteristic at each iteration with a large number of simulated run lengths from the Phase 2 chart attribute.
+
+This algorithm is implemented in the `bisectionCL!` and `bisectionCL` functions.
+
+### Stochastic Approximations
+
+For single- and multi-chart schemes, the method simulates one run length at a time and applies a stochastic gradient descent algorithm,
+
+$\bm{h}_{k+1} = \Psi\left( \bm{h}_{k} - \frac{1}{(k+1)^{q}} D \bm{s}(\bm{h}_k) \right),$
+
+which converges to the required control limit value. 
+This algorithm is implemented in the `saCL!` and `saCL` functions.
+
+## Hyperparameter Tuning
 
 Hyperparameter tuning for optimal performance with respect to a specific out-of-control scenario is implemented via:
 
-- Grid search, see [qiu2008](@citet) for a unidimensional example.
+- Grid search (slow for multidimensional parameters)
 - Nonlinear numerical solvers available from the [NLopt.jl](https://github.com/JuliaOpt/NLopt.jl) package (e.g., BOBYQA)
 
 The function `optimize_design!` provides a high-level interface for optimization and requires being able to simulate from the out-of-control scenario of interest.

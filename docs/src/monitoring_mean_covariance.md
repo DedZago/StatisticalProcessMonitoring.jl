@@ -1,7 +1,7 @@
 
 # Jointly Monitoring the Mean and Covariance Using a Multi-Chart Scheme
 
-Here, we provide an example of multiple control charts being run simultaneously. We consider sequential monitoring of the data from Example 7.7 of [qiu2013](@citet).
+Here, we provide an example of multiple control charts being run simultaneously. We consider sequential monitoring of the data from Example 7.7 of [Introduction to Statistical Process Control](https://www.taylorfrancis.com/books/mono/10.1201/b15016/introduction-statistical-process-control-peihua-qiu).
 
 First, the required packages are loaded
 ```julia
@@ -9,13 +9,12 @@ using StatisticalProcessMonitoring, LinearAlgebra, Random, Distributions, CSV, D
 ```
 
 In the example, three quality variables resulting from a production process are monitored for changes. Under IC conditions, the quality variables follow the $N_3(\bm{0}, \Sigma_0)$ distribution, where
-$$
-  \Sigma_0 = \begin{pmatrix}
+
+$\Sigma_0 = \begin{pmatrix}
     1.0  & 0.8 & 0.5\\
     0.8 & 1.0 & 0.8 \\
     0.5 & 0.8 & 1.0
-  \end{pmatrix}.
-$$
+  \end{pmatrix}.$
 
 First, we set the seed for replicability.
 

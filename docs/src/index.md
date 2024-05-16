@@ -4,13 +4,9 @@ CurrentModule = StatisticalProcessMonitoring
 
 # StatisticalProcessMonitoring.jl
 
+**StatisticalProcessMonitoring.jl**  is a Julia package for testing the stability of sequential data streams using statistical process monitoring (SPM) techniques. The package provides a flexible framework for implementing control charts, monitoring statistics, and control limit calibration methods. The package is designed to be extensible, allowing users to define custom control charts and monitoring statistics.
 
-In statistical process monitoring (SPM), control charts are sequential statistics that are plotted and used for assessing the stability of processes and detecting deviations from stable conditions. These methods are widely used in various domains such as industrial processes, healthcare, image surveillance, and defect detection.
-
-The **StatisticalProcessMonitoring.jl** package introduces an extensible SPM framework for monitoring online (Phase II) univariate, multivariate, and structured observations.
-The package provides implementation of several control charts, as well as automated tools for control limit calibration and hyperparameter optimization.
-
-For an extensive review of SPM and control charts, a recommended resource is the book [Introduction to Statistical Process Control](https://www.taylorfrancis.com/books/mono/10.1201/b15016/introduction-statistical-process-control-peihua-qiu) [qiu2013](@citep)
+For an extensive review of SPM and control charts, a recommended resource is the book [Introduction to Statistical Process Control](https://www.taylorfrancis.com/books/mono/10.1201/b15016/introduction-statistical-process-control-peihua-qiu).
 
 ## Installation
 StatisticalProcessMonitoring.jl requires Julia version 1.8 or above. To install StatisticalProcessMonitoring.jl, press the `]` key inside the Julia REPL to access the interactive package manager model and run the following command
@@ -44,7 +40,7 @@ julia> using StatisticalProcessMonitoring
     * Control charts for profile monitoring.
 2. Multi-chart monitoring schemes
     * Support for arbitrary combination of control charts
-    * Joint control limit calibration for control charts (see [capizzi2016](@tcite))
+    * Joint control limit calibration for control charts
 3. Metrics
     * Metrics based on the Average Run Length
     * Metrics based on Run Length quantiles
@@ -83,7 +79,7 @@ Other specialized packages offer functionalities for specific applications, such
 - [cpm](https://cran.r-project.org/web/packages/cpm/index.html), [strucchange](https://cran.r-project.org/web/packages/strucchange/index.html), [bcp](https://www.jstatsoft.org/article/view/v023i03), and [changepoint](https://cran.r-project.org/web/packages/changepoint/index.html) for process monitoring based on change-point models
 - [dfphase1](https://cran.r-project.org/web/packages/dfphase1/index.html) for change detection in retrospective samples using distribution-free control charts
 
-### SPM Software Packages in Other Programming Languages
+### Packages in other programming languages
 
 Limited support for SPM methodologies exists in other programming languages:
 - [PySpc](https://pypi.org/project/pyspc/) in Python for classical control charts
