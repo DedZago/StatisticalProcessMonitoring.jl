@@ -2,7 +2,7 @@
 
 Statistical Process Monitoring (SPM) involves using various tools to assess process stability. Here's an overview of the terminology, types of control charts, and methodologies used in SPM. 
 
-## Basic Terminology
+## Basic terminology
 
 Control charts are fundamental tools for assessing process stability under the SPM framework. 
 In the online (Phase II) setting, the process is monitored sequentially as new data is collected. The goal is to detect deviations from the in-control (IC) state as soon as possible.
@@ -14,7 +14,7 @@ In the online (Phase II) setting, the process is monitored sequentially as new d
     where $A_0 > 1$ and $\mathbb{E}_{0}[\cdot ]$ represents the expectation assuming the process always remains IC.
     Other designs use the median of the IC run length $\text{MRL}_\text{IC}$ or the run length's quantiles.
 
-## Taxonomy of Control Charts
+## Taxonomy of control charts
 
 Control charts can be classified into three main categories:
 
@@ -23,7 +23,7 @@ Control charts can be classified into three main categories:
 2. CUSUM-type: chart with memory, dampens the historical information with an update mechanism of the form $C_{t} = \max\left\{ 0, C_{t-1} + f(\bm{X}_t) \right\}.$
 3. EWMA-type: chart with memory, the historical information is weighted using exponentially-decaying weights such as $C_{t} = (1 - \lambda)C_{t-1} + \lambda X_{t}.$
 
-## Nonparametric Control Charts
+## Nonparametric control charts
 
 Traditional control charts rely on i.i.d. continuous quality variables following a parametric distribution. When these assumptions are violated, control charts designed under these assumptions can display poor performance. 
 
@@ -33,7 +33,7 @@ Various nonparametric methods have been developed to relax the parametric assump
 
 These methods help when parametric assumptions are infeasible but might lose effectiveness in information compared to parametric charts.
 
-## Selecting Hyperparameters
+## Selecting hyperparameters
 
 Choosing the appropriate values of tuning parameters $\bm{\zeta} \in \mathcal{Z} \subseteq \mathbb{R}^{d}$ (e.g., smoothing constant $\lambda$ in EWMA, allowance constant $k$ in CUSUM) is crucial.
 
@@ -46,7 +46,7 @@ $\begin{aligned}
 
 When analitycal solutions are unavailable, numerical optimization methods like stochastic approximations or Monte-Carlo simulations are used.
 
-## Multi-Chart Monitoring Schemes
+## Multi-chart monitoring schemes
 
 In complex monitoring scenarios, multiple control charts may be run simultaneously. These schemes are useful for monitoring multiple parameters jointly, such as the mean and variance of a distribution.
 
