@@ -2,7 +2,7 @@
 
 | Build | Coverage | Documentation |
 |-------|----------|---------------|
-| [![Build status](https://github.com/DedZago/StatisticalProcessMonitoring.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/DedZago/StatisticalProcessMonitoring.jl/actions/workflows/CI.yml?query=branch%3Amain)| [![codecov](https://codecov.io/gh/DedZago/StatisticalProcessMonitoring.jl/graph/badge.svg?token=F1KFUFLD9A)](https://codecov.io/gh/DedZago/StatisticalProcessMonitoring.jl)| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://DedZago.github.io/StatisticalProcessMonitoring.jl/stable/)|
+| [![Build status](https://github.com/DedZago/StatisticalProcessMonitoring.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/DedZago/StatisticalProcessMonitoring.jl/actions/workflows/CI.yml?query=branch%3Amain)| [![codecov](https://codecov.io/gh/DedZago/StatisticalProcessMonitoring.jl/graph/badge.svg?token=F1KFUFLD9A)](https://codecov.io/gh/DedZago/StatisticalProcessMonitoring.jl)| [![dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://DedZago.github.io/StatisticalProcessMonitoring.jl/dev/)|
 
 
 
