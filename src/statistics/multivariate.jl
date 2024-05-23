@@ -191,9 +191,9 @@ A Multivariate Adaptive Exponentially Weighted Moving Average.
 
 The update mechanism based on a new observation `x` is given by
 
-``Z_t = (I-Ω)*Z_{t-1} + Ω * x_t``,
+``Z_t = (I-\\Omega)\\cdot Z_{t-1} + \\Omega \\cdot x_t``,
 
-where Ω = ω(e)*I is an adaptive generalization of the classical MEWMA smoothing matrix.
+where ``Ω = \\omega(e)I_p`` is an adaptive generalization of the classical MEWMA smoothing matrix.
 The chart value is defined as
 
 ``value_t = Z_t' Z_t``.
@@ -330,11 +330,11 @@ Exponentially weighted moving covariance matrix with smoothing constant `λ`.
 
 The update mechanism based on a new observation `x \\in \\mathbb{R}^p` is given by
 
-``Z_t = (1 - λ)*Z_{t-1} + λ \\cdot xx'``,
+``Z_t = (1 - λ)\\cdot Z_{t-1} + λ \\cdot xx'``,
 
 and the chart value is defined as
 
-``value_t = \\text{tr}(Z_t).
+``C_t = \\textrm{tr}(Z_t).``
 
 ### References 
 Huwang, L., Yeh, A. B., & Wu, C.-W. (2007). Monitoring Multivariate Process Variability for Individual Observations. Journal of Quality Technology, 39(3), 258-278. https://doi.org/10.1080/00224065.2007.11917692

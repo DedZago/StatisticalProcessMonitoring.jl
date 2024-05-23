@@ -209,9 +209,9 @@ Adaptive exponentially weighted moving average with design parameters `λ`, `k`,
 
 The update mechanism for the statistic ``C_t`` based on a new observation `x` is given by
 
-``C_t = (1-\\phi(e))\\cdot C_{t-1} + \\phi(e) * x``,
+``C_t = (1-\\phi(e))\\cdot C_{t-1} + \\phi(e) \\cdot x``,
 
-where `\\phi(e)` is a forecast error function based on the Huber score function.
+where ``\\phi(e)`` is a forecast error function based on the Huber score function.
 
 ### Arguments
 - `λ::Float64`: The smoothing constant. Default is `0.1`.

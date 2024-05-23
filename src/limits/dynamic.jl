@@ -19,7 +19,7 @@ Curved one-sided limit, such that the run length ``RL`` of a control chart is th
 * if `upw == true`, ``RL = \\inf\\{t : C_t > h\\cdot f(t)\\}``
 * if `upw == false`, ``RL = \\inf\\{t : C_t < -h\\cdot f(t)\\}``
 
-Note that by definition, `h > 0`.
+Note that by definition, ``h > 0``.
 """
 @with_kw mutable struct OneSidedCurvedLimit{T, F <: Function} <: DynamicLimit{T}
     h::T
@@ -58,7 +58,7 @@ Curved one-sided limit, such that the run length ``RL`` of a control chart is th
 
 ``RL = \\inf\\{t > 0 : |C_t| > h\\cdot f(t)\\}``.
 
-Note that by definition, `h > 0`.
+Note that by definition, ``h > 0``.
 """
 @with_kw mutable struct TwoSidedCurvedLimit{T, F <: Function} <: DynamicLimit{T}
     h::T
